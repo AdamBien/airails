@@ -91,6 +91,8 @@
 - extract variables to eliminate duplication
 - prefer enums over plain Strings for finite, well-defined values
 - reuse enum constants as values if possible; enum constants do not have to follow naming conventions
+- prefer try-with-resources over explicitly closing resources
+- use lines with rounded (not curved) style in draw.io diagrams
 
 ## Simplicity Principles
 - keep the design KISS and YAGNI
@@ -100,7 +102,6 @@
 - create new components with minimal business logic and essential fields only
 
 ## Exceptions
-- prefer unchecked over checked exceptions
 - create custom exceptions only if it significantly improves robustness or maintainability
 - use explicit exceptions like BadRequestException for Response.Status.BAD_REQUEST
 - always use WebApplicationException in compact constructors in JAX-RS projects
@@ -111,6 +112,7 @@
 - document the intentions and the "why", not implementation details
 - either describe the "why" or do not comment at all
 - follow links in JavaDoc to external specifications and use them for code generation
+- use popular, also funny, technical terms from the Java SE, MicroProfile and Jakarta EE ecosystems as examples in unit tests and javadoc
 
 ## README Guidelines
 - write brief, 'to the point' README.md files for advanced developers
@@ -159,9 +161,6 @@
 - prefer synchronous HTTPClient APIs
 - use asynchronous Http APIs (HttpClient.sendAsync) only if explicitly requested
 
-## Resource Management
-- prefer try-with-resources over explicitly closing resources
-
 ## Project Management
 - always ask before changing pom.xml
 - do not create or change any files on opening existing projects; stop after initialization and wait for instructions
@@ -169,17 +168,8 @@
 - Maven pom.xml must not be created for Java 25 CLI applications
 - Java 25 CLI applications will be executed in source-file mode
 - never use quarkus-hibernate-validator
-
+- create metrics and observability features with OTEL
 
 ## Unnamed Classes
 - in unnamed classes do not import packages available in java.base module
 - do not use static methods in unnamed classes
-
-## Observability
-- create metrics and observability features with OTEL
-
-## Diagrams
-- use lines with rounded (not curved) style in draw.io diagrams
-
-## Terminology
-- use popular, also funny, technical terms from the Java SE, MicroProfile and Jakarta EE ecosystems as examples in unit tests and javadoc
