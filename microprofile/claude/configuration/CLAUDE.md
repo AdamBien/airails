@@ -170,10 +170,6 @@
 - Java 25 CLI applications will be executed in source-file mode
 - never use quarkus-hibernate-validator
 
-## CDK Stacks
-- always maintain cognito functionality in a dedicated stack
-- all stacks, except the application stack, have to be placed in boundary package
-- keep stacks independent; never pass them directly
 
 ## Unnamed Classes
 - in unnamed classes do not import packages available in java.base module
