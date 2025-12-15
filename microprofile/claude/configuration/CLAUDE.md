@@ -143,6 +143,7 @@
 - name client interfaces after the resource with "Client" suffix (e.g., GreetingsResource -> GreetingsResourceClient)
 - RegisterRestClient configKey: "service_uri"
 - STs end with "IT" suffix
+- do not use RestAssured. Write e2e test in the -st module
 
 ## JAX-RS
 - resources should be named in plural (e.g., SpeakersResource not SpeakerResource)
