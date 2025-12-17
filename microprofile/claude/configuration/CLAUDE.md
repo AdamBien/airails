@@ -26,7 +26,7 @@
 - create application level package with name derived from maven project or context
 - name packages after their domain responsibilities
 - create package-info.java for top level packages with JavaDoc documenting design decisions and responsibilities (not contents)
-- do not create package-info.java for components with obvious meaning; describe the "Why?" not implementation details
+- document only domain-specific packages with package-info.java where the purpose is not self-evident
 
 ## Boundary Layer
 - keep coarse-grained classes in the boundary package
@@ -127,7 +127,7 @@
 - avoid writing repetitive or trivial unit tests; keep only essential tests verifying core functionality
 - do not write tests for implementations that cannot fail (enums, records, getters/setters)
 - create minimalistic tests first
-- generate at most three UTs, ITs or STs
+- generate at most three tests per class under test (applies separately to UTs, ITs, and STs)
 - use AssertJ library instead of JUnit assertions
 - the presence of isEqualTo assertion makes less specific checks (startsWith, isNotNull) obsolete
 - do not use private visibility in tests
