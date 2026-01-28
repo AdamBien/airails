@@ -1,7 +1,7 @@
 ---
-name: Static Web Development
+name: static-web-development
 description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems
-keywords: html, css, semantic markup, web standards, static sites, baseline 2025, accessibility, responsive design, no javascript
+keywords: html, css, semantic markup, web standards, static website, baseline 2025, accessibility, responsive design, no javascript
 version: 0.0.1
 author: adam-bien.com
 ---
@@ -32,9 +32,8 @@ project/
 ├── about.html          # Additional pages
 ├── contact.html
 ├── css/                # or styles/
-│   ├── main.css
+│   ├── style.css
 │   ├── components.css
-│   └── utilities.css
 ├── images/             # or img/
 │   ├── logo.svg
 │   └── hero.jpg
@@ -70,7 +69,7 @@ Use semantic HTML5 elements to convey document structure and meaning:
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Page description for SEO">
   <title>Page Title</title>
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
   <header>
@@ -254,7 +253,7 @@ Note: Always maintain visible focus indicators for accessibility. The `accent-co
 Maintain styles in dedicated CSS files, never inline:
 
 ```css
-/* main.css - Global styles and CSS custom properties */
+/* style.css - Global styles and CSS custom properties */
 :root {
   --color-primary: #0066cc;
   --color-secondary: #6c757d;
@@ -699,7 +698,7 @@ Note: HTML provides a native `<dialog>` element with built-in accessibility and 
 
 ```html
 <!-- Preload critical resources -->
-<link rel="preload" href="styles/main.css" as="style">
+<link rel="preload" href="styles/style.css" as="style">
 <link rel="preload" href="fonts/main.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- Lazy load images -->
