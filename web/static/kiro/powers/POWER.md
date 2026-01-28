@@ -538,6 +538,8 @@ details[open] summary {
 ```
 
 **CSS-Only Modal with :target**:
+
+Note: HTML provides a native `<dialog>` element with built-in accessibility and focus management, but it requires JavaScript (`.showModal()`) to open. The `:target` approach below works without JavaScript:
 ```html
 <a href="#modal">Open Modal</a>
 
