@@ -5,41 +5,28 @@ argument-hint: "[description of the CLI application to create]"
 
 Create or maintain a Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.
 
-## Language
-
-- Use Java 25
-
 ## Build
 
-- Prefer Java source files without any build tool
+- Use Java 25 source-file mode — no build tool required
 - If necessary, use https://github.com/AdamBien/zb to create executable JARs
-- Java 25 CLI applications will be executed in source-file mode
-- Java files can be made directly executable by adding a shebang line as the very first line:
+- Prefer creating executable files without the `.java` extension, with a lowercase filename and a shebang:
 
 ```
 #!/usr/bin/env -S java --source 25
-```
 
-  The shebang line tells the OS to use java as the interpreter. The "env -S" flag allows passing multiple arguments and locates java via PATH, making the script portable. The file must have no .java extension and use a lowercase name. Mark it executable with chmod +x.
-
-- Prefer creating executable Java files without the `.java` extension, with a lowercase filename and a shebang:
-
-```
-#!/usr/bin/env -S java --source 25
- 
 void main(String... args) {
     // ...
 }
 ```
 
-  Save as e.g. `app`, then run directly with: `./app`
+  Save as e.g. `app`, mark executable with `chmod +x`, then run with: `./app`
 
-- When asked, create a shell script wrapper for execution:
+- When asked, create a shell script wrapper for execution (replace `SCRIPT_NAME`):
 
 ```
 #!/bin/sh
 BASEDIR=$(dirname $0)
-java ${BASEDIR}/[SCRIPT_NAME] "$@"
+java ${BASEDIR}/SCRIPT_NAME "$@"
 ```
 
 ## Version Management
@@ -48,20 +35,20 @@ java ${BASEDIR}/[SCRIPT_NAME] "$@"
 
 ## Main Method Conventions
 
-- Main method signature: `void main()` if args are not needed, otherwise `void main(String... args)` (instance main — not static)
-
-
-## Unnamed Classes
-
-- In unnamed classes do not import packages available in java.base module
-- Do not use static methods in unnamed classes
+- Use `void main()` if args are not needed, otherwise `void main(String... args)`
+- Instance main only — not static (unnamed classes do not use static methods)
 
 ## Code Style
 
 - Code must be as simple, elegant, and understandable as possible
 - Always choose the simplest possible API — prefer higher-level, concise APIs over verbose low-level ones
 - When multiple approaches exist, use the one with the fewest lines of code
-- Use `IO.println()` for printing
-- Alternatively use `IO::println` as a method reference
-- Do not use `System.out.println()`
-
+- Use `IO.println()` for printing (or `IO::println` as method reference) — never `System.out.println()`
+- Use `var` for local variable declarations where the type is obvious
+- Use modern Java features (records, sealed types, pattern matching, etc.) naturally
+- No package declaration
+- Nested types (records, enums, interfaces) go inside the `interface App` block
+- Do not import packages from `java.base` — it is automatically available
+- Always use module imports (e.g., `import module java.net.http;`) — never individual type imports
+- Minimal imports — only import what is actually used
+- No blank lines between imports
