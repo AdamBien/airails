@@ -26,7 +26,7 @@ Create or maintain a Java 25 CLI application using $ARGUMENTS. Apply all rules b
 
 ```
 #!/usr/bin/env -S java --source 25
-
+ 
 void main(String... args) {
     // ...
 }
