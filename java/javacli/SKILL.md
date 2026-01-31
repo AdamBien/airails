@@ -56,5 +56,12 @@ java ${BASEDIR}/[SCRIPT_NAME] "$@"
 - In unnamed classes do not import packages available in java.base module
 - Do not use static methods in unnamed classes
 
+## Code Style
 
+- Code must be as simple, elegant, and understandable as possible
+- Always choose the simplest possible API — prefer higher-level, concise APIs over verbose low-level ones
+- When multiple approaches exist, use the one with the fewest lines of code
+- Use `IO.println()` for printing
+- Alternatively use `IO::println` as a method reference
+- Do not use `System.out.println()`
 
