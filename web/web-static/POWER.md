@@ -1,5 +1,5 @@
 ---
-name: static-web-development
+name: static-web
 description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems
 keywords: html, css, semantic markup, web standards, static website, baseline 2025, accessibility, responsive design, no javascript
 version: 0.0.1
