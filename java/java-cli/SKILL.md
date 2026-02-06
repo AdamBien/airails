@@ -41,6 +41,7 @@ java ${BASEDIR}/SCRIPT_NAME "$@"
 
 ## Code Style
 
+- Do not create classes or interfaces — use unnamed classes with top-level methods, records, enums, and sealed types only
 - Code must be as simple, elegant, and understandable as possible
 - Always choose the simplest possible API — prefer higher-level, concise APIs over verbose low-level ones
 - When multiple approaches exist, use the one with the fewest lines of code
