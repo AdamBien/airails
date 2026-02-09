@@ -58,3 +58,4 @@ java ${BASEDIR}/SCRIPT_NAME "$@"
 - Extract complex boolean conditions into named predicate methods — write `boolean isEligible()` instead of inlining `age >= 18 && status.equals("active") && !banned`
 - Extract non-trivial calculations into named methods — write `double shippingCost()` instead of inlining the formula, so call sites read as intent rather than arithmetic
 - Inline single-use variables — if a variable is assigned and used only once on the next line, pass the expression directly instead
+- Extract repeated string literals into named constants — if the same string appears more than once, define a `String` constant so changes happen in one place
