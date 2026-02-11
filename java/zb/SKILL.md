@@ -7,6 +7,10 @@ description: Build Java 21+ projects with zb (Zero Dependencies Builder). Use wh
 
 Build single-module Java 21+ projects into executable JARs without Maven or Gradle.
 
+## Installation
+
+Download `zb.jar` and `zb.sh` from [github.com/AdamBien/zb](https://github.com/AdamBien/zb) into your project root. Requires Java 21+.
+
 ## Build Command
 
 ```bash
