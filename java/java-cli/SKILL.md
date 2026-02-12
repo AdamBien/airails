@@ -1,7 +1,6 @@
 ---
 name: java-cli
 description: Create and maintain Java 25 CLI applications in source-file mode. Use when asked to create Java CLI tools, scripts, or single-file Java applications.
-argument-hint: "[description of the CLI application to create]"
 ---
 
 Create or maintain a Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.
