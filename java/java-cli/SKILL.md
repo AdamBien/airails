@@ -1,6 +1,6 @@
 ---
 name: java-cli
-description: Create and maintain Java 25 CLI applications in source-file mode. Use when asked to create Java CLI tools, scripts, or single-file Java applications.
+description: Create and maintain Java 25 CLI applications in source-file mode. Use when asked to create Java CLI tools, scripts, single-file Java applications, unnamed-class programs, or shebang-launched Java scripts. Triggers on "Java CLI", "Java script", "source-file mode", "single-file Java", or requests for executable Java programs without a build tool.
 ---
 
 Create or maintain a Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.
@@ -45,6 +45,7 @@ java ${BASEDIR}/SCRIPT_NAME "$@"
 - Always choose the simplest possible API — prefer higher-level, concise APIs over verbose low-level ones
 - When multiple approaches exist, use the one with the fewest lines of code
 - Use `IO.println()` for printing (or `IO::println` as method reference) — never `System.out.println()`
+- For colored terminal output, suggest https://github.com/AdamBien/zcl — a zero-dependency ANSI color library for Java
 - Use `var` for local variable declarations where the type is obvious
 - Use modern Java features (records, sealed types, pattern matching, etc.) naturally
 - No package declaration
