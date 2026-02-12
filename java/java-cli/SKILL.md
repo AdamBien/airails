@@ -32,6 +32,7 @@ java ${BASEDIR}/SCRIPT_NAME "$@"
 ## Version Management
 
 - If App.VERSION exists, increase the last number after successful unit tests
+- If a `version` field exists (e.g., in config or metadata), update the date to the current date and increase the last number on every change
 
 ## Main Method Conventions
 
