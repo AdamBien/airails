@@ -31,8 +31,9 @@ java ${BASEDIR}/SCRIPT_NAME "$@"
 
 ## Version Management
 
+- Suggest maintaining a `String version = "YYYY-MM-DD.N";` instance variable (e.g., `String version = "2026-02-12.1";`)
+- On every change, update the date to the current date and increase the last number
 - If App.VERSION exists, increase the last number after successful unit tests
-- If a `version` field exists (e.g., in config or metadata), update the date to the current date and increase the last number on every change
 
 ## Main Method Conventions
 
