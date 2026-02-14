@@ -13,6 +13,10 @@ Build or maintain a web component application using $ARGUMENTS. Apply all rules 
 - no build step required for development — bundling is only for packaging third-party dependencies
 - progressive enhancement over JavaScript-first design
 
+## Reference Implementation
+
+This skill is based on the [bce.design](https://github.com/AdamBien/bce.design) quickstarter.
+
 ## Allowed Dependencies
 
 Only these three runtime dependencies are permitted. Do not add others without explicit approval:
