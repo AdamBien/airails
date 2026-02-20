@@ -1,6 +1,6 @@
 ---
 name: java-cli-script
-description: Create zero-dependency, single-file executable Java scripts for system-wide use via PATH. Use when asked to create a single-file Java shell script, system utility, PATH-installed Java tool, or shebang-launched Java program without the .java extension. Triggers on "Java script", "Java utility", "PATH script", "system script", "executable Java", or requests for single-file Java programs installed in /usr/local/bin or similar PATH directories. Not for multi-file Java applications — use java-cli for those.
+description: Create zero-dependency, single-file executable Java scripts for system-wide use via PATH. Use when asked to create a single-file Java shell script, system utility, PATH-installed Java tool, or shebang-launched Java program without the .java extension. Triggers on "Java script", "Java utility", "PATH script", "system script", or requests for single-file Java programs installed in /usr/local/bin or similar PATH directories. Not for multi-file Java applications — use java-cli-app for those.
 ---
 
 Create or maintain a zero-dependency, single-file executable Java script using $ARGUMENTS. Apply all rules below strictly.
@@ -98,7 +98,7 @@ void main(String... args) {
 - Only use the `java.base` module and standard JDK modules
 - Never add external JARs or classpath entries to the shebang
 - Use `java.net.http.HttpClient` for HTTP, `javax.crypto` for crypto, `java.nio.file` for file I/O
-- If a task genuinely requires external libraries or multiple files, suggest using the `java-cli` skill with zb instead
+- If a task genuinely requires external libraries or multiple files, suggest using the `java-cli-app` skill with zb instead
 
 ## Code Style
 
