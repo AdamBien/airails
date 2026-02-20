@@ -1,33 +1,15 @@
 ---
-name: java-cli
-description: Create and maintain Java 25 CLI applications in source-file mode. Use when asked to create Java CLI tools, scripts, single-file Java applications, unnamed-class programs, or shebang-launched Java scripts. Triggers on "Java CLI", "Java script", "source-file mode", "single-file Java", or requests for executable Java programs without a build tool.
+name: java-cli-app
+description: Create and maintain multi-file Java 25 CLI applications packaged as executable JARs with zb (Zero Dependencies Builder). Use when asked to create a Java CLI application, a CLI project with multiple source files, or an executable JAR. Triggers on "Java CLI app", "CLI application", "multi-file Java", "executable JAR", "zb build", or requests for Java programs that need multiple source files or JAR packaging. Not for single-file scripts — use java-cli-script for those.
 ---
 
-Create or maintain a Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.
+Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.
 
 ## Build
 
-- Use Java 25 source-file mode — no build tool required
-- If necessary, use https://github.com/AdamBien/zb to create executable JARs
-- Never use the `.java` extension — always create executable files with a lowercase filename and a shebang:
-
-```
-#!/usr/bin/env -S java --source 25
-
-void main(String... args) {
-    // ...
-}
-```
-
-  Save as e.g. `app`, mark executable with `chmod +x`, then run with: `./app`
-
-- When asked, create a shell script wrapper for execution (replace `SCRIPT_NAME`):
-
-```
-#!/bin/sh
-BASEDIR=$(dirname $0)
-java ${BASEDIR}/SCRIPT_NAME "$@"
-```
+- Use https://github.com/AdamBien/zb to create executable JARs — no Maven or Gradle required
+- Never use `--enable-preview` — Java 25 is a GA release, all features used here are standard
+- Source files use the `.java` extension and live in the project directory
 
 ## Version Management
 
