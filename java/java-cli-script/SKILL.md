@@ -27,6 +27,7 @@ These are self-contained, single-file Java scripts installed in a PATH directory
 ```
 
 - Save with a short, descriptive, lowercase command name (e.g., `jsonformat`, `portcheck`, `sysinfo`)
+- Never use dashes in filenames (e.g., `hello-world`) — Java source-file mode does not support them. Use camelCase instead (e.g., `helloWorld`)
 - Mark executable: `chmod +x scriptname`
 - Install by copying or symlinking to a PATH directory: `cp scriptname /usr/local/bin/` or `ln -s $(pwd)/scriptname /usr/local/bin/scriptname`
 
