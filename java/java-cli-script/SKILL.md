@@ -12,7 +12,7 @@ These are self-contained, single-file Java scripts installed in a PATH directory
 ## Single-File Constraint
 
 - Everything lives in one file — all logic, records, enums, sealed types, and helper methods
-- If the script grows beyond what fits comfortably in a single file, suggest switching to the `java-cli` skill instead
+- If the script grows beyond what fits comfortably in a single file, suggest switching to the `java-cli-app` skill instead
 - No multi-file source-code programs — this skill is strictly for single-file scripts
 
 ## Build
@@ -63,30 +63,31 @@ void main(String... args) {
 
 - Suggest maintaining a `String version = "YYYY-MM-DD.N";` instance variable (e.g., `String version = "2026-02-20.1";`)
 - On every change, update the date to the current date and increase the last number
-- Support `--version` flag to print the version
+- Support `-version` flag to print the version
 
 ## Main Method Conventions
 
 - Use `void main(String... args)` — PATH-installed scripts always accept arguments
 - Instance main only — not static (unnamed classes do not use static methods)
-- Parse arguments manually — no argument-parsing libraries
+- Parse arguments manually for simple scripts with few flags
+- For scripts with multiple options or complex argument handling, use the `/zargs` skill to generate an enum-based argument parser — it remains zero-dependency and single-file
 
 ## Argument Handling
 
-- Support `--help` and `--version` flags in every script
-- Print usage information to stdout when `--help` is passed or when required arguments are missing
+- Support `-help` and `-version` flags in every script
+- Print usage information to stdout when `-help` is passed or when required arguments are missing
 - Use clear, descriptive error messages for invalid input
 - Exit with code 0 on success, non-zero on failure
 
 ```
 void main(String... args) {
-    if (args.length == 0 || args[0].equals("--help")) {
+    if (args.length == 0 || args[0].equals("-help")) {
         IO.println("Usage: scriptname <input> [options]");
-        IO.println("  --help     Show this help");
-        IO.println("  --version  Show version");
+        IO.println("  -help     Show this help");
+        IO.println("  -version  Show version");
         return;
     }
-    if (args[0].equals("--version")) {
+    if (args[0].equals("-version")) {
         IO.println("scriptname " + version);
         return;
     }
@@ -127,7 +128,21 @@ void main(String... args) {
 - Read from stdin when no file argument is given — support piping (e.g., `cat file | scriptname`)
 - Write normal output to stdout
 - Write errors and diagnostics to stderr using `System.err.println()`
+- For colored terminal output (status messages, errors, warnings), use the `/zcl` skill — it adds ANSI color support with zero dependencies
 - Support both piped input and file arguments where applicable
+
+## Configuration (Optional)
+
+- For scripts that need external configuration (properties files, environment overrides), use the `/zcfg` skill to add zero-dependency configuration loading
+- Most scripts should prefer command-line arguments over configuration files — only use `/zcfg` when persistent settings are genuinely needed
+
+## Companion Libraries
+
+The following zero-dependency libraries can be embedded directly into single-file scripts. They may need to be cloned first:
+
+- **zcl** — colored terminal output: `git clone https://github.com/AdamBien/zcl`
+- **zargs** — enum-based argument parsing pattern: https://github.com/AdamBien/zeeds/blob/main/zargs (no repo to clone — the `/zargs` skill generates the code directly)
+- **zcfg** — configuration loading: `git clone https://github.com/AdamBien/zcfg`
 
 ## Installation Guidance
 
