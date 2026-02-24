@@ -130,7 +130,7 @@ Log.stop("Fatal error — shutting down");   // logs error and calls System.exit
 
 ## Integration Rules
 
-1. Copy `Log.java` as-is into the project source tree — do not add it as a Maven/Gradle dependency
+1. Copy `Log.java` into the project source tree — do not add it as a Maven/Gradle dependency. Only include the enum constants, `Color` entries, and static methods that the target project actually uses. Remove unused log levels and their corresponding colors and convenience methods.
 2. Add a `package` declaration matching the target package at the top of the copied file
 3. Use `Log.ERROR` (to `System.err`) for errors and `Log.INFO`/`Log.SYSTEM`/`Log.USER`/`Log.WARNING`/`Log.DEBUG` (to `System.out`) for everything else
 4. Replace `System.out.println` calls with the appropriate `Log` level
