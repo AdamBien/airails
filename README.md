@@ -4,6 +4,20 @@ Development conventions, [SKILLS.md](https://agentskills.io/specification), and 
 
 ## What's Inside
 
-- [**javacli**](java/javacli) — Guidelines for Java 25 CLI applications using source-file mode (JEP 458), no build tools required
-- [**static-web-development**](web/static) — Standards for modern static websites using semantic HTML5 and CSS without external dependencies
-- [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE (Boundary-Control-Entity) pattern
+### Java
+
+- [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH
+- [**java-cli-app**](java/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
+- [**zb**](java/zb) — Zero Dependencies Builder for compiling, building, and packaging Java 21+ projects
+- [**zargs**](java/zargs) — Zero-dependency, enum-based argument parsing for Java CLI applications
+- [**zcfg**](java/zcfg) — Zero Dependency Configuration Utility for loading properties and application configuration
+- [**zcl**](java/zcl) — Zero-dependency Colour Logger for colored terminal output in Java applications
+
+### Web
+
+- [**web-static**](web/web-static) — Modern static websites using semantic HTML and CSS without external dependencies or build systems
+- [**web-components**](web/web-components) — Single-page applications using web components, BCE layering, lit-html, Redux Toolkit, and client-side routing
+
+### Server
+
+- [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
