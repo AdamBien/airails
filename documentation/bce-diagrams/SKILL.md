@@ -20,8 +20,8 @@ Create diagrams that show interactions and dependencies between business compone
 1. **Gather information** - Identify BCs, subsystems, and external services to visualize. Analyze the codebase package structure (`[org].[project].[bc].[boundary|control|entity]`) or use the user's description.
 2. **Choose detail level and format** - Ask the user using a single AskUserQuestion call with two questions:
    - **Detail level**: "Between components" (each BC is a single opaque node) or "Within components" (show boundary, control, entity layers inside each BC)
-   - **Format**: "Mermaid" (text-based, version-control friendly, renders in GitHub/GitLab) or "draw.io" (visual editor, richer styling, exportable to PNG/SVG)
-3. **Invoke the chosen skill** - Use the Skill tool to invoke either `mermaid` or `drawio` with the identified BCs, subsystems, interactions, and chosen detail level.
+   - **Format**: "Mermaid (Recommended)" (text-based, version-control friendly, renders natively in GitHub/GitLab — default for README.md in GitHub projects) or "draw.io" (visual editor, richer styling, exportable to PNG/SVG)
+3. **Invoke the chosen skill** - Use the Skill tool to invoke either `mermaid` or `drawio` with the identified BCs, subsystems, interactions, and chosen detail level. When the diagram is destined for a README.md in a GitHub project, default to Mermaid without asking.
 
 ## Diagram Content Guidelines
 
