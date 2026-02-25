@@ -21,3 +21,8 @@ Development conventions, [SKILLS.md](https://agentskills.io/specification), and 
 ### Server
 
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
+
+### Documentation
+
+- [**bce-diagrams**](documentation/bce-diagrams) — High-level overview diagrams showing interactions between business components, subsystems, and services
+- [**mermaid**](documentation/mermaid) — Mermaid overview diagrams for architecture and component visualization
