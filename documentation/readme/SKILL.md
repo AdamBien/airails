@@ -41,7 +41,7 @@ One or two sentences: what it does and why.
 
 ## Prerequisites
 
-Java 21+, Docker
+Java 25+, Docker
 
 ## Build and Run
 
