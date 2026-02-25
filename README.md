@@ -25,4 +25,5 @@ Development conventions, [SKILLS.md](https://agentskills.io/specification), and 
 ### Documentation
 
 - [**bce-diagrams**](documentation/bce-diagrams) — High-level overview diagrams showing interactions between business components, subsystems, and services
+- [**drawio**](documentation/drawio) — Draw.io overview diagrams with BCE shape mapping and consistent visual style
 - [**mermaid**](documentation/mermaid) — Mermaid overview diagrams for architecture and component visualization
