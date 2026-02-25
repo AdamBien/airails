@@ -1,34 +1,26 @@
 ---
 name: mermaid
-description: Generate Mermaid overview diagrams for architecture and component visualization. Use when asked to create, generate, or draw Mermaid diagrams, architecture overviews, component diagrams, dependency graphs, or system visualizations. Triggers on "mermaid diagram", "architecture diagram", "component overview", "dependency graph", "draw a diagram", or requests to visualize system structure.
+description: Generate Mermaid overview diagrams for architecture and component visualization. Use when asked to create, generate, or draw Mermaid diagrams, architecture overviews, component diagrams, dependency graphs, or system visualizations. Triggers on "mermaid diagram", "architecture diagram", "component overview", "dependency graph", "draw a diagram", or requests to visualize system structure. Not for detailed class diagrams, sequence diagrams, or UML.
 ---
 
 # Mermaid Overview Diagrams
 
-## Diagram Type
-- prefer flowchart (graph) for component overviews
-- use TD (top-down) or LR (left-right) direction
-
-## Output
-- wrap diagram in a ` ```mermaid ` fenced code block for GitHub markdown rendering
-
-## Style
+## Rules
+- prefer flowchart (graph) with TD or LR direction
+- wrap in ` ```mermaid ` fenced code block
 - use stadium-shaped nodes: `([text])`
-
-## Content
-- visualize only high-level concepts and modules
-- show dependencies with arrows: `API --> Database`
-- omit implementation details, classes, and methods
+- use meaningful node IDs reflecting component names
+- use `-->` for dependencies, `-.->` for optional dependencies
+- label arrows only when ambiguous: `Gateway -->|routes| Service`
+- visualize only high-level concepts — omit classes, methods, implementation details
 - use subgraphs sparingly for logical grouping
-- limit diagram to essential relationships
+- write diagram into the target file (e.g. README.md) when context is clear
 
-## Arrows
-- use `-->` for dependencies
-- use `-.->` for optional/weak dependencies
-- label arrows only when relationship type is ambiguous: `Gateway -->|routes| Service`
+## Example
 
-## Node IDs
-- use meaningful, descriptive node IDs: `UserService`, `OrderDB`, `PaymentGateway`
-- avoid generic IDs like `A`, `B`, `C` or `node1`, `node2`
-- node ID should reflect the component name
-- keep IDs concise but self-explanatory
+```mermaid
+graph LR
+    Gateway([API Gateway]) -->|routes| OrderService([Order Service])
+    OrderService --> OrderDB([Order DB])
+    OrderService -.-> NotificationService([Notification Service])
+```
