@@ -169,6 +169,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 
 ## Project Management
 - always ask before changing pom.xml
+- on opening existing projects, load AGENTS.md (if present) before making changes
 - do not create or change any files on opening existing projects; stop after initialization and wait for instructions
 - do not generate code initially in an empty project
 - Maven pom.xml must not be created for Java 25 CLI applications
