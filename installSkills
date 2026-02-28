@@ -120,6 +120,18 @@ void deleteSkill(Path home, String name) throws IOException {
     Log.INFO.out("Done.");
 }
 
+boolean isVisiblePath(Path path) {
+    return !path.toString().contains(File.separator + ".");
+}
+
+boolean isSkillFile(Path path) {
+    return path.getFileName().toString().equals("SKILL.md");
+}
+
+boolean hasSkillFile(Path dir) {
+    return Files.exists(dir.resolve("SKILL.md"));
+}
+
 List<Path> sources() {
     return List.of(
             Path.of("").toAbsolutePath()
@@ -128,10 +140,10 @@ List<Path> sources() {
 
 List<String> findSkillNames(Path source) throws IOException {
     if (!Files.exists(source)) return List.of();
-    try (var paths = Files.walk(source).filter(p -> !p.toString().contains(File.separator + "."))) {
+    try (var paths = Files.walk(source).filter(this::isVisiblePath)) {
         return paths
                 .filter(Files::isRegularFile)
-                .filter(p -> p.getFileName().toString().equals("SKILL.md"))
+                .filter(this::isSkillFile)
                 .map(p -> p.getParent().getFileName().toString())
                 .sorted()
                 .toList();
@@ -154,7 +166,7 @@ void listSkills(Path home) throws IOException {
         try (var dirs = Files.list(target)) {
             var installed = dirs
                     .filter(Files::isDirectory)
-                    .filter(d -> Files.exists(d.resolve("SKILL.md")))
+                    .filter(this::hasSkillFile)
                     .map(d -> d.getFileName().toString())
                     .sorted()
                     .toList();
@@ -173,10 +185,10 @@ void installSkills(Path home) throws IOException {
     for (var source : sources) {
         Log.SYSTEM.out("Installing airails.dev skills");
         Log.SYSTEM.out("Source: " + source);
-        try (var paths = Files.walk(source).filter(p -> !p.toString().contains(File.separator + "."))) {
+        try (var paths = Files.walk(source).filter(this::isVisiblePath)) {
             var skills = paths
                     .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equals("SKILL.md"))
+                    .filter(this::isSkillFile)
                     .toList();
             Log.INFO.out("Found %d skill(s)".formatted(skills.size()));
             var skillNames = skills.stream()
