@@ -1,0 +1,199 @@
+#!/usr/bin/env -S java --source 25
+enum Log {
+
+    ERROR(Color.BRIGHT_RED, System.err),
+    USER(Color.BRIGHT_CYAN, System.out),
+    INFO(Color.BRIGHT_GREEN, System.out),
+    SYSTEM(Color.SKY_BLUE, System.out),
+    WARNING(Color.WARM_YELLOW, System.out),
+    DEBUG(Color.SOFT_PURPLE, System.out);
+
+    PrintStream out;
+
+    enum Color {
+        SOFT_GRAY("\033[38;5;246m"),
+        WARM_YELLOW("\033[38;5;220m"),
+        BRIGHT_BLUE("\033[38;5;33m"),
+        BRIGHT_WHITE("\033[38;5;255m"),
+        BRIGHT_RED("\033[38;5;196m"),
+        BRIGHT_GREEN("\033[38;5;46m"),
+        BRIGHT_YELLOW("\033[38;5;226m"),
+        SKY_BLUE("\033[38;5;39m"),
+        SOFT_PURPLE("\033[38;5;129m"),
+        BRIGHT_CYAN("\033[38;5;51m"),
+        BLACK_ON_WHITE("\033[38;5;232;48;5;255m");
+
+        String code;
+
+        Color(String code) {
+            this.code = code;
+        }
+    }
+
+    private final String value;
+    private final static String RESET = "\u001B[0m";
+
+    private Log(Color color, PrintStream out) {
+        this.value = (color.code + "%s" + RESET);
+        this.out = out;
+    }
+
+    public String formatted(String raw) {
+        return this.value.formatted(raw);
+    }
+
+    public void out(String message) {
+        var colored = formatted(message);
+        this.out.println(colored);
+    }
+
+    public static void debug(String message) {
+        Log.DEBUG.out(message);
+    }
+
+    public static void error(String message) {
+        Log.ERROR.out(message);
+    }
+
+    public static void error(String message, Exception e) {
+        Log.ERROR.out(message + ": " + e.getMessage());
+        e.printStackTrace(System.err);
+    }
+
+    public static void user(String message) {
+        Log.USER.out(message);
+    }
+
+    public static void warning(String message) {
+        Log.WARNING.out(message);
+    }
+
+    public static void stop(String message) {
+        error(message);
+        System.exit(1);
+    }
+}
+
+List<Path> targets(Path home) {
+    return List.of(
+            home.resolve(".claude/skills"),
+            home.resolve(".vibe/skills"),
+            home.resolve(".kiro/skills"),
+            home.resolve(".copilot/skills"),
+            home.resolve(".agents/skills"), //codex
+            home.resolve(".config/goose/skills")
+    );
+}
+
+void deleteSkill(Path home, String name) throws IOException {
+    var console = System.console();
+    for (var target : targets(home)) {
+        var skillDir = target.resolve(name);
+        if (Files.exists(skillDir)) {
+            var answer = console.readLine("  Delete %s? [y/N] ", skillDir);
+            if (answer.trim().equalsIgnoreCase("y")) {
+                try (var files = Files.walk(skillDir).sorted(Comparator.reverseOrder())) {
+                    files.forEach(p -> {
+                        try { Files.delete(p); } catch (IOException e) { throw new UncheckedIOException(e); }
+                    });
+                }
+                Log.INFO.out("  Deleted.");
+            } else {
+                Log.SYSTEM.out("  Skipped.");
+            }
+        }
+    }
+    Log.INFO.out("Done.");
+}
+
+List<Path> sources() {
+    return List.of(
+            Path.of("").toAbsolutePath()
+    );
+}
+
+List<String> findSkillNames(Path source) throws IOException {
+    if (!Files.exists(source)) return List.of();
+    try (var paths = Files.walk(source)) {
+        return paths
+                .filter(Files::isRegularFile)
+                .filter(p -> p.getFileName().toString().equals("SKILL.md"))
+                .map(p -> p.getParent().getFileName().toString())
+                .sorted()
+                .toList();
+    }
+}
+
+void listSkills(Path home) throws IOException {
+    Log.SYSTEM.out("Available skills:");
+    for (var source : sources()) {
+        var skills = findSkillNames(source);
+        if (skills.isEmpty()) continue;
+        Log.SYSTEM.out("  " + source);
+        for (var name : skills) {
+            Log.USER.out("    " + name);
+        }
+    }
+    Log.SYSTEM.out("Installed skills:");
+    for (var target : targets(home)) {
+        if (!Files.exists(target)) continue;
+        try (var dirs = Files.list(target)) {
+            var installed = dirs
+                    .filter(Files::isDirectory)
+                    .filter(d -> Files.exists(d.resolve("SKILL.md")))
+                    .map(d -> d.getFileName().toString())
+                    .sorted()
+                    .toList();
+            if (installed.isEmpty()) continue;
+            Log.SYSTEM.out("  " + target);
+            for (var name : installed) {
+                Log.INFO.out("    " + name);
+            }
+        }
+    }
+}
+
+void installSkills(Path home) throws IOException {
+    var scriptDir = Path.of("").toAbsolutePath();
+    var sources = List.of(scriptDir);
+    for (var source : sources) {
+        Log.SYSTEM.out("Installing airails.dev skills");
+        Log.SYSTEM.out("Source: " + source);
+        try (var paths = Files.walk(source)) {
+            var skills = paths
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().equals("SKILL.md"))
+                    .toList();
+            Log.INFO.out("Found %d skill(s)".formatted(skills.size()));
+            for (var skill : skills) {
+                var name = skill.getParent().getFileName().toString();
+                for (var target : targets(home)) {
+                    var dest = target.resolve(name).resolve("SKILL.md");
+                    Files.createDirectories(dest.getParent());
+                    Files.copy(skill, dest, StandardCopyOption.REPLACE_EXISTING);
+                    Log.USER.out("  %s -> %s".formatted(name, dest));
+                }
+            }
+        }
+    }
+    Log.INFO.out("Done.");
+}
+
+void main(String... args) throws IOException {
+    var home = Path.of(System.getProperty("user.home"));
+    if (args.length == 1 && "-h".equals(args[0])) {
+        Log.USER.out("Usage: installSkills              - install all skills");
+        Log.USER.out("       installSkills -l           - list available and installed skills");
+        Log.USER.out("       installSkills -d <name>    - delete skill by folder name");
+        Log.USER.out("       installSkills -h           - show this help");
+        return;
+    }
+    if (args.length == 1 && "-l".equals(args[0])) {
+        listSkills(home);
+    } else if (args.length == 2 && "-d".equals(args[0])) {
+        Log.SYSTEM.out("Deleting skill: " + args[1]);
+        deleteSkill(home, args[1]);
+    } else {
+        installSkills(home);
+    }
+}
