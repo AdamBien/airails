@@ -1,4 +1,7 @@
 #!/usr/bin/env -S java --source 25
+/**
+ * Based on: https://github.com/adambien/zeeds
+ */
 enum Log {
 
     ERROR(Color.BRIGHT_RED, System.err),
@@ -165,9 +168,20 @@ void installSkills(Path home) throws IOException {
                     .filter(p -> p.getFileName().toString().equals("SKILL.md"))
                     .toList();
             Log.INFO.out("Found %d skill(s)".formatted(skills.size()));
-            for (var skill : skills) {
-                var name = skill.getParent().getFileName().toString();
-                for (var target : targets(home)) {
+            var skillNames = skills.stream()
+                    .map(p -> p.getParent().getFileName().toString())
+                    .sorted()
+                    .toList();
+            Log.SYSTEM.out("Skills: " + String.join(", ", skillNames));
+            var console = System.console();
+            for (var target : targets(home)) {
+                var answer = console.readLine("Install to %s? [y/N] ", target);
+                if (!answer.trim().equalsIgnoreCase("y")) {
+                    Log.SYSTEM.out("  Skipped.");
+                    continue;
+                }
+                for (var skill : skills) {
+                    var name = skill.getParent().getFileName().toString();
                     var dest = target.resolve(name).resolve("SKILL.md");
                     Files.createDirectories(dest.getParent());
                     Files.copy(skill, dest, StandardCopyOption.REPLACE_EXISTING);
