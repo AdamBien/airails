@@ -119,6 +119,7 @@ void main(String... args) {
 - Prefer character literals and named constants over raw numeric literals — write `'\n'` not `10`, define `int ESC = '\033'` instead of inlining `27`
 - Bind behavior to data with functional fields — store a `Runnable`, `Consumer`, or lambda in a record instead of switching on type externally
 - Extract complex boolean conditions into named predicate methods
+- Extract inline lambda predicates into explaining methods and use method references (e.g., `.filter(this::isSkillFile)` over `.filter(p -> p.endsWith("SKILL.md"))`)
 - Extract non-trivial calculations into named methods
 - Inline single-use variables — if a variable is assigned and used only once on the next line, pass the expression directly instead
 - Extract repeated string literals into named constants
