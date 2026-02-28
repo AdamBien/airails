@@ -96,9 +96,11 @@ List<Path> targets(Path home) {
 
 void deleteSkill(Path home, String name) throws IOException {
     var console = System.console();
+    var found = false;
     for (var target : targets(home)) {
         var skillDir = target.resolve(name);
         if (Files.exists(skillDir)) {
+            found = true;
             var answer = console.readLine("  Delete %s? [y/N] ", skillDir);
             if (answer.trim().equalsIgnoreCase("y")) {
                 try (var files = Files.walk(skillDir).sorted(Comparator.reverseOrder())) {
@@ -112,6 +114,9 @@ void deleteSkill(Path home, String name) throws IOException {
             }
         }
     }
+    if (!found) {
+        Log.WARNING.out("Skill '%s' not found in any target.".formatted(name));
+    }
     Log.INFO.out("Done.");
 }
 
@@ -123,7 +128,7 @@ List<Path> sources() {
 
 List<String> findSkillNames(Path source) throws IOException {
     if (!Files.exists(source)) return List.of();
-    try (var paths = Files.walk(source)) {
+    try (var paths = Files.walk(source).filter(p -> !p.toString().contains(File.separator + "."))) {
         return paths
                 .filter(Files::isRegularFile)
                 .filter(p -> p.getFileName().toString().equals("SKILL.md"))
@@ -168,7 +173,7 @@ void installSkills(Path home) throws IOException {
     for (var source : sources) {
         Log.SYSTEM.out("Installing airails.dev skills");
         Log.SYSTEM.out("Source: " + source);
-        try (var paths = Files.walk(source)) {
+        try (var paths = Files.walk(source).filter(p -> !p.toString().contains(File.separator + "."))) {
             var skills = paths
                     .filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().equals("SKILL.md"))
