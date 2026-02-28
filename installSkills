@@ -1,5 +1,11 @@
 #!/usr/bin/env -S java --source 25
 /**
+ * Installs airails.dev skills from the cloned repository into
+ * AI agent skill directories (~/.claude/skills, ~/.vibe/skills,
+ * ~/.kiro/skills, ~/.copilot/skills, ~/.agents/skills, ~/.config/goose/skills).
+ *
+ * Usage: clone the repo, cd into it, run ./installSkills
+ *
  * Based on: https://github.com/adambien/zeeds
  */
 enum Log {
