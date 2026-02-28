@@ -2,6 +2,24 @@
 
 Development conventions, [SKILLS.md](https://agentskills.io/specification), and [AGENTS.md](https://agents.md) for building modern Java and web applications.
 
+## Installation
+
+```
+git clone https://github.com/AdamBien/airails
+cd airails
+./installSkills
+```
+
+The installer finds all skills and prompts before copying to each supported agent directory (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`).
+
+Manage installed skills:
+
+```
+./installSkills -l           # list available and installed skills
+./installSkills -d <name>    # delete a skill by name
+./installSkills -h           # show help
+```
+
 ## What's Inside
 
 ### Java
