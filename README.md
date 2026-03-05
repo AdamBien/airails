@@ -49,6 +49,7 @@ Manage installed skills:
 
 ### Quickstarters
 
-- [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
 - [**quarkus-microprofile**](https://github.com/AdamBien/quarkus-microprofile) — Quarkus MicroProfile template with BCE architecture, REST endpoints, CDI, and System Tests
+- [**bce.design**](https://github.com/AdamBien/bce.design) — Web Components starter with lit-html, Redux Toolkit, and Vaadin Router
 - [**ebank**](https://github.com/AdamBien/ebank) — CRUD with Quarkus, JPA, and PostgreSQL
+- [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
