@@ -50,3 +50,4 @@ Manage installed skills:
 ### Quickstarters
 
 - [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
+- [**quarkus-microprofile**](https://github.com/AdamBien/quarkus-microprofile) — Quarkus MicroProfile template with BCE architecture, REST endpoints, CDI, and System Tests
