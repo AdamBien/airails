@@ -53,3 +53,4 @@ Manage installed skills:
 - [**bce.design**](https://github.com/AdamBien/bce.design) — Web Components starter with lit-html, Redux Toolkit, and Vaadin Router
 - [**ebank**](https://github.com/AdamBien/ebank) — CRUD with Quarkus, JPA, and PostgreSQL
 - [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
+- [**zeeds**](https://github.com/AdamBien/zeeds) — Zero-dependency Java 25+ source files as starting points, run directly with `java filename.java`
