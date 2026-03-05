@@ -46,3 +46,7 @@ Manage installed skills:
 - [**drawio**](documentation/drawio) — Draw.io overview diagrams with BCE shape mapping and consistent visual style
 - [**mermaid**](documentation/mermaid) — Mermaid overview diagrams for architecture and component visualization
 - [**readme**](documentation/readme) — Conventions for writing README.md files targeting advanced developers
+
+### Quickstarters
+
+- [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
