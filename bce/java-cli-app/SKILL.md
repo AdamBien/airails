@@ -7,6 +7,7 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 
 ## Build
 
+- For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure
 - Use https://github.com/AdamBien/zb to create executable JARs — no Maven or Gradle required
 - Never use `--enable-preview` — Java 25 is a GA release, all features used here are standard
 - Source files use the `.java` extension and live in the project directory
