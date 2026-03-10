@@ -137,6 +137,7 @@ void main(String... args) {
 - Extract non-trivial calculations into named methods
 - Inline single-use variables — if a variable is assigned and used only once on the next line, pass the expression directly instead
 - Extract repeated string literals into named constants
+- Separate side effects from conditions — do the work first, then branch on the result. Keep the `if` a pure decision rather than hiding behavior inside the condition
 
 ## stdin / stdout / stderr
 
