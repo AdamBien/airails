@@ -74,10 +74,24 @@ void main(String... args) {
 
 ## Argument Handling
 
-- Support `-help` and `-version` flags in every script
-- Print usage information to stdout when `-help` is passed or when required arguments are missing
+- Scripts with no additional arguments: print the version when invoked without arguments — no `-help` or `-version` flag needed
+- Scripts with additional arguments: support both `-help` and `-version` flags
 - Use clear, descriptive error messages for invalid input
 - Exit with code 0 on success, non-zero on failure
+
+Script with no additional arguments — just print the version:
+
+```
+void main(String... args) {
+    if (args.length == 0) {
+        IO.println("scriptname " + version);
+        return;
+    }
+    // ... main logic
+}
+```
+
+Script with additional arguments — include `-help` and `-version`:
 
 ```
 void main(String... args) {
