@@ -77,6 +77,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - if a lambda requires multiple statements or braces {}, extract it into a well-named helper method
 - do not create multiline lambda expressions; use method references instead
 - prefer extracting inline predicates into explaining methods and use method references (e.g., `.filter(this::isSkillFile)` over `.filter(p -> p.endsWith("SKILL.md"))`)
+- complex `.filter()` with multiple `&&`/`||` conditions split into chained `.filter()` calls 
 - extract repeated calculations or string concatenations into helper methods (DRY principle)
 - do not create empty delegates which just call methods without added value
 
