@@ -59,6 +59,11 @@ void main(String... args) {
 }
 ```
 
+## Naming Convention
+
+- The script's filename is its application name — use it consistently in all output: version strings, help text, usage lines, and error messages
+- Derive the application name dynamically at startup using `MethodHandles.lookup().lookupClass().getName()` — in source-file mode, the class name matches the filename, so there is nothing to hardcode or keep in sync
+
 ## Version Management
 
 - Suggest maintaining a `String version = "YYYY-MM-DD.N";` instance variable (e.g., `String version = "2026-02-20.1";`)
@@ -82,9 +87,12 @@ void main(String... args) {
 Script with no additional arguments — just print the version:
 
 ```
+String name = MethodHandles.lookup().lookupClass().getName();
+String version = "2026-02-20.1";
+
 void main(String... args) {
     if (args.length == 0) {
-        IO.println("scriptname " + version);
+        IO.println(name + " " + version);
         return;
     }
     // ... main logic
@@ -94,15 +102,18 @@ void main(String... args) {
 Script with additional arguments — include `-help` and `-version`:
 
 ```
+String name = MethodHandles.lookup().lookupClass().getName();
+String version = "2026-02-20.1";
+
 void main(String... args) {
     if (args.length == 0 || args[0].equals("-help")) {
-        IO.println("Usage: scriptname <input> [options]");
+        IO.println("Usage: " + name + " <input> [options]");
         IO.println("  -help     Show this help");
         IO.println("  -version  Show version");
         return;
     }
     if (args[0].equals("-version")) {
-        IO.println("scriptname " + version);
+        IO.println(name + " " + version);
         return;
     }
     // ...
