@@ -301,6 +301,21 @@ for (Employee e : employees) {
 var byDept = employees.stream().collect(groupingBy(Employee::department));
 ```
 
+### Effectively final capture — hoist computation out of lambdas
+
+```java
+// before — "." + extension is recomputed for every element
+files.stream()
+    .filter(name -> name.endsWith("." + extension))
+    .toList();
+
+// after — computed once, captured as effectively final
+var suffix = "." + extension;
+files.stream()
+    .filter(name -> name.endsWith(suffix))
+    .toList();
+```
+
 ### Optional over null checks
 
 ```java
