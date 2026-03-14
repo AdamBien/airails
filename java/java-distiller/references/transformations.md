@@ -261,6 +261,21 @@ var result = names.stream()
     .toList();
 ```
 
+### Pipeline stages over chained calls in lambdas
+
+```java
+// before — extraction and conversion packed into one lambda
+lines.stream()
+    .mapToDouble(line -> Double.parseDouble(line.replace(",", ".")))
+    .sum();
+
+// after — one transformation per stage, enables method reference
+lines.stream()
+    .map(line -> line.replace(",", "."))
+    .mapToDouble(Double::parseDouble)
+    .sum();
+```
+
 ### Method references over lambdas
 
 ```java
