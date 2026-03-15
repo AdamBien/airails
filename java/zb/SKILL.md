@@ -7,21 +7,38 @@ description: Build Java 21+ projects with zb (Zero Dependencies Builder). Use wh
 
 Build single-module Java 21+ projects into executable JARs without Maven or Gradle.
 
-## Installation
+## How to Build
 
-Download `zb.jar` and `zb.sh` from [github.com/AdamBien/zb](https://github.com/AdamBien/zb) into your project root. Requires Java 21+.
+### Step 1: Find zb.jar
 
-## Build Command
+Locate `zb.jar` in this order — stop at the first match:
+
+1. `zb.jar` in the project root
+2. Glob for `**/zb.jar` within the project directory tree
+3. Glob for `**/zb.jar` one level above the project (sibling projects)
+4. Check `~/bin/zb.jar` or `~/.local/bin/zb.jar`
+
+If not found, tell the user to download it from [github.com/AdamBien/zb](https://github.com/AdamBien/zb).
+
+### Step 2: Find the build directory
+
+zb must run from the directory containing the `.zb` config file (or where one should be generated). In multi-module repos, this is the module subdirectory, not the repo root.
+
+- Glob for `.zb` files in the project
+- `cd` into the directory containing the `.zb` file before running zb
+- If no `.zb` exists, run from the directory that contains `src/main/java`
+
+### Step 3: Run the build
 
 ```bash
-zb.sh
+cd <build-directory> && java -jar <path-to-zb.jar>
 ```
 
-Or directly:
+### Step 4: Verify
 
-```bash
-java -jar zb.jar
-```
+Check exit code and output. A successful build prints the number of compiled files. Common errors:
+- **"Multiple main classes found"** — you are in the wrong directory (likely the repo root instead of a module subdirectory)
+- **Compilation errors** — fix the source and rebuild
 
 ## Source Directory Convention
 
@@ -39,7 +56,7 @@ The project must have exactly one class with a `void main(` method (Java 21+ unn
 
 ## Configuration (.zb)
 
-Optional `.zb` properties file in project root (auto-generated on first run):
+Optional `.zb` properties file in the build directory (auto-generated on first run):
 
 ```properties
 sources.dir=<discovered by zb>
@@ -49,8 +66,8 @@ jar.dir=zbo/
 jar.file.name=app.jar
 ```
 
-- `<discovered by zb>` - auto-detect directory
-- `<temp.dir>` - use temporary directory, cleaned after build
+- `<discovered by zb>` — auto-detect directory
+- `<temp.dir>` — use temporary directory, cleaned after build
 
 ## CLI Arguments (Positional)
 
@@ -62,26 +79,12 @@ Precedence: CLI args > `.zb` file > defaults.
 
 ## Output
 
-Default: `zbo/app.jar` - executable JAR with Main-Class manifest entry.
+Default: `zbo/app.jar` — executable JAR with Main-Class manifest entry.
 
 Run with:
 
 ```bash
 java -jar zbo/app.jar
-```
-
-## Project Structure for zb-Compatible Projects
-
-```
-project/
-├── src/main/java/       # Java sources
-│   └── com/example/
-│       └── App.java     # Must contain void main(
-├── src/main/resources/  # Optional resources (included in JAR)
-│   └── META-INF/services/  # Optional SPI configuration
-├── .zb                  # Optional configuration
-└── zbo/
-    └── app.jar          # Build output
 ```
 
 ## Constraints

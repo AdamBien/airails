@@ -10,43 +10,49 @@ All three conditions must apply:
 - No Maven/Gradle dependencies required
 - Single-module application
 
-## Build Command
+## Build Procedure
 
-Run from the project root:
+### 1. Locate zb.jar
+
+Search in this order — stop at the first match:
+
+1. `zb.jar` in the current project root
+2. Glob `**/zb.jar` within the project tree (prefer one inside a `zbo/` or `target/` directory)
+3. Glob `**/zb.jar` one level above the project (sibling project directories)
+4. `~/bin/zb.jar` or `~/.local/bin/zb.jar`
+
+If none found, inform the user that zb.jar is missing and point them to https://github.com/AdamBien/zb
+
+### 2. Find the correct build directory
+
+zb must run from the directory that contains the `.zb` config file. In multi-module repos, each module has its own `.zb` file.
+
+- Glob for `.zb` files in the project
+- The build directory is the one containing `.zb` whose `sources.dir` points to your target sources
+- If no `.zb` exists, use the directory containing `src/main/java`
+- **Never run from the repo root of a multi-module project** — this causes "Multiple main classes found"
+
+### 3. Run the build
 
 ```bash
-java -jar ~/bin/zb.jar
+cd <build-directory> && java -jar <absolute-path-to-zb.jar>
 ```
 
-Or with shell wrapper:
+Always use an absolute path to `zb.jar` since you are cd-ing into the build directory.
 
-```bash
-zb.sh
-```
+### 4. Check the result
 
-CLI arguments override `.zb` configuration:
-
-```bash
-java -jar ~/bin/zb.jar [source-dir] [classes-dir] [jar-dir] [jar-filename]
-```
-
-## Source Detection
-
-zb auto-detects sources in this order:
-
-1. `src/main/java`
-2. `src/`
-3. Current directory
-
-All `.java` files in the source directory are compiled together in a single pass.
+- Success: output shows "compiled N files" and exit code 0
+- "Multiple main classes found": wrong directory — find the right module subdirectory
+- Compilation errors: fix source code and rebuild
 
 ## Output
 
-Executable JAR: `zbo/app.jar`
+Executable JAR: `zbo/<jar-name>.jar` (jar name configured in `.zb` as `jar.file.name`)
 
 ## Configuration
 
-A `.zb` file is auto-generated in the project root on first run with these defaults:
+A `.zb` file is auto-generated in the build directory on first run:
 
 ```properties
 sources.dir=<discovered by zb>
@@ -57,16 +63,4 @@ jar.file.name=app.jar
 ```
 
 - `<discovered by zb>` — zb uses its auto-detection logic
-- `<temp.dir>` — zb creates a temporary directory for compilation and deletes it after the JAR is built
-
-## Resources
-
-Only `META-INF/services` files from the resources directory are included in the JAR.
-
-## Verification
-
-Run the built JAR:
-
-```bash
-java -jar zbo/app.jar
-```
+- `<temp.dir>` — temporary directory for compilation, deleted after JAR is built
