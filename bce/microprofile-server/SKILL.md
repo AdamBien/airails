@@ -151,6 +151,8 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - RegisterRestClient configKey: "service_uri"
 - STs end with "IT" suffix
 - do not use RestAssured. Write e2e test in the -st module
+- execute system tests after every major change to the service module
+- in PoC mode (user-activated), system test execution is skipped
 
 ## JAX-RS
 - resources should be named in plural (e.g., SpeakersResource not SpeakerResource)
