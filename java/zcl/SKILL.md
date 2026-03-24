@@ -92,7 +92,7 @@ public enum Log {
     }
 
     public static void clearScreen(){
-        System.out.println("\033c");
+        IO.println("\033c");
     }
 
     public static void warning(String message){
