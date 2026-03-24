@@ -9,8 +9,27 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 
 - For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure
 - Use https://github.com/AdamBien/zb to create executable JARs — no Maven or Gradle required
+- Build by running `zb.sh` in the project root — it compiles all `.java` files from `src/main/java/` and packages them into `zbo/app.jar`
+- Run with `java -jar zbo/app.jar`
 - Never use `--enable-preview` — Java 25 is a GA release, all features used here are standard
 - Source files use the `.java` extension and live in the project directory
+
+## Dependencies
+
+zb has no classpath or dependency resolution — all dependencies are bundled as source code directly in `src/main/java/` under their original package structure.
+
+**How to add a dependency:**
+1. Copy the dependency's `.java` source files into `src/main/java/<package-path>/`
+2. Keep the original package declarations — zb compiles everything it finds
+3. Only include the source files you actually need
+
+**Common dependencies and their source locations:**
+
+| Dependency | Source path | Copy to |
+|-----------|------------|---------|
+| org.json (JSON processing) | `/Users/abien/work/workspaces/z-JSON-java/src/main/java/org/json/` | `src/main/java/org/json/` |
+| zcfg (configuration) | `/Users/abien/work/workspaces/z/zcfg/src/main/java/airhacks/zcfg/ZCfg.java` | `src/main/java/airhacks/zcfg/` |
+| zcl (colored logging) | `/Users/abien/work/workspaces/z/zcl/src/Log.java` | `src/main/java/` |
 
 ## Version Management
 
