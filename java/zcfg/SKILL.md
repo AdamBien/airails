@@ -16,6 +16,16 @@ zcfg is a zero-dependency, single-class Java configuration loader. It reads stan
 
 zcfg is integrated by copying the source file directly into the target project — no Maven dependency required.
 
+**Source location:** https://github.com/AdamBien/zcfg/blob/main/src/main/java/airhacks/zcfg/ZCfg.java
+
+**For zb projects:** Download the file preserving its package structure:
+```
+curl -sf https://raw.githubusercontent.com/AdamBien/zcfg/main/src/main/java/airhacks/zcfg/ZCfg.java -o src/main/java/airhacks/zcfg/ZCfg.java --create-dirs
+```
+The `package airhacks.zcfg;` declaration stays as-is. Import with `import airhacks.zcfg.*;`.
+
+**For other projects:**
+
 1. Determine the target project's base package (e.g., `com.example.myapp`)
 2. Create the file `ZCfg.java` in a `zcfg` sub-package under the base package (e.g., `src/main/java/com/example/myapp/zcfg/ZCfg.java` or `src/com/example/myapp/zcfg/ZCfg.java`)
 3. Write the following source with the `package` declaration adjusted to match the target location:
