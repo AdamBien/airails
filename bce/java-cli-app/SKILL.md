@@ -19,17 +19,19 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 zb has no classpath or dependency resolution — all dependencies are bundled as source code directly in `src/main/java/` under their original package structure.
 
 **How to add a dependency:**
-1. Copy the dependency's `.java` source files into `src/main/java/<package-path>/`
-2. Keep the original package declarations — zb compiles everything it finds
-3. Only include the source files you actually need
+1. **Ask the user first** whether they already have the dependency source locally (e.g., a cloned repo or a local path) — do NOT fetch from GitHub without asking
+2. If the user provides a local path, copy the `.java` source files from that path into `src/main/java/<package-path>/`
+3. If the user does not have it locally, clone from the source URL listed below
+4. Keep the original package declarations — zb compiles everything it finds
+5. Only include the source files you actually need
 
 **Common dependencies and their source locations:**
 
-| Dependency | Source path | Copy to |
-|-----------|------------|---------|
-| org.json (JSON processing) | `/Users/abien/work/workspaces/z-JSON-java/src/main/java/org/json/` | `src/main/java/org/json/` |
-| zcfg (configuration) | `/Users/abien/work/workspaces/z/zcfg/src/main/java/airhacks/zcfg/ZCfg.java` | `src/main/java/airhacks/zcfg/` |
-| zcl (colored logging) | `/Users/abien/work/workspaces/z/zcl/src/Log.java` | `src/main/java/` |
+| Dependency | Ask user for local path to | Fallback source | Copy to |
+|-----------|---------------------------|----------------|---------|
+| org.json (JSON processing) | org.json / z-JSON-java repo | `https://github.com/AdamBien/z-JSON-java` | `src/main/java/org/json/` |
+| zcfg (configuration) | zcfg repo | `https://github.com/AdamBien/zcfg` | `src/main/java/airhacks/zcfg/` |
+| zcl (colored logging) | zcl repo | `https://github.com/AdamBien/zcl` | `src/main/java/` |
 
 ## Version Management
 
