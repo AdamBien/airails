@@ -1,0 +1,24 @@
+# Enterprisifier
+
+> **WARNING: Do not use in production.**
+> This skill is strictly for educational and entertainment purposes. It intentionally produces the most overcomplicated, pattern-saturated Java code possible. Applying it to real systems will result in unmaintainable software.
+
+A Claude Code skill that transforms any piece of Java code into a maximally overengineered enterprise architecture — layered with unnecessary abstractions, design patterns, and indirections — to illustrate what *not* to do in production systems.
+
+## Purpose
+
+Demonstrates, through deliberate satire, the consequences of blindly applying enterprise patterns without regard for actual complexity requirements. Useful for:
+
+- Teaching the difference between accidental and essential complexity
+- Code review training: identifying over-abstraction
+- Conference talks and workshops on software design anti-patterns
+
+## Usage
+
+Invoke via Claude Code:
+
+```
+/enterprisifier
+```
+
+Paste or reference the code to overengineer. The skill produces Java source files, a `README.md` documenting every applied pattern, and an `architecture.drawio` diagram.
