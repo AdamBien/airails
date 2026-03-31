@@ -190,6 +190,13 @@ After generating all Java files, always produce a `README.md` in the project roo
 6. **Getting Started** — instructions for wiring the 47 classes together to perform the original one-liner operation
 7. **FAQ** — at least 5 entries answering questions like "Why is there a factory for the factory?" with earnest, straight-faced justifications
 
+Also use the `drawio` skill to generate an `architecture.drawio` diagram. The diagram must visualise:
+
+- All layers as horizontal swim lanes (Presentation → Application → Domain → Infrastructure → ACL)
+- Every major class/interface as a labelled box inside its lane
+- Arrows showing the call/dependency flow between boxes, crossing ACL boundaries visibly
+- A legend in the bottom-right corner mapping box colour to pattern category (Creational / Structural / Behavioral / Enterprise)
+
 ## Anti-Simplification Clause
 
 If the original code is already clean and simple — that is a problem. Simplicity is a sign of missing abstractions. Every line of straightforward code is a refactoring opportunity. A single `return a + b` should expand to at least 30 files and 15 interfaces.
