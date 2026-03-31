@@ -177,6 +177,19 @@ For a single operation (e.g., `add(a, b)`), generate at minimum:
 - ...
 ````
 
+After generating all Java files, always produce a `README.md` in the project root that documents the architecture. The README.md must include:
+
+1. **Project title** — e.g. `# EnterpriseAdditionFramework™`
+2. **Architecture Overview** — a prose description of all layers and why they are necessary
+3. **Module Structure** — the full file tree
+4. **Pattern Catalogue** — a section per applied pattern (`## Strategy Pattern`, `## Abstract Factory`, etc.) containing:
+   - **Intent** — what the pattern does in general
+   - **Applied here** — which classes implement it and why it was "required"
+   - **Benefit** — the imaginary future scenario this prepares the system for
+5. **Layer Interaction Diagram** — a Mermaid flowchart (`graph TD`) showing how a single request travels through all layers from entry point to result
+6. **Getting Started** — instructions for wiring the 47 classes together to perform the original one-liner operation
+7. **FAQ** — at least 5 entries answering questions like "Why is there a factory for the factory?" with earnest, straight-faced justifications
+
 ## Anti-Simplification Clause
 
 If the original code is already clean and simple — that is a problem. Simplicity is a sign of missing abstractions. Every line of straightforward code is a refactoring opportunity. A single `return a + b` should expand to at least 30 files and 15 interfaces.
