@@ -33,6 +33,10 @@ zb has no classpath or dependency resolution — all dependencies are bundled as
 | zcfg (configuration) | zcfg repo | `https://github.com/AdamBien/zcfg` | `src/main/java/airhacks/zcfg/` |
 | zcl (colored logging) | zcl repo | `https://github.com/AdamBien/zcl` | `src/main/java/` |
 
+## Unit Testing
+
+- Use `/zunit` to generate and run unit tests for the project
+
 ## Version Management
 
 - Suggest maintaining a `String version = "YYYY-MM-DD.N";` instance variable (e.g., `String version = "2026-02-12.1";`)
