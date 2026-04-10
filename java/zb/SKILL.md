@@ -9,7 +9,20 @@ Build single-module Java 21+ projects into executable JARs without Maven or Grad
 
 ## How to Build
 
-### Step 1: Find zb.jar
+### Step 1: Check for zb.sh script
+
+Search for a `zb.sh` wrapper script in this order — stop at the first match:
+
+1. `zb.sh` in the project root
+2. Glob for `**/zb.sh` within the project directory tree
+3. Glob for `**/zb.sh` one level above the project (sibling projects)
+4. Check `~/bin/zb.sh` or `~/.local/bin/zb.sh`
+
+**If `zb.sh` is found**, skip to Step 3 (zb.sh) — the script handles jar location and execution internally.
+
+**If `zb.sh` is not found**, continue to Step 2 to locate `zb.jar` manually.
+
+### Step 2: Find zb.jar (only if zb.sh not found)
 
 Locate `zb.jar` in this order — stop at the first match:
 
@@ -18,9 +31,9 @@ Locate `zb.jar` in this order — stop at the first match:
 3. Glob for `**/zb.jar` one level above the project (sibling projects)
 4. Check `~/bin/zb.jar` or `~/.local/bin/zb.jar`
 
-If not found, tell the user to download it from [github.com/AdamBien/zb](https://github.com/AdamBien/zb).
+If neither `zb.sh` nor `zb.jar` is found, tell the user to download from [github.com/AdamBien/zb](https://github.com/AdamBien/zb).
 
-### Step 2: Find the build directory
+### Step 3: Find the build directory
 
 zb must run from the directory containing the `.zb` config file (or where one should be generated). In multi-module repos, this is the module subdirectory, not the repo root.
 
@@ -28,13 +41,21 @@ zb must run from the directory containing the `.zb` config file (or where one sh
 - `cd` into the directory containing the `.zb` file before running zb
 - If no `.zb` exists, run from the directory that contains `src/main/java`
 
-### Step 3: Run the build
+### Step 4: Run the build
+
+**With zb.sh:**
+
+```bash
+cd <build-directory> && <path-to-zb.sh>
+```
+
+**With zb.jar (fallback):**
 
 ```bash
 cd <build-directory> && java -jar <path-to-zb.jar>
 ```
 
-### Step 4: Verify
+### Step 5: Verify
 
 Check exit code and output. A successful build prints the number of compiled files. Common errors:
 - **"Multiple main classes found"** — you are in the wrong directory (likely the repo root instead of a module subdirectory)
