@@ -114,3 +114,7 @@ java -jar zbo/app.jar
 - No external dependency support (no Maven/Gradle dependency resolution)
 - Single-module projects only
 - Exactly one main class per project
+
+## After a Successful Build
+
+If the project has a `test/` directory containing `*Test.java` files, ask the user if they want to run tests with `/zunit`.
