@@ -107,9 +107,11 @@ String version = "2026-02-20.1";
 
 void main(String... args) {
     if (args.length == 0 || args[0].equals("-help")) {
-        IO.println("Usage: " + name + " <input> [options]");
-        IO.println("  -help     Show this help");
-        IO.println("  -version  Show version");
+        IO.println("""
+                Usage: %s <input> [options]
+                  -help     Show this help
+                  -version  Show version
+                """.formatted(name));
         return;
     }
     if (args[0].equals("-version")) {
@@ -134,6 +136,7 @@ void main(String... args) {
 - Always choose the simplest possible API — prefer higher-level, concise APIs over verbose low-level ones
 - When multiple approaches exist, use the one with the fewest lines of code
 - Use `IO.println()` for printing (or `IO::println` as method reference) — never `System.out.println()`
+- For multi-line output, use a single `IO.println` with a text block — never multiple `IO.println` calls for consecutive lines
 - Use `var` for local variable declarations where the type is obvious
 - Use modern Java features (records, sealed types, pattern matching, etc.) naturally
 - No package declaration
