@@ -91,6 +91,13 @@ zunit auto-detects `zbo/app.jar` as the classpath. Tests import main classes dir
 - Do not use `IO.println()` for assertions — throw exceptions
 - Printing to stdout is fine for debugging but not required
 
+## HTTP Client Timeouts
+
+When tests make network calls using `java.net.http.HttpClient`, always set explicit timeouts to prevent tests from hanging:
+
+- Set `.connectTimeout(Duration.ofSeconds(2))` on the `HttpClient`
+- Set `.timeout(Duration.ofSeconds(2))` on each `HttpRequest`
+
 ## Running Tests
 
 After generating test files:
