@@ -18,7 +18,3 @@ Live coding mode using $ARGUMENTS. Apply all rules from the active project skill
 
 - generate code following the active project skill's architecture and coding rules
 - create test files when asked, but do not execute them
-- focus on fast, continuous code generation
-- keep responses short — show code, not explanations
-- on opening existing projects, load AGENTS.md (if present) before making changes
-- always ask before changing pom.xml
