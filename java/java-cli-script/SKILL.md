@@ -38,7 +38,7 @@ A minimal script:
 ```
 #!/usr/bin/env -S java --source 25
 
-void main(String... args) {
+void main(String... args) throws Exception {
     // ...
 }
 ```
@@ -54,7 +54,7 @@ Result process(String input) {
     // ...
 }
 
-void main(String... args) {
+void main(String... args) throws Exception {
     // ...
 }
 ```
@@ -72,7 +72,7 @@ void main(String... args) {
 
 ## Main Method Conventions
 
-- Use `void main(String... args)` — PATH-installed scripts always accept arguments
+- Use `void main(String... args) throws Exception` — PATH-installed scripts always accept arguments; declaring `throws Exception` keeps the code clean by avoiding try-catch boilerplate for checked exceptions like `IOException`
 - Instance main only — not static (unnamed classes do not use static methods)
 - Parse arguments manually for simple scripts with few flags
 - For scripts with multiple options or complex argument handling, use the `/zargs` skill to generate an enum-based argument parser — it remains zero-dependency and single-file
@@ -90,7 +90,7 @@ Script with no additional arguments — just print the version:
 String name = MethodHandles.lookup().lookupClass().getName();
 String version = "2026-02-20.1";
 
-void main(String... args) {
+void main(String... args) throws Exception {
     if (args.length == 0) {
         IO.println(name + " " + version);
         return;
@@ -105,7 +105,7 @@ Script with additional arguments — include `-help` and `-version`:
 String name = MethodHandles.lookup().lookupClass().getName();
 String version = "2026-02-20.1";
 
-void main(String... args) {
+void main(String... args) throws Exception {
     if (args.length == 0 || args[0].equals("-help")) {
         IO.println("""
                 Usage: %s <input> [options]
