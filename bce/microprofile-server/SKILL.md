@@ -50,6 +50,9 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - maintain domain objects, data classes, and entities in the entity package
 - entities maintain state and corresponding behavior
 - model value objects as enums
+- direct references between entities from independent BCs are allowed, but always aim for Maximal Cohesion and Minimal Coupling between BCs
+- if a relation exists in the database (e.g. JPA foreign key), the entities must carry a corresponding reference (id field or association); the DB schema is the source of truth
+- excessive cross-BC references or shared configuration is a refactoring signal — split, merge, or rebalance the BCs to restore cohesion
 
 ## Class Naming Conventions
 - name classes after their responsibilities
