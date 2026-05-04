@@ -13,6 +13,7 @@ Generate valid draw.io XML and save as `<name>.drawio` using the Write tool.
 - black stroke: `strokeColor=#000000;`
 - arrow at target: `endArrow=block;endFill=1;`
 - label without shadow: `shadow=0;` on the label cell
+- when an edge crosses container boundaries (source or target is nested in a container), pin explicit `exitX`/`exitY` on the source and `entryX`/`entryY` on the target so the orthogonal router does not take ugly paths; when multiple edges share a target, give each a distinct entry point to prevent overlap
 
 ## Style
 
