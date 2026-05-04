@@ -23,9 +23,12 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - package structure: [ORGANIZATION_NAME].[PROJECT_NAME].[COMPONENT_NAME].[boundary|control|entity]
 - top level package reflects the application responsibility or name
 - business components are children of top level package, named after their responsibilities
+- a BC may represent a domain concept or a shared concern; both are valid when the responsibility has a name and is reused across the application
 - boundary, control, entity packages are only allowed in business components
-- classes with cross-cutting functionality are located in the root application package
+- a BC does not need every layer; a BC may consist of only a control layer when its responsibility is procedural and consumed by other BCs
 - not every BCE component needs a dedicated boundary package; control package contents can be accessed directly
+- prefer a dedicated BC over the root application package when a shared concern carries domain or protocol semantics, exposes more than one operation, or is expected to grow
+- reserve the root application package for trivial single-class plumbing with no business semantics and no protocol coupling
 - do not explain the BCE pattern in documentation
 
 ## Package Naming
