@@ -41,6 +41,16 @@ Generate valid draw.io XML and save as `<name>.drawio` using the Write tool.
 - Control purple: fill `#e1d5e7`, border `#9673a6`
 - Entity yellow: fill `#fff2cc`, border `#d6b656`
 
+## BCE Robustness Icons (built-in)
+
+Drawio ships with the Jacobson BCE icons. Use these — never reconstruct them from primitives (lines + ellipses + triangles).
+
+- Boundary Object: `shape=umlBoundary;whiteSpace=wrap;html=1;`
+- Control Object: `ellipse;shape=umlControl;whiteSpace=wrap;html=1;`
+- Entity Object: `ellipse;shape=umlEntity;whiteSpace=wrap;html=1;`
+
+Color them by adding `fillColor=#ffffff;strokeColor=<layer-border>;`. Typical icon size: `width=30;height=32`.
+
 ## Content
 
 - visualize only high-level concepts and modules
