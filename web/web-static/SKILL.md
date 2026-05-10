@@ -39,6 +39,8 @@ Build or maintain a static website using $ARGUMENTS. Apply all rules below stric
 - Use `content-visibility: auto` for off-screen sections
 - WCAG AA color contrast minimum (4.5:1)
 - Always maintain visible `:focus-visible` indicators
+- Use `@supports` for feature detection when applying Baseline Newly Available features, providing a graceful fallback for older browsers
+- When recommending a newer CSS feature, cite its Baseline status (Widely Available, Newly Available, or Limited) so the reader can judge browser support
 
 ## CSS Reset Baseline
 
