@@ -117,7 +117,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 ## Exceptions
 - create custom exceptions only if it significantly improves robustness or maintainability
 - use explicit exceptions like BadRequestException for Response.Status.BAD_REQUEST
-- always use WebApplicationException in compact constructors in JAX-RS projects
+- in JAX-RS projects, throw explicit WebApplicationException subclasses (e.g. BadRequestException, NotFoundException) rather than constructing Response objects inline — they are automatically mapped to the correct HTTP status by the JAX-RS runtime
 - do not re-throw exceptions with "throw e" without adding value
 
 ## JavaDoc
