@@ -5,6 +5,11 @@ description: Create and maintain multi-file Java 25 CLI applications packaged as
 
 Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.
 
+## Architecture
+
+- For larger CLI apps with multiple business concerns, compose with the `/bce` skill — organize source files into business component packages with boundary/control/entity layers
+- For small single-purpose tools, keep everything in one unnamed class with top-level methods
+
 ## Build
 
 - For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure
