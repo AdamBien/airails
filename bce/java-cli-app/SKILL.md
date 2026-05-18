@@ -7,8 +7,17 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 
 ## Architecture
 
-- For larger CLI apps with multiple business concerns, compose with the `/bce` skill — organize source files into business component packages with boundary/control/entity layers
-- For small single-purpose tools, keep everything in one unnamed class with top-level methods
+- **Default: multi-file CLI apps compose with the `/bce` skill.** Feature business components (BCs) are direct children of the project package; `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the project root.
+  ```
+  src/main/java/
+    Main.java                                  # unnamed package, compact source
+    <project>/<bc-a>/{boundary,control,entity}/
+    <project>/<bc-b>/{boundary,control,entity}/
+    <project>/<bc-c>/control/                  # BC may have only the layers it needs
+  ```
+  - Name BCs after their domain responsibilities (e.g., `auth`, `users`, `billing`), not technical concerns.
+  - If a design doc or input layout places `boundary/control/entity` directly under the project root, flag it as a BCE violation and propose feature BCs before scaffolding.
+- Exception: small single-purpose tools (one screen of logic, no distinct concerns) — keep everything in one unnamed class with top-level methods, no BCs, no packages.
 
 ## Build
 
