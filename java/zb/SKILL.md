@@ -1,11 +1,11 @@
 ---
 name: zb
-description: Build Java 21+ projects with zb (Zero Dependencies Builder). Use when compiling, building, packaging, or running Java projects that have no external dependencies. Triggers on "build with zb", "zb build", "compile and package", "create executable JAR", or when a .zb configuration file is present in the project. Not for projects requiring Maven/Gradle dependency management.
+description: Build Java 25+ projects with zb (Zero Dependencies Builder). Use when compiling, building, packaging, or running Java projects that have no external dependencies. Triggers on "build with zb", "zb build", "compile and package", "create executable JAR", or when a .zb configuration file is present in the project. Not for projects requiring Maven/Gradle dependency management.
 ---
 
 # zb - Zero Dependencies Builder
 
-Build single-module Java 21+ projects into executable JARs without Maven or Gradle.
+Build single-module Java 25+ projects into executable JARs without Maven or Gradle.
 
 ## How to Build
 
@@ -73,7 +73,7 @@ Resources auto-detected from `src/main/resources` or current directory.
 
 ## Entry Point Requirement
 
-The project must have exactly one class with a `void main(` method (Java 21+ unnamed main).
+The project must have exactly one class with a `void main(` method (Java 25+ unnamed main).
 
 ## Configuration (.zb)
 
@@ -110,7 +110,7 @@ java -jar zbo/app.jar
 
 ## Constraints
 
-- Java 21+ required
+- Java 25+ required
 - No external dependency support (no Maven/Gradle dependency resolution)
 - Single-module projects only
 - Exactly one main class per project
