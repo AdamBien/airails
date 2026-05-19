@@ -1,0 +1,40 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '__JAVA_VERSION__'
+
+      - name: Extract version
+        id: version
+        run: echo "version=$(cat __VERSION_FILE__)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch zb
+        run: curl -fL -o zb.jar https://github.com/AdamBien/zb/releases/latest/download/zb.jar
+
+      - name: Build
+        working-directory: __BUILD_DIR__
+        run: java -jar __ZB_JAR_REF__
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}.${{ github.run_number }}" \
+            __ARTIFACT_PATH__ \
+            --title "__ARTIFACT_NAME__ ${{ steps.version.outputs.version }} (build ${{ github.run_number }})" \
+            --generate-notes
