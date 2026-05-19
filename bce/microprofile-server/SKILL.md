@@ -74,6 +74,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 ## Interfaces & Classes
 - only use interfaces with multiple implementations or for strategy pattern
 - do not create interfaces with abstract methods implemented by a single class; use classes directly
+- avoid anonymous classes; extract them into named, testable top-level classes (e.g. a CDI bean produced via @Produces) instead of instantiating an interface inline
 - create multiple classes only if it decreases complexity and increases readability
 
 ## Method Naming & Design
