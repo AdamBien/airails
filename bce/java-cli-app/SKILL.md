@@ -64,7 +64,10 @@ zb has no classpath or dependency resolution — all dependencies are bundled as
 
 ## Code Style
 
-- Do not create classes or interfaces — use unnamed classes with top-level methods, records, enums, and sealed types only
+- For stateless/procedural logic, prefer interfaces with static methods over classes with private constructors
+- In utility interfaces, prefer static over default methods
+- Only use interfaces with multiple implementations or for strategy pattern; do not create interfaces with abstract methods implemented by a single class
+- Use unnamed classes with top-level methods for `Main`; use records, enums, and sealed types for data
 - Code must be as simple, elegant, and understandable as possible
 - Always choose the simplest possible API — prefer higher-level, concise APIs over verbose low-level ones
 - When multiple approaches exist, use the one with the fewest lines of code
