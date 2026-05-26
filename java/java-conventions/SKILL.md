@@ -46,6 +46,7 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - avoid anonymous inner classes — extract them into named, testable top-level classes (e.g. a CDI bean produced via `@Produces`) instead of instantiating an interface inline
 - use records by default for value types and data carriers
 - use sealed interfaces or sealed classes for closed type hierarchies (pairs well with pattern matching)
+- prefer factory methods (static `of`, `from`, etc.) in records over passing `null` to constructors
 - prefer composition over inheritance
 - create multiple classes only if it decreases complexity and increases readability
 
@@ -92,8 +93,8 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - prefer text blocks (`"""`) over `+`-concatenated multi-line strings
 - prefer `String.formatted()` (instance) over `String.format(...)` (static) for readability at the call site
 - prefer imports over fully qualified class names; remove unused imports
-- no blank lines between imports
 - prefer `Files.readString` / `Files.writeString` / `Files.lines` over `BufferedReader`/`BufferedWriter` ceremony
+- no blank lines between imports
 - use `this` to reference instance fields when it improves clarity
 - prefer enums over plain strings for finite, well-defined values; reuse existing enum constants as values where possible (enum constants do not have to follow naming conventions when reused as values)
 - prefer try-with-resources over manual `.close()` on any `AutoCloseable`
