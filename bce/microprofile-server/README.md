@@ -4,13 +4,14 @@ An [AIrails.dev](https://airails.dev) skill defining architecture and coding rul
 
 ## Scope
 
-- [BCE (Boundary-Control-Entity)](https://bce.design) layering
-- JAX-RS resources, CDI, JSON-P
-- Testing conventions: unit, integration, and system tests
+- [BCE (Boundary-Control-Entity)](https://bce.design) layering and business component (BC) structure
+- JAX-RS resources and exception mapping via `WebApplicationException`
+- JSON-P preferred over JSON-B; `toJSON` / `fromJSON` on record entities
+- Testing conventions: unit, integration (`*IT`), and system tests in a dedicated `-st` module using microprofile-rest-client
 - Maven project structure
-- Java 25 with modern syntax
 - Minimal dependencies (Java SE → MicroProfile → Jakarta EE)
-
+- OTEL / OpenTelemetry for metrics and observability
+- Composes with [`java-conventions`](../../java/java-conventions) for all language-level Java 25 rules
 
 Not intended for serverless deployments.
 
