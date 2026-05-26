@@ -24,6 +24,11 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - never use raw generic types — always parameterize
 - prefer `void main()` / `void main(String... args)` over `public static void main(String[] args)`; instance main, not static
 
+## Java SE APIs
+
+- use Java SE APIs over writing custom code — the standard library has it, usually in `java.util`, `java.nio.file`, `java.net.http`, or `java.time`
+- prefer the most specific Java SE type for the domain — `Path` over `String`, `URI` over `String`, `Duration` over `long millis`, `Instant`/`LocalDate` over `Date`/`long`
+
 ## Visibility & Modifiers
 
 - avoid `private` visibility; prefer package-private (default) visibility so collaborators in the same package can test and reuse without ceremony
