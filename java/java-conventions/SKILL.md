@@ -87,6 +87,7 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - prefer text blocks (`"""`) over `+`-concatenated multi-line strings
 - prefer `String.formatted()` (instance) over `String.format(...)` (static) for readability at the call site
 - prefer imports over fully qualified class names; remove unused imports
+- no blank lines between imports
 - prefer `Files.readString` / `Files.writeString` / `Files.lines` over `BufferedReader`/`BufferedWriter` ceremony
 - use `this` to reference instance fields when it improves clarity
 - prefer enums over plain strings for finite, well-defined values; reuse existing enum constants as values where possible (enum constants do not have to follow naming conventions when reused as values)
@@ -106,6 +107,26 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - do not re-throw with `throw e` adding no value
 - do not catch and silently ignore exceptions — at minimum, log with context or rethrow wrapped
 - create custom exceptions only when they significantly improve robustness or maintainability
+
+## Logging
+
+- use `java.lang.System.Logger` instead of `System.out` statements
+- never use `java.util.logging.Logger`
+- `Logger` fields must be named `LOGGER` (uppercase) and marked as `static final`
+
+## HTTP Client
+
+- prefer the synchronous `java.net.http.HttpClient` APIs
+- use asynchronous APIs (`HttpClient.sendAsync`) only when explicitly requested
+
+## Testing
+
+- use AssertJ assertions instead of JUnit assertions
+- unit test methods must not start with `test` or `should`
+- create minimalistic tests first; avoid repetitive or trivial unit tests and keep only essential tests verifying core functionality
+- do not write tests for implementations that cannot fail (enums, records, getters/setters)
+- generate at most three tests per class under test (applies separately to unit, integration, and system tests)
+- the presence of an `isEqualTo` assertion makes less specific checks (`startsWith`, `isNotNull`) obsolete
 
 ## Comments & JavaDoc
 
