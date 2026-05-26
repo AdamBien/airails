@@ -15,11 +15,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - use explicit exceptions like BadRequestException for Response.Status.BAD_REQUEST
 - throw explicit WebApplicationException subclasses (e.g. BadRequestException, NotFoundException) rather than constructing Response objects inline — they are automatically mapped to the correct HTTP status by the JAX-RS runtime
 
-## Logging
-- use java.lang.System.Logger instead of System.out statements
-- never use java.util.logging.Logger
-- Logger fields must be named LOGGER (uppercase) and marked as static final
-
 ## BCE/ECB Architecture
 - structure code using the Boundary Control Entity (BCE/ECB) pattern
 - package structure: [ORGANIZATION_NAME].[PROJECT_NAME].[COMPONENT_NAME].[boundary|control|entity]
@@ -72,16 +67,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - if modules are listed, provide links
 - do not use "Orchestrates" term; use more specific alternatives
 
-## Testing
-- unit test methods must not start with "test" or "should"
-- avoid writing repetitive or trivial unit tests; keep only essential tests verifying core functionality
-- do not write tests for implementations that cannot fail (enums, records, getters/setters)
-- create minimalistic tests first
-- generate at most three tests per class under test (applies separately to UTs, ITs, and STs)
-- use AssertJ library instead of JUnit assertions
-- the presence of isEqualTo assertion makes less specific checks (startsWith, isNotNull) obsolete
-- do not use private visibility in tests
-
 ## Integration Tests
 - integration tests end with IT suffix and are executed by the failsafe maven plugin (no configuration necessary)
 
@@ -109,10 +94,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - record entities should ship with toJSON method returning a JSON-P object
 - always map JSON-P in the boundary to entities
 - create record entities from JSON-P JsonObject in static method: fromJSON(JsonObject json)
-
-## HTTP Client
-- prefer synchronous HTTPClient APIs
-- use asynchronous Http APIs (HttpClient.sendAsync) only if explicitly requested
 
 ## Project Management
 - always ask before changing pom.xml
