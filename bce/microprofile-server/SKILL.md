@@ -9,11 +9,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 
 ## Dependencies
 - prefer dependencies in this order: Java SE, MicroProfile, Jakarta EE
-- use Java SE APIs over writing custom code
-- prefer the most specific Java SE type for the domain
-
-## Records
-- prefer factory methods in records over passing null in constructors
 
 ## Exceptions (JAX-RS)
 - in JAX-RS projects, inherit from WebApplicationException for custom exceptions
