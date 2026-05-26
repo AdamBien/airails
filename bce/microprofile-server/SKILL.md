@@ -3,15 +3,22 @@ name: microprofile-server
 description: Architecture and coding rules for long-running Java MicroProfile / Jakarta EE server applications — BCE layering, business components (BC), JAX-RS resources, CDI, JSON-P, testing (unit/integration/system), and Maven project structure. Use when creating, generating, scaffolding, writing, or reviewing code, resources, entities, boundaries, or business components in MicroProfile server projects. Not for serverless deployments.
 ---
 
-## Java Version & Syntax
-- use Java 25 with modern syntax (var, pattern matching, records, text blocks)
+## Composition
+- compose with `java-conventions` for all language-level Java rules (syntax, style, naming, visibility, interfaces/classes, methods/lambdas, streams/collections, exceptions, comments/JavaDoc)
+- this skill specializes only the MicroProfile / Jakarta EE server context — it does not restate language-level rules
+
+## Dependencies
 - prefer dependencies in this order: Java SE, MicroProfile, Jakarta EE
 - use Java SE APIs over writing custom code
 - prefer the most specific Java SE type for the domain
-- prefer unchecked over checked exceptions; never throw generic exceptions like java.lang.Exception
-- throw RuntimeException subclasses, not directly; inherit from WebApplicationException in JAX-RS projects
-- consider using Java records instead of classes with final fields
+
+## Records
 - prefer factory methods in records over passing null in constructors
+
+## Exceptions (JAX-RS)
+- in JAX-RS projects, inherit from WebApplicationException for custom exceptions
+- use explicit exceptions like BadRequestException for Response.Status.BAD_REQUEST
+- throw explicit WebApplicationException subclasses (e.g. BadRequestException, NotFoundException) rather than constructing Response objects inline — they are automatically mapped to the correct HTTP status by the JAX-RS runtime
 
 ## Logging
 - use java.lang.System.Logger instead of System.out statements
@@ -46,8 +53,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 
 ## Control Layer
 - implement procedural business logic in the control package
-- prefer interfaces with static methods over classes for stateless/procedural logic
-- in utility interfaces prefer static over default methods
 
 ## Entity Layer
 - maintain domain objects, data classes, and entities in the entity package
@@ -57,74 +62,10 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - if a relation exists in the database (e.g. JPA foreign key), the entities must carry a corresponding reference (id field or association); the DB schema is the source of truth
 - excessive cross-BC references or shared configuration is a refactoring signal — split, merge, or rebalance the BCs to restore cohesion
 
-## Class Naming Conventions
-- name classes after their responsibilities
-- avoid meaningless suffixes: *Impl, *Service, *Manager, *Creator
-- class names must not end with "Control"
-- only use "Resource" suffix for JAX-RS classes
-- only use "Factory" suffix for actual GoF Factory pattern
-- only use "Builder" suffix for classes with typical builder structure (method chaining)
-
-## Visibility & Modifiers
-- avoid private visibility; prefer package-private (default) visibility
-- avoid "private static" methods; prefer default visibility
-- do not use final for fields (exception: static final for LOGGER)
-- do not use constructor injection
-
-## Interfaces & Classes
-- only use interfaces with multiple implementations or for strategy pattern
-- do not create interfaces with abstract methods implemented by a single class; use classes directly
-- avoid anonymous classes; extract them into named, testable top-level classes (e.g. a CDI bean produced via @Produces) instead of instantiating an interface inline
-- create multiple classes only if it decreases complexity and increases readability
-
-## Method Naming & Design
-- avoid "getter" methods starting with "get"; prefer record convention (e.g., configuration() not getConfiguration())
-- keep methods short and testable
-- create well-named methods for coarse-grained, cohesive, self-contained logic
-- if a lambda requires multiple statements or braces {}, extract it into a well-named helper method
-- do not create multiline lambda expressions; use method references instead
-- prefer extracting inline predicates into explaining methods and use method references (e.g., `.filter(this::isSkillFile)` over `.filter(p -> p.endsWith("SKILL.md"))`)
-- complex `.filter()` with multiple `&&`/`||` conditions split into chained `.filter()` calls 
-- extract repeated calculations or string concatenations into helper methods (DRY principle)
-- do not create empty delegates which just call methods without added value
-
-## Stream & Collections
-- prefer java.util.stream.Stream API over for loops
-- avoid forEach; prefer Stream methods
-- prefer Stream.of to Arrays.stream
-- prefer toList() to .collect(Collectors.toList())
-- prefer List.of over String[] or new ArrayList<>()
-- avoid creating unnecessary intermediate collections when streaming arrays
-- prefer variable declaration over lengthy method chaining
-
-## Code Style
-- prefer multiple simpler lines to one more complex line
-- prefer multiline Strings (text blocks) over String concatenations
-- prefer imports over fully qualified class names
-- use "this" to reference instance fields
-- remove unused imports
-- extract variables to eliminate duplication
-- prefer enums over plain Strings for finite, well-defined values
-- reuse enum constants as values if possible; enum constants do not have to follow naming conventions
-- prefer try-with-resources over explicitly closing resources
-
-## Simplicity Principles
-- keep the design KISS and YAGNI
-- always implement the simplest possible solution
-- write simple code first; ask before implementing enhancements or optional features
-- never over-engineer; ask about adding optional features or extension points
+## Components
 - create new components with minimal business logic and essential fields only
 
-## Exceptions
-- create custom exceptions only if it significantly improves robustness or maintainability
-- use explicit exceptions like BadRequestException for Response.Status.BAD_REQUEST
-- in JAX-RS projects, throw explicit WebApplicationException subclasses (e.g. BadRequestException, NotFoundException) rather than constructing Response objects inline — they are automatically mapped to the correct HTTP status by the JAX-RS runtime
-- do not re-throw exceptions with "throw e" without adding value
-
-## JavaDoc
-- do not write obvious JavaDoc comments that rephrase code
-- document the intentions and the "why", not implementation details
-- either describe the "why" or do not comment at all
+## JavaDoc (MicroProfile/Jakarta EE)
 - follow links in JavaDoc to external specifications and use them for code generation
 - use popular, also funny, technical terms from the Java SE, MicroProfile and Jakarta EE ecosystems as examples in unit tests and javadoc
 
