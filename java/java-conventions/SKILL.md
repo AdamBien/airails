@@ -112,6 +112,7 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - never throw raw `java.lang.Exception` or `RuntimeException` directly — throw a specific subclass
 - do not re-throw with `throw e` adding no value
 - do not catch and silently ignore exceptions — at minimum, log with context or rethrow wrapped
+- use the underscore `_` for unused catch parameters (`catch (IOException _)`) instead of named variables like `e` or `ignored`
 - create custom exceptions only when they significantly improve robustness or maintainability
 
 ## Logging
