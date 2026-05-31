@@ -78,6 +78,7 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - prefer `.toList()` over `.collect(Collectors.toList())`
 - prefer `List.of` / `Set.of` / `Map.of` over `new ArrayList<>()` and array literals for small immutable collections
 - avoid creating unnecessary intermediate collections when streaming arrays
+- prefer `Stream.gather(...)` with a `Gatherer` (Java 24+) over custom `Spliterator` or stateful `forEach` for stream transformations that need to keep state across elements or flush a remainder at end-of-stream
 - prefer a named intermediate variable over deeply nested method chaining when readability suffers
 - return empty collections (`List.of()`, `Set.of()`, `Map.of()`), never `null`
 - do not put `null` values in collections
