@@ -143,6 +143,7 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - do not explain *what* the code does — well-named identifiers do that
 - do not write JavaDoc that restates the method signature or rephrases the code
 - either describe the *why* or omit the comment entirely
+- when JavaDoc is written, prefer Markdown JavaDoc (`///`, JEP 467) over HTML-tagged `/** */` blocks
 
 ## Composition with Other Skills
 
