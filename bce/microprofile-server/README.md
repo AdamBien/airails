@@ -11,9 +11,11 @@ An [AIrails.dev](https://airails.dev) skill defining architecture and coding rul
 - Maven project structure
 - Minimal dependencies (Java SE → MicroProfile → Jakarta EE)
 - OTEL / OpenTelemetry for metrics and observability
-- Composes with [`java-conventions`](../../java/java-conventions) for all language-level Java 25 rules
-
 Not intended for serverless deployments.
+
+## Composition
+
+This skill composes with [`java-conventions`](../../java/java-conventions), which provides all language-level Java 25 rules (modern syntax, code style, naming, visibility, structure, methods, streams, exceptions, and documentation). `microprofile-server` adds the server-specific architecture and conventions on top.
 
 ## Usage
 
