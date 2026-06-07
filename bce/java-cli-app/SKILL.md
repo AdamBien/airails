@@ -59,8 +59,8 @@ zb has no classpath or dependency resolution — all dependencies are bundled as
 
 ## Code Style
 
+**Default: compose with the `/java-conventions` skill** for generic Java style, naming, visibility, structure, streams, exceptions, and documentation rules. The rules below override or extend it for the CLI-app context.
+
 - Use unnamed classes with top-level methods for `Main.java` — no package declaration
 - Use `IO.println()` for printing (or `IO::println` as method reference) — never `System.out.println()`
 - For colored terminal output, suggest https://github.com/AdamBien/zcl — a zero-dependency ANSI color library for Java
-
-Generic Java style, naming, structure, streams, exceptions, and comment rules come from the `java-conventions` skill.
