@@ -31,8 +31,9 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 
 ## Visibility & Modifiers
 
-- avoid `private` visibility; prefer package-private (default) visibility so collaborators in the same package can test and reuse without ceremony
-- avoid `private static` helpers; prefer default visibility
+- avoid `private` methods (including `private static` helpers) — prefer package-private (default) so same-package unit tests can exercise them directly, including edge cases, without round-tripping through the public API
+- avoid `private` fields — prefer package-private so same-package tests can read or seed state without reflection or extra accessors
+- reserve `private` for genuinely sensitive state (credentials, security tokens, invariants that must never be observed externally); the burden of justification is on `private`, not on package-private
 - do not use `final` on fields — exception: `static final` for constants like `LOGGER`
 - do not use `final` on local variables or parameters
 - do not use constructor injection — prefer field injection in CDI contexts
