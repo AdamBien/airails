@@ -28,12 +28,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - reserve the root application package for trivial single-class plumbing with no business semantics and no protocol coupling
 - do not explain the BCE pattern in documentation
 
-## Package Naming
-- create application level package with name derived from maven project or context
-- name packages after their domain responsibilities
-- create package-info.java for top level packages with JavaDoc documenting design decisions and responsibilities (not contents)
-- document only domain-specific packages with package-info.java where the purpose is not self-evident
-
 ## Boundary Layer
 - keep coarse-grained classes in the boundary package
 - place facades in the boundary package

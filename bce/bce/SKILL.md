@@ -60,6 +60,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 
 - document only domain-specific packages where the purpose is not self-evident
 - when documenting a top-level package or BC, describe design decisions and responsibilities — not contents
+- in Java, use `package-info.java` with JavaDoc to document packages
 - do not write documentation that restates the BCE pattern itself
 
 ## Composition with Other Skills
