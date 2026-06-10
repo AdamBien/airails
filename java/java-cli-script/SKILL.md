@@ -57,7 +57,7 @@ void main(String... args) throws Exception {
 
 - Suggest maintaining a `String version = "YYYY-MM-DD.N";` instance variable (e.g., `String version = "2026-02-20.1";`)
 - On every change, update the date to the current date and increase the last number
-- Support `-version` flag to print the version
+- Support `-version` flag to print the version — only for scripts that accept additional arguments
 
 ## Main Method Conventions
 
@@ -67,25 +67,10 @@ void main(String... args) throws Exception {
 
 ## Argument Handling
 
-- Scripts with no additional arguments: print the version when invoked without arguments — no `-help` or `-version` flag needed
+- Scripts with no additional arguments: do not introduce `-help` or `-version` flags — the script should just do its work
 - Scripts with additional arguments: support both `-help` and `-version` flags
 - Use clear, descriptive error messages for invalid input
 - Exit with code 0 on success, non-zero on failure
-
-Script with no additional arguments — just print the version:
-
-```
-String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-02-20.1";
-
-void main(String... args) throws Exception {
-    if (args.length == 0) {
-        IO.println(name + " " + version);
-        return;
-    }
-    // ... main logic
-}
-```
 
 Script with additional arguments — include `-help` and `-version`:
 
