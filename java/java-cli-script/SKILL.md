@@ -57,6 +57,7 @@ void main(String... args) throws Exception {
 
 - Suggest maintaining a `String version = "YYYY-MM-DD.N";` instance variable (e.g., `String version = "2026-02-20.1";`)
 - On every change, update the date to the current date and increase the last number
+- Print the script name and version on startup as the first line of output (e.g., `IO.println(name + " " + version);`)
 - Support `-version` flag to print the version — only for scripts that accept additional arguments
 
 ## Main Method Conventions
@@ -79,6 +80,7 @@ String name = MethodHandles.lookup().lookupClass().getName();
 String version = "2026-02-20.1";
 
 void main(String... args) throws Exception {
+    IO.println(name + " " + version);
     if (args.length == 0 || args[0].equals("-help")) {
         IO.println("""
                 Usage: %s <input> [options]
@@ -88,7 +90,6 @@ void main(String... args) throws Exception {
         return;
     }
     if (args[0].equals("-version")) {
-        IO.println(name + " " + version);
         return;
     }
     // ...
