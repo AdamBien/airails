@@ -48,22 +48,6 @@ void main(String... args) throws Exception {
 }
 ```
 
-A script with helper methods and records:
-
-```
-#!/usr/bin/env -S java --source 25
-
-record Result(String name, int value) {}
-
-Result process(String input) {
-    // ...
-}
-
-void main(String... args) throws Exception {
-    // ...
-}
-```
-
 ## Naming Convention
 
 - The script's filename is its application name — use it consistently in all output: version strings, help text, usage lines, and error messages
