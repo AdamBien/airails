@@ -29,6 +29,7 @@ Manage installed skills:
 - [**zargs**](java/zargs) — Zero-dependency, enum-based argument parsing for Java CLI applications
 - [**zcfg**](java/zcfg) — Zero Dependency Configuration Utility for loading properties and application configuration
 - [**zcl**](java/zcl) — Zero-dependency Colour Logger for colored terminal output in Java applications
+- [**zjson**](java/zjson) — JSON parsing and generation by copying the org.json source into the project, no Maven/Gradle dependency
 
 ### Web
 
