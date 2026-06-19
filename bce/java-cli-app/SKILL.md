@@ -22,6 +22,7 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 ## Build
 
 - For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure
+- Alternatively, bootstrap from the minimalistic template https://github.com/adambien/z-java-cli-app — a stripped-down starter for fresh `/java-cli-app` projects
 - Use https://github.com/AdamBien/zb to create executable JARs — no Maven or Gradle required
 - Build by running `zb.sh` in the project root — it compiles all `.java` files from `src/main/java/` and packages them into `zbo/app.jar`
 - Run with `java -jar zbo/app.jar`
