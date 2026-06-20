@@ -50,7 +50,8 @@ zb has no classpath or dependency resolution — all dependencies are bundled as
 
 ## Unit Testing
 
-- Use `/zunit` to generate and run unit tests for the project
+- **Suggest the `/zunit` skill** for testing — use it to generate and run unit tests for the project
+- `/zunit` is the testing approach for `java-cli-app` projects; do not use JUnit or other frameworks here
 
 ## Version Management
 
