@@ -4,13 +4,21 @@ Development conventions, [SKILLS.md](https://agentskills.io/specification), and 
 
 ## Installation
 
+Install without cloning — downloads the skills and installs them into every supported agent directory that already exists:
+
+```
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 -
+```
+
+Or clone and install interactively (prompts before copying to each agent directory):
+
 ```
 git clone https://github.com/AdamBien/airails
 cd airails
 ./installSkills
 ```
 
-The installer finds all skills and prompts before copying to each supported agent directory (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`).
+Both target the same supported agent directories (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`).
 
 Manage installed skills:
 

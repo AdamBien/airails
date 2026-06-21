@@ -1,0 +1,165 @@
+#!/usr/bin/env -S java --source 25
+
+import module java.base;
+import module java.net.http;
+
+String name = MethodHandles.lookup().lookupClass().getName();
+String version = "2026-06-21.1";
+
+/// Remote counterpart to `installSkills`: installs airails.dev skills without a
+/// `git clone`. Mirrors the one-liner ergonomics of zsmith's `zsinstall`, but
+/// because airails ships ~two dozen skill *directories* (not a single released
+/// JAR) it downloads the repository archive and fans the skills out instead.
+///
+/// Run it remotely:
+/// ```
+/// curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 -
+/// ```
+///
+/// Unlike `installSkills`, this script is non-interactive — under a `curl | java`
+/// pipe stdin is the script body, so there is no console to prompt on. Skills
+/// install into every supported agent whose base directory already exists, so an
+/// unused agent is silently skipped rather than conjured into being.
+String archiveUrl = "https://codeload.github.com/AdamBien/airails/zip/refs/heads/main";
+
+/// Agent skill roots. A target is used only when its parent (e.g. `~/.claude`)
+/// already exists — presence of the agent dir is the install signal.
+List<Path> targets(Path home) {
+    return List.of(
+            home.resolve(".claude/skills"),
+            home.resolve(".vibe/skills"),
+            home.resolve(".kiro/skills"),
+            home.resolve(".copilot/skills"),
+            home.resolve(".agents/skills"), // codex
+            home.resolve(".config/goose/skills")
+    );
+}
+
+void main(String... args) throws Exception {
+    IO.println("%s %s".formatted(name, version));
+    var home = Path.of(System.getProperty("user.home"));
+    var work = Files.createTempDirectory(name + "-");
+    try {
+        var root = unzip(download(archiveUrl, work.resolve("airails.zip")), work);
+        var skills = findSkills(root);
+        IO.println("%s: %d skill(s) found".formatted(name, skills.size()));
+        var installed = targets(home).stream().filter(t -> Files.exists(t.getParent())).toList();
+        if (installed.isEmpty()) {
+            IO.println("%s: no agent directories detected under %s — nothing installed".formatted(name, home));
+            return;
+        }
+        for (var target : installed) {
+            for (var skill : skills) {
+                copySkill(skill, target.resolve(skill.getFileName()));
+            }
+            IO.println("%s: installed %d skill(s) into %s".formatted(name, skills.size(), target));
+        }
+    } finally {
+        deleteRecursively(work);
+    }
+}
+
+/// A skill directory is any directory directly containing a `SKILL.md`.
+List<Path> findSkills(Path root) throws IOException {
+    try (var paths = Files.walk(root)) {
+        return paths
+                .filter(p -> p.getFileName().toString().equals("SKILL.md"))
+                .map(Path::getParent)
+                .sorted()
+                .toList();
+    }
+}
+
+/// Copies the whole skill directory — `SKILL.md` plus any `references/`,
+/// `assets/`, or `POWER.md` siblings the skill needs — minus repository noise
+/// (`README.md`, dotfiles, `.claude/`). `installSkills` copies only `SKILL.md`;
+/// here the full payload is taken so reference-backed skills (drawio,
+/// python-to-java, zb-release-pipeline, …) arrive intact.
+void copySkill(Path skill, Path dest) throws IOException {
+    try (var paths = Files.walk(skill)) {
+        for (var source : (Iterable<Path>) paths::iterator) {
+            var relative = skill.relativize(source);
+            if (isNoise(relative)) {
+                continue;
+            }
+            var resolved = dest.resolve(relative);
+            if (Files.isDirectory(source)) {
+                Files.createDirectories(resolved);
+            } else {
+                Files.createDirectories(resolved.getParent());
+                Files.copy(source, resolved, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
+}
+
+boolean isNoise(Path relative) {
+    for (var segment : relative) {
+        var part = segment.toString();
+        if (part.startsWith(".") || part.equals("README.md")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/// Atomic-staged download: the destination either keeps its prior content or
+/// becomes the complete archive, never a truncated stream. Exit-on-failure on
+/// non-200 — a single-file script has no caller to unwind to.
+Path download(String url, Path destination) throws Exception {
+    IO.println("%s: fetching %s".formatted(name, url));
+    var staging = Files.createTempFile(destination.getParent(), destination.getFileName() + "-", ".part");
+    var client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
+    var request = HttpRequest.newBuilder(URI.create(url)).build();
+    var response = client.send(request, HttpResponse.BodyHandlers.ofFile(staging));
+    if (response.statusCode() != HttpURLConnection.HTTP_OK) {
+        Files.deleteIfExists(staging);
+        System.err.println("%s: download failed (HTTP %d)".formatted(name, response.statusCode()));
+        System.exit(1);
+    }
+    Files.move(staging, destination, StandardCopyOption.REPLACE_EXISTING);
+    return destination;
+}
+
+/// Extracts the GitHub archive (entries nest under a single `airails-main/`
+/// directory) and returns that top-level directory. Guards against Zip-Slip by
+/// rejecting any entry that would resolve outside `into`.
+Path unzip(Path zip, Path into) throws IOException {
+    Path root = null;
+    try (var in = new ZipInputStream(Files.newInputStream(zip))) {
+        for (var entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
+            var resolved = into.resolve(entry.getName()).normalize();
+            if (!resolved.startsWith(into)) {
+                throw new IOException("blocked path traversal: " + entry.getName());
+            }
+            if (entry.isDirectory()) {
+                Files.createDirectories(resolved);
+            } else {
+                Files.createDirectories(resolved.getParent());
+                Files.copy(in, resolved, StandardCopyOption.REPLACE_EXISTING);
+            }
+            if (root == null) {
+                root = into.resolve(Path.of(entry.getName()).getName(0));
+            }
+        }
+    }
+    if (root == null) {
+        throw new IOException("empty archive: " + zip);
+    }
+    return root;
+}
+
+void deleteRecursively(Path dir) throws IOException {
+    if (!Files.exists(dir)) {
+        return;
+    }
+    try (var paths = Files.walk(dir)) {
+        paths.sorted(Comparator.reverseOrder()).forEach(p -> {
+            try {
+                Files.delete(p);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+    }
+}
