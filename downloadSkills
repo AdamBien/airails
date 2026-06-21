@@ -4,103 +4,41 @@ import module java.base;
 import module java.net.http;
 
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-06-21.1";
+String version = "2026-06-21.2";
 
-/// Remote counterpart to `installSkills`: installs airails.dev skills without a
-/// `git clone`. Mirrors the one-liner ergonomics of zsmith's `zsinstall`, but
-/// because airails ships ~two dozen skill *directories* (not a single released
-/// JAR) it downloads the repository archive and fans the skills out instead.
+/// Git-free counterpart to `git clone`: fetches the airails.dev repository into
+/// `./airails` so the interactive `./installSkills` can take over from there.
+/// Mirrors the one-liner ergonomics of zsmith's `zsinstall`, but because airails
+/// ships skill *directories* (not a single released JAR) it unpacks the whole
+/// repository archive instead of a lone artifact.
 ///
-/// Run it remotely:
 /// ```
-/// curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 -
+/// curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin
+/// cd airails
+/// ./installSkills
 /// ```
 ///
-/// Unlike `installSkills`, this script is non-interactive — under a `curl | java`
-/// pipe stdin is the script body, so there is no console to prompt on. Skills
-/// install into every supported agent whose base directory already exists, so an
-/// unused agent is silently skipped rather than conjured into being.
+/// Install logic lives in `installSkills` alone — this script only obtains the
+/// sources, leaving the prompts, listing, and deletion to the single installer.
 String archiveUrl = "https://codeload.github.com/AdamBien/airails/zip/refs/heads/main";
-
-/// Agent skill roots. A target is used only when its parent (e.g. `~/.claude`)
-/// already exists — presence of the agent dir is the install signal.
-List<Path> targets(Path home) {
-    return List.of(
-            home.resolve(".claude/skills"),
-            home.resolve(".vibe/skills"),
-            home.resolve(".kiro/skills"),
-            home.resolve(".copilot/skills"),
-            home.resolve(".agents/skills"), // codex
-            home.resolve(".config/goose/skills")
-    );
-}
+Path output = Path.of("airails");
 
 void main(String... args) throws Exception {
     IO.println("%s %s".formatted(name, version));
-    var home = Path.of(System.getProperty("user.home"));
+    if (Files.exists(output)) {
+        System.err.println("%s: %s already exists — remove it and retry".formatted(name, output.toAbsolutePath()));
+        System.exit(1);
+    }
     var work = Files.createTempDirectory(name + "-");
     try {
-        var root = unzip(download(archiveUrl, work.resolve("airails.zip")), work);
-        var skills = findSkills(root);
-        IO.println("%s: %d skill(s) found".formatted(name, skills.size()));
-        var installed = targets(home).stream().filter(t -> Files.exists(t.getParent())).toList();
-        if (installed.isEmpty()) {
-            IO.println("%s: no agent directories detected under %s — nothing installed".formatted(name, home));
-            return;
-        }
-        for (var target : installed) {
-            for (var skill : skills) {
-                copySkill(skill, target.resolve(skill.getFileName()));
-            }
-            IO.println("%s: installed %d skill(s) into %s".formatted(name, skills.size(), target));
-        }
+        var zip = download(archiveUrl, work.resolve("airails.zip"));
+        unzipInto(zip, output);
+        restoreExecutableBits(output);
+        IO.println("%s: extracted to %s".formatted(name, output.toAbsolutePath()));
+        IO.println("%s: next — cd %s && ./installSkills".formatted(name, output));
     } finally {
         deleteRecursively(work);
     }
-}
-
-/// A skill directory is any directory directly containing a `SKILL.md`.
-List<Path> findSkills(Path root) throws IOException {
-    try (var paths = Files.walk(root)) {
-        return paths
-                .filter(p -> p.getFileName().toString().equals("SKILL.md"))
-                .map(Path::getParent)
-                .sorted()
-                .toList();
-    }
-}
-
-/// Copies the whole skill directory — `SKILL.md` plus any `references/`,
-/// `assets/`, or `POWER.md` siblings the skill needs — minus repository noise
-/// (`README.md`, dotfiles, `.claude/`). `installSkills` copies only `SKILL.md`;
-/// here the full payload is taken so reference-backed skills (drawio,
-/// python-to-java, zb-release-pipeline, …) arrive intact.
-void copySkill(Path skill, Path dest) throws IOException {
-    try (var paths = Files.walk(skill)) {
-        for (var source : (Iterable<Path>) paths::iterator) {
-            var relative = skill.relativize(source);
-            if (isNoise(relative)) {
-                continue;
-            }
-            var resolved = dest.resolve(relative);
-            if (Files.isDirectory(source)) {
-                Files.createDirectories(resolved);
-            } else {
-                Files.createDirectories(resolved.getParent());
-                Files.copy(source, resolved, StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-    }
-}
-
-boolean isNoise(Path relative) {
-    for (var segment : relative) {
-        var part = segment.toString();
-        if (part.startsWith(".") || part.equals("README.md")) {
-            return true;
-        }
-    }
-    return false;
 }
 
 /// Atomic-staged download: the destination either keeps its prior content or
@@ -121,15 +59,20 @@ Path download(String url, Path destination) throws Exception {
     return destination;
 }
 
-/// Extracts the GitHub archive (entries nest under a single `airails-main/`
-/// directory) and returns that top-level directory. Guards against Zip-Slip by
-/// rejecting any entry that would resolve outside `into`.
-Path unzip(Path zip, Path into) throws IOException {
-    Path root = null;
+/// Unpacks the GitHub archive into `target`, stripping the single leading
+/// `airails-main/` component GitHub wraps every entry in, so `target` mirrors
+/// the repository root rather than nesting it. Guards against Zip-Slip by
+/// rejecting any entry that would resolve outside `target`.
+void unzipInto(Path zip, Path target) throws IOException {
+    var base = target.toAbsolutePath().normalize();
     try (var in = new ZipInputStream(Files.newInputStream(zip))) {
         for (var entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
-            var resolved = into.resolve(entry.getName()).normalize();
-            if (!resolved.startsWith(into)) {
+            var stripped = strip(entry.getName());
+            if (stripped.isEmpty()) {
+                continue;
+            }
+            var resolved = base.resolve(stripped).normalize();
+            if (!resolved.startsWith(base)) {
                 throw new IOException("blocked path traversal: " + entry.getName());
             }
             if (entry.isDirectory()) {
@@ -138,15 +81,36 @@ Path unzip(Path zip, Path into) throws IOException {
                 Files.createDirectories(resolved.getParent());
                 Files.copy(in, resolved, StandardCopyOption.REPLACE_EXISTING);
             }
-            if (root == null) {
-                root = into.resolve(Path.of(entry.getName()).getName(0));
+        }
+    }
+}
+
+/// Drops the first path segment (`airails-main/`) GitHub prepends to archive
+/// entries; the wrapper directory itself maps to the empty string.
+String strip(String entryName) {
+    var slash = entryName.indexOf('/');
+    return slash < 0 ? "" : entryName.substring(slash + 1);
+}
+
+/// `ZipInputStream` does not carry the Unix mode bits, so the extracted
+/// `installSkills` arrives non-executable and `./installSkills` would fail with
+/// "permission denied". Re-grants `+x` to every shebang script (`#!` first two
+/// bytes), keeping the post-download `./installSkills` step working without
+/// hard-coding script names.
+void restoreExecutableBits(Path root) throws IOException {
+    try (var paths = Files.walk(root)) {
+        for (var file : (Iterable<Path>) paths.filter(Files::isRegularFile)::iterator) {
+            if (startsWithShebang(file)) {
+                file.toFile().setExecutable(true, false);
             }
         }
     }
-    if (root == null) {
-        throw new IOException("empty archive: " + zip);
+}
+
+boolean startsWithShebang(Path file) throws IOException {
+    try (var in = Files.newInputStream(file)) {
+        return in.read() == '#' && in.read() == '!';
     }
-    return root;
 }
 
 void deleteRecursively(Path dir) throws IOException {
