@@ -122,6 +122,7 @@ run stack test loop + structural sync
   | Unwanted-behaviour | `If <trigger>, then the BC shall <response>.` |
   | Complex | `While <precondition>, when <trigger>, the BC shall <response>.` |
 
+- Every EARS statement uses `shall` and is mandatory **and** tested. No `SHOULD`/`MAY` gradation (RFC 2119) — the test oracle is binary, so express optionality with the `Where` (optional-feature) pattern, never a weaker keyword.
 - Every boundary op traces to a requirement group; every EARS statement traces to ≥1 test.
 - The **form** of the statement→test trace is the stack skill's call — an `r1…` method name for `zunit`, a system-test name, an `@requirement` tag, a Playwright spec. SBCE only requires the trace exist and be grep-visible.
 - Stack-neutral throughout: no types, no transports, no framework verbs, no *how*.
