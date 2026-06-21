@@ -71,7 +71,7 @@ Make reality match the declared spec — the kubectl/terraform "make it so" step
 1. Locate `specs/<path>/spec.md`; if missing, tell the user to run `/sbce new <capability>` first and stop.
 2. Detect the composed stack skill from `AGENTS.md`/`README` (here `java-cli-app`); ask once if it cannot be inferred.
 3. Run the stack's test loop. If it is green **and** the structural sync step finds no gap, stop — idempotent no-op; report "already converged".
-4. Else read the gap and close it: invoke `/bce` (invariants) + the stack skill (code idioms) to implement each undeclared boundary op as a method, add a traceable test per untested requirement, and write code to make the tests pass.
+4. Else read the gap and close it: invoke `/bce` (invariants) + the stack skill (code idioms) to implement each undeclared boundary op as a method, add a traceable test per untested requirement, write code to make the tests pass, and reflect the spec's one-line responsibility into the BC's package-level doc (in Java, `/bce`'s `package-info.java`) so the intention stays co-located with the code.
 5. Re-run the test loop. Repeat steps 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 
 Guard: green build + no structural drift is the only definition of done; never self-certify; never bake in a stack or runner — ask the stack skill "are you green?".
@@ -85,7 +85,7 @@ Archive a converged capability by **moving** its spec. Never delete; BC source s
 3. Move the spec: `mv specs/<path>/ archive/specs/<path>/` (create `archive/specs/` if needed). Do **not** touch `src/main/java/<path>/` — the BC source remains.
 4. Confirm the result as `from → to`.
 
-Guard: archive only when the gate is green; **move, never delete**; BC source is never removed.
+Guard: archive only when the gate is green; **move, never delete**; BC source is never removed. Before moving, the spec's one-line responsibility must already live in the BC's own package-level doc (in Java, `/bce`'s `package-info.java`) — the mechanism is the stack skill's / `/bce`'s call, but the intention must be co-located with the code so it survives the spec leaving the source tree.
 
 ## Convergence loop
 
