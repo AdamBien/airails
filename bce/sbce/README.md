@@ -2,12 +2,13 @@
 
 An [AIrails.dev](https://airails.dev) skill for **SBCE** (pronounced *"space"*) — Spec-driven
 BCE — the workflow where one capability spec equals one business component (same name) and the
-spec is the boundary contract. One slash-invocable skill, three modes: `new → apply → gc`
-(declare → converge → reap).
+spec is the boundary contract. One slash-invocable skill, four modes: `upsert → new → apply → gc`
+(place → declare → converge → reap).
 
 ## Scope
 
-- One skill, three modes — invoke as `/sbce new|apply|gc <capability>` (or by intent):
+- One skill, four modes — invoke as `/sbce upsert|new|apply|gc <capability>` (or by intent):
+  - **upsert** (place) — resolve a natural-language capability to its single BC, then dispatch: coin a name and run `new` if absent, or extend the existing spec and run `apply` if present
   - **new** (declare) — author `specs/<path>/spec.md` from the bundled template and scaffold empty `boundary/control/entity` BC dirs
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
   - **gc** (reap) — archive a converged spec by **moving** it to `archive/specs/<path>/`; never deletes, BC source stays
@@ -32,6 +33,10 @@ format and rules live in [SKILL.md](SKILL.md).
 Invoke `/sbce <mode> <capability>` (or just describe the intent — "declare a checkout
 capability", "converge this BC to its spec"). Run the lifecycle in order:
 
+0. **Place** *(optional front door)* — `/sbce upsert "let a customer check out a cart"`
+   Resolves a fuzzy, unnamed capability to its single BC: coins a name and dispatches to `new`
+   if no existing BC covers it (insert), or extends the existing spec and dispatches to `apply`
+   if one does (update). Use when you don't yet have the dotted name or aren't sure a BC exists.
 1. **Declare** — `/sbce new airhacks.sbce.checkout`
    Writes `specs/airhacks/sbce/checkout/spec.md` from the template and scaffolds empty
    `boundary/control/entity` dirs. Fill in the spec: boundary operations, requirements as
@@ -42,8 +47,9 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 3. **Reap** — `/sbce gc airhacks.sbce.checkout`
    Once green, moves the spec to `archive/specs/...`. Never deletes; BC source stays.
 
-Omit the mode and the skill infers it: no spec yet → `new`; spec exists but not green →
-`apply`; converged → `gc`.
+Omit the mode and the skill infers it: a natural-language description with no dotted name →
+`upsert`; a dotted name with no spec yet → `new`; spec exists but not green → `apply`;
+converged → `gc`.
 
 ## Test
 
