@@ -132,6 +132,39 @@ boolean hasSkillFile(Path dir) {
     return Files.exists(dir.resolve("SKILL.md"));
 }
 
+/// Copies the whole skill directory — `SKILL.md` plus any `references/`,
+/// `assets/`, or `POWER.md` siblings the skill needs — minus repository noise
+/// (`README.md`, dotfiles, `.claude/`). Copying only `SKILL.md` would strip the
+/// bundled resources reference-backed skills (sbce, drawio, python-to-java, …)
+/// load at runtime.
+void copySkill(Path skillDir, Path destDir) throws IOException {
+    try (var paths = Files.walk(skillDir)) {
+        for (var source : (Iterable<Path>) paths::iterator) {
+            var relative = skillDir.relativize(source);
+            if (isNoise(relative)) {
+                continue;
+            }
+            var resolved = destDir.resolve(relative);
+            if (Files.isDirectory(source)) {
+                Files.createDirectories(resolved);
+            } else {
+                Files.createDirectories(resolved.getParent());
+                Files.copy(source, resolved, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
+}
+
+boolean isNoise(Path relative) {
+    for (var segment : relative) {
+        var part = segment.toString();
+        if (part.startsWith(".") || part.equals("README.md")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 List<Path> sources() {
     return List.of(
             Path.of("").toAbsolutePath()
@@ -204,10 +237,10 @@ void installSkills(Path home) throws IOException {
                     continue;
                 }
                 for (var skill : skills) {
-                    var name = skill.getParent().getFileName().toString();
-                    var dest = target.resolve(name).resolve("SKILL.md");
-                    Files.createDirectories(dest.getParent());
-                    Files.copy(skill, dest, StandardCopyOption.REPLACE_EXISTING);
+                    var skillDir = skill.getParent();
+                    var name = skillDir.getFileName().toString();
+                    var dest = target.resolve(name);
+                    copySkill(skillDir, dest);
                     Log.USER.out("  %s -> %s".formatted(name, dest));
                 }
             }
