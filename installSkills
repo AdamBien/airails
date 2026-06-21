@@ -1,87 +1,10 @@
 #!/usr/bin/env -S java --source 25
-/**
- * Installs airails.dev skills from the cloned repository into
- * AI agent skill directories (~/.claude/skills, ~/.vibe/skills,
- * ~/.kiro/skills, ~/.copilot/skills, ~/.agents/skills, ~/.config/goose/skills).
- *
- * Usage: clone the repo, cd into it, run ./installSkills
- *
- * Based on: https://github.com/adambien/zeeds
- */
-enum Log {
 
-    ERROR(Color.BRIGHT_RED, System.err),
-    USER(Color.BRIGHT_CYAN, System.out),
-    INFO(Color.BRIGHT_GREEN, System.out),
-    SYSTEM(Color.SKY_BLUE, System.out),
-    WARNING(Color.WARM_YELLOW, System.out),
-    DEBUG(Color.SOFT_PURPLE, System.out);
-
-    PrintStream out;
-
-    enum Color {
-        SOFT_GRAY("\033[38;5;246m"),
-        WARM_YELLOW("\033[38;5;220m"),
-        BRIGHT_BLUE("\033[38;5;33m"),
-        BRIGHT_WHITE("\033[38;5;255m"),
-        BRIGHT_RED("\033[38;5;196m"),
-        BRIGHT_GREEN("\033[38;5;46m"),
-        BRIGHT_YELLOW("\033[38;5;226m"),
-        SKY_BLUE("\033[38;5;39m"),
-        SOFT_PURPLE("\033[38;5;129m"),
-        BRIGHT_CYAN("\033[38;5;51m"),
-        BLACK_ON_WHITE("\033[38;5;232;48;5;255m");
-
-        String code;
-
-        Color(String code) {
-            this.code = code;
-        }
-    }
-
-    private final String value;
-    private final static String RESET = "\u001B[0m";
-
-    private Log(Color color, PrintStream out) {
-        this.value = (color.code + "%s" + RESET);
-        this.out = out;
-    }
-
-    public String formatted(String raw) {
-        return this.value.formatted(raw);
-    }
-
-    public void out(String message) {
-        var colored = formatted(message);
-        this.out.println(colored);
-    }
-
-    public static void debug(String message) {
-        Log.DEBUG.out(message);
-    }
-
-    public static void error(String message) {
-        Log.ERROR.out(message);
-    }
-
-    public static void error(String message, Exception e) {
-        Log.ERROR.out(message + ": " + e.getMessage());
-        e.printStackTrace(System.err);
-    }
-
-    public static void user(String message) {
-        Log.USER.out(message);
-    }
-
-    public static void warning(String message) {
-        Log.WARNING.out(message);
-    }
-
-    public static void stop(String message) {
-        error(message);
-        System.exit(1);
-    }
-}
+/// Installs airails.dev skills from the cloned (or downloaded) repository into
+/// the skill directories of supported AI agents. Run from the repository root:
+/// `./installSkills`. Based on https://github.com/adambien/zeeds.
+String name = MethodHandles.lookup().lookupClass().getName();
+String version = "2026-06-21.1";
 
 List<Path> targets(Path home) {
     return List.of(
@@ -89,47 +12,112 @@ List<Path> targets(Path home) {
             home.resolve(".vibe/skills"),
             home.resolve(".kiro/skills"),
             home.resolve(".copilot/skills"),
-            home.resolve(".agents/skills"), //codex
+            home.resolve(".agents/skills"), // codex
             home.resolve(".config/goose/skills")
     );
 }
 
-void deleteSkill(Path home, String name) throws IOException {
-    var console = System.console();
+void main(String... args) throws Exception {
+    IO.println(name + " " + version);
+    var home = Path.of(System.getProperty("user.home"));
+    switch (args.length == 0 ? "" : args[0]) {
+        case "-version" -> {}
+        case "-h" -> help();
+        case "-l" -> listSkills(home);
+        case "-d" -> deleteSkill(home, args.length > 1 ? args[1] : null);
+        default -> installSkills(home);
+    }
+}
+
+void help() {
+    IO.println("""
+            Usage: %1$s            install all skills
+                   %1$s -l         list available and installed skills
+                   %1$s -d <name>  delete a skill by folder name
+                   %1$s -h         show this help
+                   %1$s -version   show version
+            """.formatted(name));
+}
+
+void installSkills(Path home) throws IOException {
+    var source = Path.of("").toAbsolutePath();
+    var skills = findSkillDirs(source);
+    var skillNames = skills.stream().map(this::skillName).collect(Collectors.joining(", "));
+    IO.println("%s: %d skill(s) in %s: %s".formatted(name, skills.size(), source, skillNames));
+    var console = requireConsole();
+    for (var target : targets(home)) {
+        if (!isYes(console.readLine("Install to %s? [y/N] ", target))) {
+            IO.println("  skipped");
+            continue;
+        }
+        for (var skill : skills) {
+            var dest = target.resolve(skillName(skill));
+            copySkill(skill, dest);
+            IO.println("  %s -> %s".formatted(skillName(skill), dest));
+        }
+    }
+    IO.println(name + ": done");
+}
+
+void listSkills(Path home) throws IOException {
+    IO.println(name + ": available");
+    for (var skill : findSkillDirs(Path.of("").toAbsolutePath())) {
+        IO.println("  " + skillName(skill));
+    }
+    IO.println(name + ": installed");
+    for (var target : targets(home)) {
+        var skills = findSkillDirs(target);
+        if (skills.isEmpty()) {
+            continue;
+        }
+        IO.println("  " + target);
+        for (var skill : skills) {
+            IO.println("    " + skillName(skill));
+        }
+    }
+}
+
+void deleteSkill(Path home, String skill) throws IOException {
+    if (skill == null) {
+        System.err.println(name + ": -d requires a skill name");
+        System.exit(1);
+    }
+    var console = requireConsole();
     var found = false;
     for (var target : targets(home)) {
-        var skillDir = target.resolve(name);
-        if (Files.exists(skillDir)) {
-            found = true;
-            var answer = console.readLine("  Delete %s? [y/N] ", skillDir);
-            if (answer.trim().equalsIgnoreCase("y")) {
-                try (var files = Files.walk(skillDir).sorted(Comparator.reverseOrder())) {
-                    files.forEach(p -> {
-                        try { Files.delete(p); } catch (IOException e) { throw new UncheckedIOException(e); }
-                    });
-                }
-                Log.INFO.out("  Deleted.");
-            } else {
-                Log.SYSTEM.out("  Skipped.");
-            }
+        var dir = target.resolve(skill);
+        if (!Files.exists(dir)) {
+            continue;
+        }
+        found = true;
+        if (isYes(console.readLine("  delete %s? [y/N] ", dir))) {
+            deleteRecursively(dir);
+            IO.println("  deleted");
+        } else {
+            IO.println("  skipped");
         }
     }
     if (!found) {
-        Log.WARNING.out("Skill '%s' not found in any target.".formatted(name));
+        System.err.println("%s: skill '%s' not found in any target".formatted(name, skill));
     }
-    Log.INFO.out("Done.");
 }
 
-boolean isVisiblePath(Path path) {
-    return !path.toString().contains(File.separator + ".");
-}
-
-boolean isSkillFile(Path path) {
-    return path.getFileName().toString().equals("SKILL.md");
-}
-
-boolean hasSkillFile(Path dir) {
-    return Files.exists(dir.resolve("SKILL.md"));
+/// Skill directories under `root` — the parent of every `SKILL.md`, skipping
+/// dot-directories *below* `root`. Visibility is judged on the relativized path
+/// so an agent target whose own prefix carries a dot (`~/.claude/skills`) is not
+/// excluded wholesale, only its `.`-prefixed children are.
+List<Path> findSkillDirs(Path root) throws IOException {
+    if (!Files.exists(root)) {
+        return List.of();
+    }
+    try (var paths = Files.walk(root)) {
+        return paths
+                .filter(this::isSkillFile)
+                .map(Path::getParent)
+                .filter(dir -> isVisible(root, dir))
+                .sorted()
+                .toList();
+    }
 }
 
 /// Copies the whole skill directory — `SKILL.md` plus any `references/`,
@@ -155,6 +143,23 @@ void copySkill(Path skillDir, Path destDir) throws IOException {
     }
 }
 
+void deleteRecursively(Path dir) throws IOException {
+    try (var paths = Files.walk(dir)) {
+        for (var path : (Iterable<Path>) paths.sorted(Comparator.reverseOrder())::iterator) {
+            Files.delete(path);
+        }
+    }
+}
+
+Console requireConsole() {
+    var console = System.console();
+    if (console == null) {
+        System.err.println(name + ": interactive terminal required — run ./installSkills directly, not piped");
+        System.exit(1);
+    }
+    return console;
+}
+
 boolean isNoise(Path relative) {
     for (var segment : relative) {
         var part = segment.toString();
@@ -165,105 +170,18 @@ boolean isNoise(Path relative) {
     return false;
 }
 
-List<Path> sources() {
-    return List.of(
-            Path.of("").toAbsolutePath()
-    );
+boolean isVisible(Path root, Path path) {
+    return !root.relativize(path).toString().contains(File.separator + ".");
 }
 
-List<String> findSkillNames(Path source) throws IOException {
-    if (!Files.exists(source)) return List.of();
-    try (var paths = Files.walk(source).filter(this::isVisiblePath)) {
-        return paths
-                .filter(Files::isRegularFile)
-                .filter(this::isSkillFile)
-                .map(p -> p.getParent().getFileName().toString())
-                .sorted()
-                .toList();
-    }
+boolean isSkillFile(Path path) {
+    return path.getFileName().toString().equals("SKILL.md");
 }
 
-void listSkills(Path home) throws IOException {
-    Log.SYSTEM.out("Available skills:");
-    for (var source : sources()) {
-        var skills = findSkillNames(source);
-        if (skills.isEmpty()) continue;
-        Log.SYSTEM.out("  " + source);
-        for (var name : skills) {
-            Log.USER.out("    " + name);
-        }
-    }
-    Log.SYSTEM.out("Installed skills:");
-    for (var target : targets(home)) {
-        if (!Files.exists(target)) continue;
-        try (var dirs = Files.list(target)) {
-            var installed = dirs
-                    .filter(Files::isDirectory)
-                    .filter(this::hasSkillFile)
-                    .map(d -> d.getFileName().toString())
-                    .sorted()
-                    .toList();
-            if (installed.isEmpty()) continue;
-            Log.SYSTEM.out("  " + target);
-            for (var name : installed) {
-                Log.INFO.out("    " + name);
-            }
-        }
-    }
+boolean isYes(String answer) {
+    return answer != null && answer.strip().equalsIgnoreCase("y");
 }
 
-void installSkills(Path home) throws IOException {
-    var scriptDir = Path.of("").toAbsolutePath();
-    var sources = List.of(scriptDir);
-    for (var source : sources) {
-        Log.SYSTEM.out("Installing airails.dev skills");
-        Log.SYSTEM.out("Source: " + source);
-        try (var paths = Files.walk(source).filter(this::isVisiblePath)) {
-            var skills = paths
-                    .filter(Files::isRegularFile)
-                    .filter(this::isSkillFile)
-                    .toList();
-            Log.INFO.out("Found %d skill(s)".formatted(skills.size()));
-            var skillNames = skills.stream()
-                    .map(p -> p.getParent().getFileName().toString())
-                    .sorted()
-                    .toList();
-            Log.SYSTEM.out("Skills: " + String.join(", ", skillNames));
-            var console = System.console();
-            for (var target : targets(home)) {
-                var answer = console.readLine("Install to %s? [y/N] ", target);
-                if (!answer.trim().equalsIgnoreCase("y")) {
-                    Log.SYSTEM.out("  Skipped.");
-                    continue;
-                }
-                for (var skill : skills) {
-                    var skillDir = skill.getParent();
-                    var name = skillDir.getFileName().toString();
-                    var dest = target.resolve(name);
-                    copySkill(skillDir, dest);
-                    Log.USER.out("  %s -> %s".formatted(name, dest));
-                }
-            }
-        }
-    }
-    Log.INFO.out("Done.");
-}
-
-void main(String... args) throws IOException {
-    var home = Path.of(System.getProperty("user.home"));
-    if (args.length == 1 && "-h".equals(args[0])) {
-        Log.USER.out("Usage: installSkills              - install all skills");
-        Log.USER.out("       installSkills -l           - list available and installed skills");
-        Log.USER.out("       installSkills -d <name>    - delete skill by folder name");
-        Log.USER.out("       installSkills -h           - show this help");
-        return;
-    }
-    if (args.length == 1 && "-l".equals(args[0])) {
-        listSkills(home);
-    } else if (args.length == 2 && "-d".equals(args[0])) {
-        Log.SYSTEM.out("Deleting skill: " + args[1]);
-        deleteSkill(home, args[1]);
-    } else {
-        installSkills(home);
-    }
+String skillName(Path skillDir) {
+    return skillDir.getFileName().toString();
 }
