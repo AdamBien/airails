@@ -28,7 +28,7 @@ airhacks.sbce.checkout
 ```
 
 - `## Boundary` ops ↔ the BC's `boundary` layer (one operation → one entry-point method).
-- `## Requirements` + scenarios ↔ behavior **and** the tests that cover it.
+- `## Requirements` + EARS statements ↔ behavior **and** the tests that cover it.
 - `## Entities` ↔ the BC's `entity` layer.
 - `capability` frontmatter == the directory path. This is the only identity field; there is no `bc` field.
 
@@ -58,7 +58,7 @@ converged → `gc` — or ask. Compute the path by replacing dots with slashes
 
 1. Validate the name: lowercase, dot-separated, no spaces or uppercase. Reject otherwise.
 2. If `specs/<path>/spec.md` exists, do **not** overwrite — report and stop unless the user confirms a rewrite.
-3. Author `specs/<path>/spec.md` from the bundled `references/spec-template.md`: one-line responsibility, boundary ops, SHALL requirements with GIVEN/WHEN/THEN scenarios, optional entities, out-of-scope. Stack-neutral — no types, transports, frameworks, or *how*.
+3. Author `specs/<path>/spec.md` from the bundled `references/spec-template.md`: one-line responsibility, boundary ops, requirements as EARS statements, optional entities, out-of-scope. Stack-neutral — no types, transports, frameworks, or *how*.
 4. Scaffold empty BC layer dirs `src/main/java/<path>/{boundary,control,entity}/` (add `.gitkeep` if the stack needs empty dirs tracked). Write **no** BC source.
 5. Report the open gap (counts of ops / requirements) and point the user to `/sbce apply <capability>`.
 
@@ -111,9 +111,19 @@ run stack test loop + structural sync
 
 - Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, `## Out of scope`.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
-- Requirements are SHALL statements; each has ≥1 `#### Scenario` in GIVEN / WHEN / THEN form.
-- Every boundary op traces to a requirement; every requirement traces to ≥1 test.
-- The **form** of the requirement→test trace is the stack skill's call — an `r1…` method name for `zunit`, a system-test name, an `@requirement` tag, a Playwright spec. SBCE only requires the trace exist and be grep-visible.
+- Requirements are [EARS](https://alistairmavin.com/ears/) statements — one of six patterns, the system is always **the BC**. Group related statements under a titled `### Rn`. Use the unwanted-behaviour (`If…then`) and state-driven (`While…`) patterns to capture error and edge cases.
+
+  | Pattern | Template |
+  |---|---|
+  | Ubiquitous | `The BC shall <response>.` |
+  | State-driven | `While <precondition>, the BC shall <response>.` |
+  | Event-driven | `When <trigger>, the BC shall <response>.` |
+  | Optional-feature | `Where <feature is included>, the BC shall <response>.` |
+  | Unwanted-behaviour | `If <trigger>, then the BC shall <response>.` |
+  | Complex | `While <precondition>, when <trigger>, the BC shall <response>.` |
+
+- Every boundary op traces to a requirement group; every EARS statement traces to ≥1 test.
+- The **form** of the statement→test trace is the stack skill's call — an `r1…` method name for `zunit`, a system-test name, an `@requirement` tag, a Playwright spec. SBCE only requires the trace exist and be grep-visible.
 - Stack-neutral throughout: no types, no transports, no framework verbs, no *how*.
 
 ## Reference spec
@@ -132,18 +142,12 @@ status: active
 
 ## Requirements
 ### R1: Place an order
-The BC SHALL accept a cart and produce a confirmed order.
-#### Scenario: valid cart
-- GIVEN a cart with at least one item
-- WHEN place-order is invoked
-- THEN an order is created and confirmed
+- When a cart with at least one item is submitted, the BC shall create and confirm an order.
+- If the cart is empty, then the BC shall reject the request.
 
 ### R2: Cancel an order
-The BC SHALL withdraw an order that has not been fulfilled.
-#### Scenario: cancel unfulfilled order
-- GIVEN a confirmed, unfulfilled order
-- WHEN cancel-order is invoked
-- THEN the order is withdrawn
+- While an order is unfulfilled, the BC shall allow it to be cancelled.
+- If the order is already fulfilled, then the BC shall reject the cancellation.
 
 ## Entities
 - Order, Cart
@@ -154,7 +158,7 @@ The BC SHALL withdraw an order that has not been fulfilled.
 ```
 
 This maps to `src/main/java/airhacks/sbce/checkout/` with `placeOrder`/`cancelOrder` in the
-boundary, and a test tracing each of R1, R2.
+boundary, and a test tracing each EARS statement under R1, R2.
 
 ## What NOT to do
 

@@ -34,10 +34,10 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 
 1. **Declare** — `/sbce new airhacks.sbce.checkout`
    Writes `specs/airhacks/sbce/checkout/spec.md` from the template and scaffolds empty
-   `boundary/control/entity` dirs. Fill in the spec: boundary operations, SHALL requirements
-   with GIVEN/WHEN/THEN scenarios. Format: [references/spec-template.md](references/spec-template.md).
+   `boundary/control/entity` dirs. Fill in the spec: boundary operations, requirements as
+   EARS statements. Format: [references/spec-template.md](references/spec-template.md).
 2. **Converge** — `/sbce apply airhacks.sbce.checkout`
-   Closes the gap (boundary methods, a test per requirement, the code) and loops the stack's
+   Closes the gap (boundary methods, a test per EARS statement, the code) and loops the stack's
    tests until green. Idempotent — re-run any time; an in-sync, green BC is a no-op.
 3. **Reap** — `/sbce gc airhacks.sbce.checkout`
    Once green, moves the spec to `archive/specs/...`. Never deletes; BC source stays.

@@ -16,8 +16,22 @@ Rules for filling it in:
 - Stack-neutral. No transport, no types, no framework verbs, no *how* — only what the boundary promises.
 - `capability` is the **only** identity field and must equal the directory path. There is no `bc` field.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
-- Every boundary op traces to a requirement; every requirement has ≥1 scenario and ≥1 test.
+- Every boundary op traces to a requirement group (`Rn`); every requirement is ≥1 EARS statement, and every EARS statement traces to ≥1 test.
 - Keep it minimal — an empty `## Out of scope` is fine, but the heading stays to keep the boundary sharp.
+
+Requirements are written in [EARS](https://alistairmavin.com/ears/) — each statement fits one
+of six patterns, and the system is always **the BC**. Reach for the unwanted-behaviour
+(`If…then`) and state-driven (`While…`) patterns to capture the error and edge cases that
+otherwise go unwritten and untested.
+
+| Pattern | Template |
+|---|---|
+| Ubiquitous | `The BC shall <response>.` |
+| State-driven | `While <precondition>, the BC shall <response>.` |
+| Event-driven | `When <trigger>, the BC shall <response>.` |
+| Optional-feature | `Where <feature is included>, the BC shall <response>.` |
+| Unwanted-behaviour | `If <trigger>, then the BC shall <response>.` |
+| Complex | `While <precondition>, when <trigger>, the BC shall <response>.` |
 
 ```markdown
 ---
@@ -33,13 +47,10 @@ status: active                     # active | archived
 - `cancel-order` — withdraw an unfulfilled order
 
 ## Requirements
-<!-- SHALL statements; each has >=1 scenario; every boundary op traces to a requirement -->
+<!-- EARS statements (the system is the BC); group related ones under a titled Rn; every boundary op traces to a requirement; every statement traces to >=1 test -->
 ### R1: Place an order
-The BC SHALL accept a cart and produce a confirmed order.
-#### Scenario: valid cart
-- GIVEN a cart with at least one item
-- WHEN place-order is invoked
-- THEN an order is created and confirmed
+- When a cart with at least one item is submitted, the BC shall create and confirm an order.
+- If the cart is empty, then the BC shall reject the request.
 
 ## Entities (optional)
 <!-- stateful domain nouns this BC owns — names only, no fields, no types -->
