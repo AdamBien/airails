@@ -70,6 +70,19 @@ feature description** (which may decompose into one *or several* BCs, some new, 
 The novelty is the *intent brought*, not the artifact — coining a fresh BC and extending an
 existing one are both "new" here.
 
+**Clarify first (both paths).** Before authoring any spec, resolve every ambiguity the contract
+needs. Vague input (`"store a session with title, description, conference, date"`) hides scope and
+edge-case decisions — a spec invented from it makes the test oracle verify assumptions instead of
+intent, so never guess.
+
+- **Loop, don't stop at one.** Ask; re-derive open questions from each answer (answers expose new gaps); repeat until resolved. Re-ask anything left unanswered — never proceed on partial answers.
+- **Never assume silently.** When you must lean on a default, name it — "I'd assume create-only; confirm or correct" — don't bury it.
+- **One ambiguity per question; specific over generic.** Offer enumerable options with an "other" escape; skip what's already answered in context; no meta-questions ("shall I ask?").
+- **Interrogate per boundary op:** its trigger and response (event-driven), the invalid/edge triggers needing an `If…then` (unwanted-behaviour), the state constraints needing a `While…` (state-driven). And across the BC: scope (create-only vs full lifecycle, in/out of scope), entities and their fields (required vs optional, identity, validation), and what "done" means.
+- **Stop only when** every boundary op and EARS statement — happy *and* unhappy — is answerable from the user's words, such that another engineer would author the same spec. If in doubt, ask one more.
+
+Only then author.
+
 **BC name** (`/sbce new checkout`):
 
 1. Validate the name: a single lowercase token, no dots, spaces, or uppercase (the stack maps it to a package segment in Java, a folder in web). Reject otherwise.
@@ -85,7 +98,7 @@ existing one are both "new" here.
 3. **Confirm the carving with the user before any write** — decomposition has no test oracle, so the human approves the BC set.
 4. Realise each entry through the BC-name steps above: a **new** BC gets a fresh package doc + dirs; an **extend-existing** BC gets the new boundary ops / EARS requirements added to its **single** existing package doc (never a second spec).
 
-Guard: one capability ≡ one BC — output is always 1..N package-doc specs, each 1:1 with a BC; a feature is ephemeral input, never a persisted artifact. Confirm the carving (and any coined name) before writing; extend the single existing package doc, never fork a parallel one; never hand-write a tasks file; never write BC source here; never overwrite without confirmation.
+Guard: one capability ≡ one BC — output is always 1..N package-doc specs, each 1:1 with a BC; a feature is ephemeral input, never a persisted artifact. Clarify until no op or requirement is guessed; confirm the carving (and any coined name) before writing; extend the single existing package doc, never fork a parallel one; never hand-write a tasks file; never write BC source here; never overwrite without confirmation.
 
 ### apply — converge
 

@@ -33,11 +33,13 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 
 1. **Declare** — `/sbce new checkout` *(BC name)* or
    `/sbce new "let a customer check out a cart"` *(feature description)*.
-   A BC name writes the spec into the BC's package doc (`package-info.java` as `///` Markdown, or
-   `package-info.md` in web) and asks the stack skill to scaffold the BC's
-   `boundary/control/entity` dirs. A feature description scans existing BCs, proposes a set (new
-   ones + existing to extend) for you to confirm, then authors/extends one package doc per BC.
-   Fill in the spec: boundary operations, requirements as EARS statements.
+   If the input is vague, `new` first **loops clarifying questions until no boundary op or EARS
+   requirement has to be guessed** — the spec is the test oracle, so it's never invented from
+   ambiguity. A BC name then writes the spec into the BC's package doc
+   (`package-info.java` as `///` Markdown, or `package-info.md` in web) and asks the stack skill to
+   scaffold the BC's `boundary/control/entity` dirs. A feature description scans existing BCs,
+   proposes a set (new ones + existing to extend) for you to confirm, then authors/extends one
+   package doc per BC. Fill in the spec: boundary operations, requirements as EARS statements.
    Format: [references/spec-template.md](references/spec-template.md).
 2. **Converge** — `/sbce apply checkout`
    Closes the gap (boundary methods, a test per EARS statement, the code) and loops the stack's
