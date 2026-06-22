@@ -39,7 +39,7 @@ otherwise go unwritten and untested.
 ```markdown
 ---
 capability: <bc-name>              # the BC name == specs/<bc-name>/; a single lowercase token
-status: active                     # active | archived
+status: active                     # active | archived — optional freeze marker; nothing auto-sets it
 ---
 # <Bc Name>
 > One sentence: this BC's single responsibility.

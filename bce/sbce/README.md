@@ -2,15 +2,14 @@
 
 An [AIrails.dev](https://airails.dev) skill for **SBCE** (pronounced *"space"*) — Spec-driven
 BCE — the workflow where one capability spec equals one business component (same name) and the
-spec is the boundary contract. One slash-invocable skill, three modes: `new → apply → gc`
-(declare → converge → reap).
+spec is the boundary contract. One slash-invocable skill, two modes: `new → apply`
+(declare → converge).
 
 ## Scope
 
-- One skill, three modes — invoke as `/sbce new|apply|gc <capability-or-feature>` (or by intent):
+- One skill, two modes — invoke as `/sbce new|apply <capability-or-feature>` (or by intent):
   - **new** (declare) — author `specs/<bc-name>/spec.md` from the bundled template and scaffold the BC's empty `boundary/control/entity` dirs. Accepts a BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
-  - **gc** (reap) — archive a converged spec by **moving** it to `archive/specs/<bc-name>/`; never deletes, BC source stays
 - The identity is the **BC name** (`checkout`); the spec is `specs/checkout/spec.md` and the stack skill resolves the source location (Java: `src/main/java/<base>/checkout/`, web: `app/src/checkout/`)
 - Stack-neutral — owns only the workflow and the spec↔BC mapping; no transport, types, or framework verbs in a spec
 - No binary required: the **stack's own test loop is the oracle for "done"**.
@@ -44,11 +43,9 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 2. **Converge** — `/sbce apply checkout`
    Closes the gap (boundary methods, a test per EARS statement, the code) and loops the stack's
    tests until green. Idempotent — re-run any time; an in-sync, green BC is a no-op.
-3. **Reap** — `/sbce gc checkout`
-   Once green, moves the spec to `archive/specs/...`. Never deletes; BC source stays.
 
 Omit the mode and the skill infers it: a BC name or a feature description with no spec yet →
-`new`; spec exists but not green → `apply`; converged → `gc`.
+`new`; spec exists but not green → `apply`.
 
 ## Test
 
@@ -56,9 +53,8 @@ Omit the mode and the skill infers it: a BC name or a feature description with n
 /sbce new checkout
 ```
 
-Edit the generated spec, then converge and archive:
+Edit the generated spec, then converge:
 
 ```
 /sbce apply checkout
-/sbce gc checkout
 ```

@@ -1,10 +1,10 @@
 ---
 name: sbce
-description: Spec-driven BCE workflow where one capability spec equals one business component (same name) and the spec is the boundary contract. Invoked as `/sbce new|apply|gc <capability-or-feature>` (or by intent), it drives declare → converge → reap; the stack's own test loop is the oracle for "done". `new` accepts a BC name or a natural-language feature description that may decompose into one or several BCs (new or existing). Stack-neutral — composes with `/bce` and a stack skill (`/java-cli-app`, `/microprofile-server`, `/web-components`, …) for code shape and verification. Use when authoring or converging a capability spec, declaring a feature as one or more BCs, mapping a spec to a BC, or running `/sbce new`, `/sbce apply`, `/sbce gc`. Triggers on "SBCE", "capability spec", "spec-driven BCE", "declare a feature", "spec to BC", "converge to spec", "/sbce new", "/sbce apply", "/sbce gc".
+description: Spec-driven BCE workflow where one capability spec equals one business component (same name) and the spec is the boundary contract. Invoked as `/sbce new|apply <capability-or-feature>` (or by intent), it drives declare → converge; the stack's own test loop is the oracle for "done". `new` accepts a BC name or a natural-language feature description that may decompose into one or several BCs (new or existing). Stack-neutral — composes with `/bce` and a stack skill (`/java-cli-app`, `/microprofile-server`, `/web-components`, …) for code shape and verification. Use when authoring or converging a capability spec, declaring a feature as one or more BCs, mapping a spec to a BC, or running `/sbce new`, `/sbce apply`. Triggers on "SBCE", "capability spec", "spec-driven BCE", "declare a feature", "spec to BC", "converge to spec", "/sbce new", "/sbce apply".
 ---
 
 Drive the spec-driven BCE workflow. This one skill owns the whole loop — both the rules and
-the steps. Invoke it as `/sbce <mode> <capability>` where mode is `new`, `apply`, or `gc`
+the steps. Invoke it as `/sbce <mode> <capability>` where mode is `new` or `apply`
 (see "Invocation modes"), or let it trigger from natural-language intent. Apply every rule
 below strictly.
 
@@ -44,7 +44,6 @@ checkout                                    # the BC name == the only identity
 | Decompose a feature into BCs (new vs existing) | this skill's judgment, over a read-only scan of `specs/` + source, **user-confirmed** | no — semantic |
 | Scaffold the spec dir `specs/<bc-name>/` | this skill + filesystem | trivially yes |
 | Resolve BC name → source location + scaffold layer dirs | the composed stack skill (owns the package base / source root) | yes — stack-defined |
-| Move spec → archive | this skill + filesystem (`mv`) | trivially yes |
 | Structural sync (op→method, requirement→test present) | this skill, made checkable by the stack's traceability convention | grep-level |
 | "Does this code satisfy the requirement" | this skill's judgment, **grounded by the requirement's passing test** | no — semantic |
 
@@ -53,12 +52,12 @@ Rules:
 - Ask the stack skill "are you green?" — never name a runner or a test kind yourself.
 - The green test run is the independent signal; do not self-certify convergence.
 
-## Invocation modes: new · apply · gc
+## Invocation modes: new · apply
 
 Read the mode and the capability from the invocation (`/sbce apply checkout`). If the mode is
 missing, infer it — a BC name **or** a feature description with no spec yet → `new`; spec exists
-but not converged → `apply`; converged → `gc` — or ask. The spec lives at `specs/<bc-name>/spec.md`;
-the source location is the stack skill's call. One skill, three modes; never split it.
+but not converged → `apply` — or ask. The spec lives at `specs/<bc-name>/spec.md`; the source
+location is the stack skill's call. One skill, two modes; never split it.
 
 ### new — declare
 
@@ -95,17 +94,6 @@ Make reality match the declared spec — the kubectl/terraform "make it so" step
 5. Re-run the test loop. Repeat steps 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 
 Guard: green build + no structural drift is the only definition of done; never self-certify; never bake in a stack or runner — ask the stack skill "are you green?".
-
-### gc — reap
-
-Archive a converged capability by **moving** its spec. Never delete; BC source stays.
-
-1. If no capability is given, scan `specs/` and list candidates, then ask which to reap.
-2. Run the converge gate (test loop green + structural sync clean). If it fails, stop and tell the user to run `/sbce apply <bc-name>` first.
-3. Move the spec: `mv specs/<bc-name>/ archive/specs/<bc-name>/` (create `archive/specs/` if needed). Do **not** touch the BC source (the stack skill's location) — it remains.
-4. Confirm the result as `from → to`.
-
-Guard: archive only when the gate is green; **move, never delete**; BC source is never removed. Before moving, the spec's one-line responsibility must already live in the BC's own package-level doc (in Java, `/bce`'s `package-info.java`) — the mechanism is the stack skill's / `/bce`'s call, but the intention must be co-located with the code so it survives the spec leaving the source tree.
 
 ## Convergence loop
 
@@ -188,7 +176,6 @@ in the boundary, and a test tracing each EARS statement under R1, R2.
 - Don't diff or merge specs — there is one spec per capability.
 - Don't bake in a stack or a test runner — delegate code idioms and verification.
 - Don't self-certify convergence — let the stack's tests speak.
-- Don't delete on archive — `gc` moves, never deletes; BC source stays.
 - Don't put *how* (types, transports, frameworks) into a spec.
-- Don't split this into separate skills or commands — one skill, three modes.
+- Don't split this into separate skills or commands — one skill, two modes.
 - Don't build the `sbce` binary until a headless need is real.
