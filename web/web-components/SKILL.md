@@ -141,14 +141,17 @@ export const items = createReducer(initialState, (builder) => {
 
 ## Documentation
 
-`package-info.md` is the web counterpart of Java's `package-info.java` — it documents a feature
-module (business component) at the folder level, so the module's intention survives independently
-of any spec.
+`package-info.md` is the web counterpart of Java's `package-info.java` — a Markdown file at the
+feature-module root (`app/src/[feature-name]/package-info.md`) that documents the business
+component at the folder level, co-located with its code.
 
-- document a feature module with a `package-info.md` at its root: `app/src/[feature-name]/package-info.md`
-- describe the module's single responsibility and the design decisions behind it — not its contents or a file listing
-- keep it to a few lines; add it where the module's purpose is not self-evident from its name
-- do not restate the BCE pattern itself or explain boundary/control/entity generically
+- at minimum, state the module's single responsibility and the design decisions behind it — not its contents or a file listing
+- keep it focused; do not restate the BCE pattern itself or explain boundary/control/entity generically
+
+When the project is driven by **SBCE** (`/sbce`), this file *is* the capability spec — it holds
+the BC's full boundary contract (responsibility, `## Boundary` operations, `## Requirements` as
+EARS statements, optional `## Entities`, `## Out of scope`). One `package-info.md` per business
+component; it is the single source of truth that `/sbce apply` converges the code to.
 
 ## BElement Base Class
 

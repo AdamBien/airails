@@ -8,9 +8,9 @@ spec is the boundary contract. One slash-invocable skill, two modes: `new → ap
 ## Scope
 
 - One skill, two modes — invoke as `/sbce new|apply <capability-or-feature>` (or by intent):
-  - **new** (declare) — author `specs/<bc-name>/spec.md` from the bundled template and scaffold the BC's empty `boundary/control/entity` dirs. Accepts a BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
+  - **new** (declare) — author the spec into the BC's package doc (`package-info.java` / `package-info.md`) and scaffold the BC's empty `boundary/control/entity` dirs. Accepts a BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
-- The identity is the **BC name** (`checkout`); the spec is `specs/checkout/spec.md` and the stack skill resolves the source location (Java: `src/main/java/<base>/checkout/`, web: `app/src/checkout/`)
+- The identity is the **BC name** (`checkout`); the spec **is** the BC's package doc, co-located with the code — Java: `package-info.java` (`///` Markdown, [JEP 467](https://openjdk.org/jeps/467)), web: `package-info.md`. No separate `specs/` tree
 - Stack-neutral — owns only the workflow and the spec↔BC mapping; no transport, types, or framework verbs in a spec
 - No binary required: the **stack's own test loop is the oracle for "done"**.
 ## Composition
@@ -33,12 +33,11 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 
 1. **Declare** — `/sbce new checkout` *(BC name)* or
    `/sbce new "let a customer check out a cart"` *(feature description)*.
-   A BC name writes one `specs/checkout/spec.md` from the template and asks the stack skill to
-   scaffold the BC's `boundary/control/entity` dirs. A feature description scans existing BCs,
-   proposes a set (new ones + existing to extend) for you to confirm, then authors/extends one
-   spec per BC. Each BC's responsibility is also written to its package-level doc
-   (`package-info.java`, or `package-info.md` in web projects). Fill in the spec: boundary
-   operations, requirements as EARS statements.
+   A BC name writes the spec into the BC's package doc (`package-info.java` as `///` Markdown, or
+   `package-info.md` in web) and asks the stack skill to scaffold the BC's
+   `boundary/control/entity` dirs. A feature description scans existing BCs, proposes a set (new
+   ones + existing to extend) for you to confirm, then authors/extends one package doc per BC.
+   Fill in the spec: boundary operations, requirements as EARS statements.
    Format: [references/spec-template.md](references/spec-template.md).
 2. **Converge** — `/sbce apply checkout`
    Closes the gap (boundary methods, a test per EARS statement, the code) and loops the stack's
