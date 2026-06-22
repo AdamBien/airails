@@ -1,21 +1,23 @@
 # Capability spec template
 
-Copy the fenced block below into `specs/<capability-as-path>/spec.md` and fill it in. One spec
-describes exactly one BC; a single feature may decompose into several specs — one per BC.
+Copy the fenced block below into `specs/<bc-name>/spec.md` and fill it in. One spec describes
+exactly one BC; a single feature may decompose into several specs — one per BC.
 
-The directory segment **is** the BC name and the only identity. The capability is dotted;
-the path is the same value with dots replaced by slashes:
+The **BC name** is the only identity — a single lowercase token. The spec location is mechanical
+and stack-neutral; the source location is the stack skill's call (it owns the package base /
+source root):
 
 ```
-airhacks.sbce.checkout
-  → spec:   specs/airhacks/sbce/checkout/spec.md
-  → source: src/main/java/airhacks/sbce/checkout/{boundary,control,entity}/
+checkout
+  → spec:   specs/checkout/spec.md          # mechanical, stack-neutral
+  → source: <stack skill resolves it>       # Java: src/main/java/<base>/checkout/{boundary,control,entity}/
+                                            # web:  app/src/checkout/{boundary,control,entity}/
 ```
 
 Rules for filling it in:
 
 - Stack-neutral. No transport, no types, no framework verbs, no *how* — only what the boundary promises.
-- `capability` is the **only** identity field and must equal the directory path. There is no `bc` field.
+- `capability` is the **only** identity field and equals the BC name (no dotted path, no `bc` field).
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
 - Every boundary op traces to a requirement group (`Rn`); every requirement is ≥1 EARS statement, and every EARS statement traces to ≥1 test.
 - Keep it minimal — an empty `## Out of scope` is fine, but the heading stays to keep the boundary sharp.
@@ -36,7 +38,7 @@ otherwise go unwritten and untested.
 
 ```markdown
 ---
-capability: <org>.<project>.<bc>   # == BC name == directory path under specs/ and src/main/java/
+capability: <bc-name>              # the BC name == specs/<bc-name>/; a single lowercase token
 status: active                     # active | archived
 ---
 # <Bc Name>

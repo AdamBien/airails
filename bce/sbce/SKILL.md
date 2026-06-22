@@ -1,6 +1,6 @@
 ---
 name: sbce
-description: Spec-driven BCE workflow where one capability spec equals one business component (same name) and the spec is the boundary contract. Invoked as `/sbce new|apply|gc <capability-or-feature>` (or by intent), it drives declare → converge → reap; the stack's own test loop is the oracle for "done". `new` accepts a dotted BC name or a natural-language feature description that may decompose into one or several BCs (new or existing). Stack-neutral — composes with `/bce` and a stack skill (`/java-cli-app`, `/microprofile-server`, `/web-components`, …) for code shape and verification. Use when authoring or converging a capability spec, declaring a feature as one or more BCs, mapping a spec to a BC, or running `/sbce new`, `/sbce apply`, `/sbce gc`. Triggers on "SBCE", "capability spec", "spec-driven BCE", "declare a feature", "spec to BC", "converge to spec", "/sbce new", "/sbce apply", "/sbce gc".
+description: Spec-driven BCE workflow where one capability spec equals one business component (same name) and the spec is the boundary contract. Invoked as `/sbce new|apply|gc <capability-or-feature>` (or by intent), it drives declare → converge → reap; the stack's own test loop is the oracle for "done". `new` accepts a BC name or a natural-language feature description that may decompose into one or several BCs (new or existing). Stack-neutral — composes with `/bce` and a stack skill (`/java-cli-app`, `/microprofile-server`, `/web-components`, …) for code shape and verification. Use when authoring or converging a capability spec, declaring a feature as one or more BCs, mapping a spec to a BC, or running `/sbce new`, `/sbce apply`, `/sbce gc`. Triggers on "SBCE", "capability spec", "spec-driven BCE", "declare a feature", "spec to BC", "converge to spec", "/sbce new", "/sbce apply", "/sbce gc".
 ---
 
 Drive the spec-driven BCE workflow. This one skill owns the whole loop — both the rules and
@@ -19,18 +19,22 @@ below strictly.
 
 ## Spec ↔ BC mapping
 
-Mechanical, never reinterpreted. Capability is dotted; the path is dots → slashes.
+The identity is the **BC name** — a single lowercase token (`checkout`), never a dotted path. The
+spec location is mechanical and stack-neutral; the **source** location is the stack skill's call
+(it owns the package base / source root), so SBCE never hand-types a package coordinate.
 
 ```
-airhacks.sbce.checkout
-  → spec:   specs/airhacks/sbce/checkout/spec.md
-  → source: src/main/java/airhacks/sbce/checkout/{boundary,control,entity}/
+checkout                                    # the BC name == the only identity
+  → spec:   specs/checkout/spec.md          # mechanical, stack-neutral
+  → source: <stack skill resolves it>       # Java: src/main/java/<base>/checkout/{boundary,control,entity}/
+                                            # web:  app/src/checkout/{boundary,control,entity}/
 ```
 
 - `## Boundary` ops ↔ the BC's `boundary` layer (one operation → one entry-point method).
 - `## Requirements` + EARS statements ↔ behavior **and** the tests that cover it.
 - `## Entities` ↔ the BC's `entity` layer.
-- `capability` frontmatter == the directory path. This is the only identity field; there is no `bc` field.
+- `capability` frontmatter == the BC name. This is the only identity field; there is no dotted
+  path and no `bc` field. The dotted form is a Java package detail the stack skill derives — never the user's input.
 
 ## Determinism boundary
 
@@ -38,7 +42,8 @@ airhacks.sbce.checkout
 |---|---|---|
 | Run tests / "is it green" | the **stack's verification loop** (the composed stack skill) | yes — existing tooling, no LLM |
 | Decompose a feature into BCs (new vs existing) | this skill's judgment, over a read-only scan of `specs/` + source, **user-confirmed** | no — semantic |
-| Scaffold spec + BC layer dirs | this skill + filesystem | trivially yes |
+| Scaffold the spec dir `specs/<bc-name>/` | this skill + filesystem | trivially yes |
+| Resolve BC name → source location + scaffold layer dirs | the composed stack skill (owns the package base / source root) | yes — stack-defined |
 | Move spec → archive | this skill + filesystem (`mv`) | trivially yes |
 | Structural sync (op→method, requirement→test present) | this skill, made checkable by the stack's traceability convention | grep-level |
 | "Does this code satisfy the requirement" | this skill's judgment, **grounded by the requirement's passing test** | no — semantic |
@@ -51,32 +56,31 @@ Rules:
 ## Invocation modes: new · apply · gc
 
 Read the mode and the capability from the invocation (`/sbce apply checkout`). If the mode is
-missing, infer it — a dotted name **or** a feature description with no spec yet → `new`; spec
-exists but not converged → `apply`; converged → `gc` — or ask. Compute the path by replacing dots
-with slashes (`airhacks.sbce.checkout` → `airhacks/sbce/checkout`). One skill, three modes; never split it.
+missing, infer it — a BC name **or** a feature description with no spec yet → `new`; spec exists
+but not converged → `apply`; converged → `gc` — or ask. The spec lives at `specs/<bc-name>/spec.md`;
+the source location is the stack skill's call. One skill, three modes; never split it.
 
 ### new — declare
 
-Declare a new feature. Accepts either a **dotted name** (one precise BC) or a **natural-language
+Declare a new feature. Accepts either a **BC name** (one precise BC) or a **natural-language
 feature description** (which may decompose into one *or several* BCs, some new, some existing).
 The novelty is the *intent brought*, not the artifact — coining a fresh BC and extending an
 existing one are both "new" here.
 
-**Dotted name** (`/sbce new airhacks.sbce.checkout`):
+**BC name** (`/sbce new checkout`):
 
-1. Validate the name: lowercase, dot-separated, no spaces or uppercase. Reject otherwise.
-2. If `specs/<path>/spec.md` exists, do **not** overwrite — report and stop unless the user confirms a rewrite.
-3. Author `specs/<path>/spec.md` from the bundled `references/spec-template.md`: one-line responsibility, boundary ops, requirements as EARS statements, optional entities, out-of-scope. Stack-neutral — no types, transports, frameworks, or *how*.
-4. Scaffold empty BC layer dirs `src/main/java/<path>/{boundary,control,entity}/` (add `.gitkeep` if the stack needs empty dirs tracked) and write the BC's one-line responsibility into the stack's package-level doc — `package-info.java` (Java) / `package-info.md` (web). Write **no** BC source.
-5. Report the open gap (counts of ops / requirements) and point the user to `/sbce apply <capability>`.
+1. Validate the name: a single lowercase token, no dots, spaces, or uppercase (the stack maps it to a package segment in Java, a folder in web). Reject otherwise.
+2. If `specs/<bc-name>/spec.md` exists, do **not** overwrite — report and stop unless the user confirms a rewrite.
+3. Author `specs/<bc-name>/spec.md` from the bundled `references/spec-template.md`: one-line responsibility, boundary ops, requirements as EARS statements, optional entities, out-of-scope. Stack-neutral — no types, transports, frameworks, or *how*.
+4. Ask the stack skill to scaffold the BC's empty layer dirs (`boundary`/`control`/`entity`) at the source location it owns, and to write the BC's one-line responsibility into its package-level doc — `package-info.java` (Java) / `package-info.md` (web). Write **no** BC source.
+5. Report the open gap (counts of ops / requirements) and point the user to `/sbce apply <bc-name>`.
 
 **Feature description** (`/sbce new "let a customer check out a cart"`):
 
-1. Derive the `<org>.<project>` prefix from existing `specs/`; ask once if the tree is empty.
-2. Scan existing BCs — `specs/**/spec.md` responsibilities + `src/main/java/**` packages.
-3. **Propose** a BC set — each entry tagged **new** (coin `<org>.<project>.<bc>` from its verb-noun core) or **extend-existing**, each with the one-line responsibility it owns (its slice of the feature).
-4. **Confirm the carving with the user before any write** — decomposition has no test oracle, so the human approves the BC set.
-5. Realise each entry through the dotted-name steps above: a **new** BC gets a fresh spec + dirs + package-level doc; an **extend-existing** BC gets the new boundary ops / EARS requirements added to its **single** existing spec (never a second spec).
+1. Scan existing BCs — `specs/*/spec.md` responsibilities + the stack's source tree.
+2. **Propose** a BC set — each entry tagged **new** (coin a BC name from its verb-noun core) or **extend-existing**, each with the one-line responsibility it owns (its slice of the feature).
+3. **Confirm the carving with the user before any write** — decomposition has no test oracle, so the human approves the BC set.
+4. Realise each entry through the BC-name steps above: a **new** BC gets a fresh spec + dirs + package-level doc; an **extend-existing** BC gets the new boundary ops / EARS requirements added to its **single** existing spec (never a second spec).
 
 Guard: one capability ≡ one BC — output is always 1..N specs, each 1:1 with a BC; a feature is ephemeral input, never a persisted artifact. Confirm the carving (and any coined name) before writing; extend the single existing spec, never fork a parallel one; never hand-write a tasks file; never write BC source here; never overwrite without confirmation.
 
@@ -84,7 +88,7 @@ Guard: one capability ≡ one BC — output is always 1..N specs, each 1:1 with 
 
 Make reality match the declared spec — the kubectl/terraform "make it so" step. Idempotent.
 
-1. Locate `specs/<path>/spec.md`; if missing, tell the user to run `/sbce new <capability>` first and stop.
+1. Locate `specs/<bc-name>/spec.md`; if missing, tell the user to run `/sbce new <bc-name>` first and stop.
 2. Detect the composed stack skill from `AGENTS.md`/`README` (here `java-cli-app`); ask once if it cannot be inferred.
 3. Run the stack's test loop. If it is green **and** the structural sync step finds no gap, stop — idempotent no-op; report "already converged".
 4. Else read the gap and close it: invoke `/bce` (invariants) + the stack skill (code idioms) to implement each undeclared boundary op as a method, add a traceable test per untested requirement, and write code to make the tests pass. (`new` already wrote the BC's responsibility into its package-level doc; if absent, add it here so the intention stays co-located with the code.)
@@ -97,8 +101,8 @@ Guard: green build + no structural drift is the only definition of done; never s
 Archive a converged capability by **moving** its spec. Never delete; BC source stays.
 
 1. If no capability is given, scan `specs/` and list candidates, then ask which to reap.
-2. Run the converge gate (test loop green + structural sync clean). If it fails, stop and tell the user to run `/sbce apply <capability>` first.
-3. Move the spec: `mv specs/<path>/ archive/specs/<path>/` (create `archive/specs/` if needed). Do **not** touch `src/main/java/<path>/` — the BC source remains.
+2. Run the converge gate (test loop green + structural sync clean). If it fails, stop and tell the user to run `/sbce apply <bc-name>` first.
+3. Move the spec: `mv specs/<bc-name>/ archive/specs/<bc-name>/` (create `archive/specs/` if needed). Do **not** touch the BC source (the stack skill's location) — it remains.
 4. Confirm the result as `from → to`.
 
 Guard: archive only when the gate is green; **move, never delete**; BC source is never removed. Before moving, the spec's one-line responsibility must already live in the BC's own package-level doc (in Java, `/bce`'s `package-info.java`) — the mechanism is the stack skill's / `/bce`'s call, but the intention must be co-located with the code so it survives the spec leaving the source tree.
@@ -147,7 +151,7 @@ run stack test loop + structural sync
 
 ```markdown
 ---
-capability: airhacks.sbce.checkout
+capability: checkout
 status: active
 ---
 # Checkout
@@ -174,8 +178,9 @@ status: active
 - shipping
 ```
 
-This maps to `src/main/java/airhacks/sbce/checkout/` with `placeOrder`/`cancelOrder` in the
-boundary, and a test tracing each EARS statement under R1, R2.
+The spec lives at `specs/checkout/spec.md`. The stack skill places the BC source (e.g.
+`src/main/java/<base>/checkout/` in Java, `app/src/checkout/` in web) with `placeOrder`/`cancelOrder`
+in the boundary, and a test tracing each EARS statement under R1, R2.
 
 ## What NOT to do
 

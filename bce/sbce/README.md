@@ -8,10 +8,10 @@ spec is the boundary contract. One slash-invocable skill, three modes: `new → 
 ## Scope
 
 - One skill, three modes — invoke as `/sbce new|apply|gc <capability-or-feature>` (or by intent):
-  - **new** (declare) — author `specs/<path>/spec.md` from the bundled template and scaffold empty `boundary/control/entity` BC dirs. Accepts a dotted BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
+  - **new** (declare) — author `specs/<bc-name>/spec.md` from the bundled template and scaffold the BC's empty `boundary/control/entity` dirs. Accepts a BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
-  - **gc** (reap) — archive a converged spec by **moving** it to `archive/specs/<path>/`; never deletes, BC source stays
-- The capability is dotted and maps 1:1 to the source path: `airhacks.sbce.checkout` ↔ `src/main/java/airhacks/sbce/checkout/`
+  - **gc** (reap) — archive a converged spec by **moving** it to `archive/specs/<bc-name>/`; never deletes, BC source stays
+- The identity is the **BC name** (`checkout`); the spec is `specs/checkout/spec.md` and the stack skill resolves the source location (Java: `src/main/java/<base>/checkout/`, web: `app/src/checkout/`)
 - Stack-neutral — owns only the workflow and the spec↔BC mapping; no transport, types, or framework verbs in a spec
 - No binary required: the **stack's own test loop is the oracle for "done"**.
 ## Composition
@@ -29,35 +29,36 @@ format and rules live in [SKILL.md](SKILL.md).
 
 ## Usage
 
-Invoke `/sbce <mode> <capability>` (or just describe the intent — "declare a checkout
+Invoke `/sbce <mode> <bc-name>` (or just describe the intent — "declare a checkout
 capability", "converge this BC to its spec"). Run the lifecycle in order:
 
-1. **Declare** — `/sbce new airhacks.sbce.checkout` *(dotted name)* or
+1. **Declare** — `/sbce new checkout` *(BC name)* or
    `/sbce new "let a customer check out a cart"` *(feature description)*.
-   A dotted name writes one `specs/<path>/spec.md` from the template and scaffolds empty
-   `boundary/control/entity` dirs. A feature description scans existing BCs, proposes a set
-   (new ones + existing to extend) for you to confirm, then authors/extends one spec per BC.
-   Each BC's responsibility is also written to its package-level doc (`package-info.java`, or
-   `package-info.md` in web projects). Fill in the spec: boundary operations, requirements as
-   EARS statements. Format: [references/spec-template.md](references/spec-template.md).
-2. **Converge** — `/sbce apply airhacks.sbce.checkout`
+   A BC name writes one `specs/checkout/spec.md` from the template and asks the stack skill to
+   scaffold the BC's `boundary/control/entity` dirs. A feature description scans existing BCs,
+   proposes a set (new ones + existing to extend) for you to confirm, then authors/extends one
+   spec per BC. Each BC's responsibility is also written to its package-level doc
+   (`package-info.java`, or `package-info.md` in web projects). Fill in the spec: boundary
+   operations, requirements as EARS statements.
+   Format: [references/spec-template.md](references/spec-template.md).
+2. **Converge** — `/sbce apply checkout`
    Closes the gap (boundary methods, a test per EARS statement, the code) and loops the stack's
    tests until green. Idempotent — re-run any time; an in-sync, green BC is a no-op.
-3. **Reap** — `/sbce gc airhacks.sbce.checkout`
+3. **Reap** — `/sbce gc checkout`
    Once green, moves the spec to `archive/specs/...`. Never deletes; BC source stays.
 
-Omit the mode and the skill infers it: a dotted name or a feature description with no spec yet →
+Omit the mode and the skill infers it: a BC name or a feature description with no spec yet →
 `new`; spec exists but not green → `apply`; converged → `gc`.
 
 ## Test
 
 ```
-/sbce new airhacks.sbce.checkout
+/sbce new checkout
 ```
 
 Edit the generated spec, then converge and archive:
 
 ```
-/sbce apply airhacks.sbce.checkout
-/sbce gc airhacks.sbce.checkout
+/sbce apply checkout
+/sbce gc checkout
 ```
