@@ -1,6 +1,7 @@
 # Capability spec template
 
-Copy the fenced block below into `specs/<capability-as-path>/spec.md` and fill it in.
+Copy the fenced block below into `specs/<capability-as-path>/spec.md` and fill it in. One spec
+describes exactly one BC; a single feature may decompose into several specs — one per BC.
 
 The directory segment **is** the BC name and the only identity. The capability is dotted;
 the path is the same value with dots replaced by slashes:
