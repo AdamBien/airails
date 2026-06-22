@@ -19,6 +19,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - structure code using the Boundary Control Entity (BCE/ECB) pattern
 - package structure: [ORGANIZATION_NAME].[PROJECT_NAME].[COMPONENT_NAME].[boundary|control|entity]
 - top level package reflects the application responsibility or name
+- suggest renaming the top level [PROJECT_NAME] package when it does not reflect the project's name or responsibility
 - business components are children of top level package, named after their responsibilities
 - a BC may represent a domain concept or a shared concern; both are valid when the responsibility has a name and is reused across the application
 - boundary, control, entity packages are only allowed in business components
