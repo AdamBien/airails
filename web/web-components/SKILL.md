@@ -40,7 +40,8 @@ app/src/
 ├── index.html               # single HTML entry point
 ├── style.css                # application styles
 ├── libs/                    # bundled third-party ESM modules
-├── [feature-name]/          # one folder per feature module
+├── [feature-name]/          # one folder per feature module (business component)
+│   ├── package-info.md      # the module's responsibility & design decisions
 │   ├── boundary/            # UI web components
 │   ├── control/             # actions and dispatchers
 │   └── entity/              # reducers and state shape
@@ -137,6 +138,17 @@ export const items = createReducer(initialState, (builder) => {
     });
 });
 ```
+
+## Documentation
+
+`package-info.md` is the web counterpart of Java's `package-info.java` — it documents a feature
+module (business component) at the folder level, so the module's intention survives independently
+of any spec.
+
+- document a feature module with a `package-info.md` at its root: `app/src/[feature-name]/package-info.md`
+- describe the module's single responsibility and the design decisions behind it — not its contents or a file listing
+- keep it to a few lines; add it where the module's purpose is not self-evident from its name
+- do not restate the BCE pattern itself or explain boundary/control/entity generically
 
 ## BElement Base Class
 
