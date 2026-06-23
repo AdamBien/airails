@@ -58,7 +58,7 @@ a BC map, mark it **generated** and regenerate it from the per-BC docs.
 | Decompose a feature into BCs (new vs existing) | this skill's judgment, over a read-only scan of the source tree's package docs, **user-confirmed** | no — semantic |
 | Author the spec content (boundary ops, EARS requirements) | this skill's judgment | no — semantic |
 | Place the BC — package doc + layer dirs at the source location | the composed stack skill (owns the package base / source root) | yes — stack-defined |
-| Structural sync (op→method, each `Rn.m` statement → test present) | this skill, made checkable by the stack's traceability convention | grep-level |
+| Structural sync, **both directions** (spec→code: op→method, `Rn.m`→test · code→spec: method→op, test-id→statement, entity→`## Entities`) | this skill, made checkable by the stack's traceability convention | grep-level |
 | "Does this code satisfy the requirement" | this skill's judgment, **grounded by the requirement's passing test** | no — semantic |
 
 - Ask the stack skill "are you green?" — never name a runner or test kind, and never self-certify convergence.
@@ -111,8 +111,10 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 
 1. Locate the package doc (the spec); if missing, tell the user to run `/sbce new <bc-name>` first and stop.
 2. Detect the composed stack skill from `AGENTS.md`/`README`; ask once if it cannot be inferred.
-3. Run the stack's test loop. Green **and** no structural gap → stop and report "already converged".
-4. Else read the gap and close it: invoke `/bce` (invariants) + the stack skill (idioms) to implement each undeclared boundary op as a method, add a test per untested statement id (`Rn.m`), and write code to pass them.
+3. Run the stack's test loop. Green **and** no structural gap **in either direction** → stop and report "already converged".
+4. Else read the gap — both directions — and close it:
+   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test; then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
+   - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and stop on it. The spec is the source of truth, so the user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 
 Green build + no structural drift is the only definition of done.
@@ -141,7 +143,7 @@ Green build + no structural drift is the only definition of done.
 
 - Every statement uses `shall` and is mandatory **and** tested — no `SHOULD`/`MAY` gradation (the oracle is binary); express optionality with the `Where` (optional-feature) pattern.
 - Ids are **stable**: never renumber on reorder; a removed id is retired, not reused.
-- Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and bijective, so a new `Rn.m` with no test is a detectable gap. The trace form is the stack skill's call (an `r1_2…` method, an `@requirement("R1.2")` tag, a system-test or Playwright name); SBCE only requires the id be grep-visible.
+- Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and **bijective both ways**: a new `Rn.m` with no test is a gap, and a method, trace id, or `entity` type with no spec counterpart is inverse drift (surfaced, never absorbed into the spec). The trace form is the stack skill's call (an `r1_2…` method, an `@requirement("R1.2")` tag, a system-test or Playwright name); SBCE only requires the id be grep-visible.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
 ## Reference spec
