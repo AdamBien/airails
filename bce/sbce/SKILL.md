@@ -40,6 +40,28 @@ checkout                                    # the BC name == the only identity
   lives in. No `capability` field, no dotted path, no `bc` field. An optional `status: archived`
   line marks a frozen contract; nothing auto-sets it.
 
+## System doc (base package)
+
+One altitude above the BC specs sits an **optional** system doc — the base package's
+`package-info.java` (Java) / `app/src/package-info.md` (web). Each BC spec answers *what this one
+boundary promises*; the system doc answers the questions that **span** BCs and have no other home.
+It is the same idea one level up: co-located with the code, no separate registry, no `specs/` tree.
+
+It holds only **cross-BC** concerns:
+
+- **Charter** — one sentence for the whole assembly, symmetric with each BC's one-liner.
+- **Composition** — *this system's* concrete wiring: which BC may call which, which integration events cross boundaries. A single BC spec is deliberately blind to its neighbours, so this is their only home. (`/bce` owns the *generic* layering rules; the system doc owns the *concrete* dependencies.)
+- **System invariants** — cross-cutting EARS `shall` statements no single BC owns.
+- **Ubiquitous language** — shared domain nouns defined once, so each BC's `## Entities` stays terse.
+- **Stack binding** — the composed stack skill + package base, so `apply` reads it instead of re-inferring from `AGENTS.md`/`README`.
+
+Guard:
+
+- Optional and additive — a one-BC system needs no system doc; add a section only when a real cross-BC concern appears.
+- **Never duplicate a BC's own one-liner.** A hand-maintained BC index drifts and breaks the single-source-of-truth rule — *the gap is read, not stored*. If you want a BC map, mark it **generated** and regenerate it from the per-BC docs; never hand-type it.
+- It is not a tasks file and not a gap registry — the gap is still read on demand from `spec` vs `BC`.
+- Author it from the bundled `references/system-doc-template.md` — `///` Markdown in Java, plain Markdown in web.
+
 ## Determinism boundary
 
 | Concern | Owner | Deterministic? |
@@ -97,6 +119,7 @@ Only then author.
 2. **Propose** a BC set — each entry tagged **new** (coin a BC name from its verb-noun core) or **extend-existing**, each with the one-line responsibility it owns (its slice of the feature).
 3. **Confirm the carving with the user before any write** — decomposition has no test oracle, so the human approves the BC set.
 4. Realise each entry through the BC-name steps above: a **new** BC gets a fresh package doc + dirs; an **extend-existing** BC gets the new boundary ops / EARS requirements added to its **single** existing package doc (never a second spec).
+5. If the carving introduces **cross-BC wiring** (one BC now calls another, a shared noun, a system invariant), record it in the system doc (base package, see "System doc") — user-confirmed, never duplicating any BC's one-liner.
 
 Guard: one capability ≡ one BC — output is always 1..N package-doc specs, each 1:1 with a BC; a feature is ephemeral input, never a persisted artifact. Clarify until no op or requirement is guessed; confirm the carving (and any coined name) before writing; extend the single existing package doc, never fork a parallel one; never hand-write a tasks file; never write BC source here; never overwrite without confirmation.
 
