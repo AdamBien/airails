@@ -13,7 +13,7 @@ or folder (web) the doc lives in. The stack skill owns the location (package bas
 Rules for filling it in:
 
 - Stack-neutral. No transport, no types, no framework verbs, no *how* — only what the boundary promises.
-- No frontmatter — the BC name comes from the location. An optional `status: archived` line marks a frozen contract; nothing auto-sets it.
+- No frontmatter — the BC name comes from the location.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
 - Every boundary op traces to a requirement group (`Rn`); every requirement is ≥1 EARS statement, and **each statement carries a stable id `Rn.m`** that ≥1 test embeds in its trace — so the spec↔test binding is per-statement and bijective. Ids are stable: never renumber on reorder; a removed statement's id is retired, not reused.
 - Keep it minimal — an empty `## Out of scope` is fine, but the heading stays to keep the boundary sharp.

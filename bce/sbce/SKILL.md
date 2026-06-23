@@ -33,7 +33,6 @@ checkout                                      # BC name == the only identity
 - `## Boundary` op ↔ one `boundary` entry-point method.
 - `## Requirements` (EARS) ↔ behaviour **and** the tests covering it.
 - `## Entities` ↔ the `entity` layer.
-- An optional `status: archived` line, directly below the one-line responsibility, marks a frozen contract; nothing auto-sets it.
 
 ## System doc (base package)
 
