@@ -10,7 +10,7 @@ strictly.
 ## Guiding principles
 
 - The spec **is** the boundary contract — *what the boundary promises*, never *how*.
-- The spec **lives in the BC's package doc** — `package-info.java` (Java, `///` Markdown) or `package-info.md` (web) — co-located with the code it governs. There is no separate `specs/` tree and no hand-typed package coordinate.
+- The spec **lives in the BC's package doc** — `package-info.java` (Java, `///` Markdown) or `package-info.md` (web) — co-located with the code it governs. There is no separate `specs/` tree and no hand-typed package coordinate. In Java the `///` doc renders via `javadoc`, so the same file is source-of-truth *and* published contract.
 - One capability spec ≡ one business component, named the same. No translation between "what" and "where".
 - The task list is the **gap**, read off `spec` vs `BC` on demand — never a hand-maintained tasks file.
 - One spec per capability, the single source of truth — never diff or merge two specs.
@@ -110,14 +110,14 @@ here; never overwrite without confirmation.
 Make reality match the declared spec — the "make it so" step. Idempotent.
 
 1. Locate the package doc (the spec); if missing, tell the user to run `/sbce new <bc-name>` first and stop.
-2. Detect the composed stack skill from `AGENTS.md`/`README`; ask once if it cannot be inferred.
+2. Resolve the composed stack skill in order: the system doc's `Stack` line if present, else `AGENTS.md`/`README`, else ask once.
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → stop and report "already converged".
 4. Else read the gap — both directions — and close it:
    - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test; then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
    - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and stop on it. The spec is the source of truth, so the user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 
-Green build + no structural drift is the only definition of done.
+Green build + no structural gap or drift is the only definition of done.
 
 ## Composition
 
@@ -144,6 +144,7 @@ Green build + no structural drift is the only definition of done.
 - Every statement uses `shall` and is mandatory **and** tested — no `SHOULD`/`MAY` gradation (the oracle is binary); express optionality with the `Where` (optional-feature) pattern.
 - Ids are **stable**: never renumber on reorder; a removed id is retired, not reused.
 - Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and **bijective both ways**: a new `Rn.m` with no test is a gap, and a method, trace id, or `entity` type with no spec counterpart is inverse drift (surfaced, never absorbed into the spec). The trace form is the stack skill's call (an `r1_2…` method, an `@requirement("R1.2")` tag, a system-test or Playwright name); SBCE only requires the id be grep-visible.
+- The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
 ## Reference spec
