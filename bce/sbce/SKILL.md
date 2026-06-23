@@ -143,7 +143,7 @@ Green build + no structural gap or drift is the only definition of done.
 
 - Every statement uses `shall` and is mandatory **and** tested — no `SHOULD`/`MAY` gradation (the oracle is binary); express optionality with the `Where` (optional-feature) pattern.
 - Ids are **stable**: never renumber on reorder; a removed id is retired, not reused.
-- Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and **bijective both ways**: a new `Rn.m` with no test is a gap, and a method, trace id, or `entity` type with no spec counterpart is inverse drift (surfaced, never absorbed into the spec). The trace form is the stack skill's call (an `r1_2…` method, an `@requirement("R1.2")` tag, a system-test or Playwright name); SBCE only requires the id be grep-visible.
+- Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and **bijective both ways**: a new `Rn.m` with no test is a gap, and a method, trace id, or `entity` type with no spec counterpart is inverse drift (surfaced, never absorbed into the spec). The trace form is the stack skill's call (an `r1_2…` method, a `@requirement R1.2` JavaDoc tag on the test, a system-test or Playwright name); SBCE only requires the id be grep-visible.
 - The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
