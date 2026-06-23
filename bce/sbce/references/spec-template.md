@@ -15,7 +15,7 @@ Rules for filling it in:
 - Stack-neutral. No transport, no types, no framework verbs, no *how* — only what the boundary promises.
 - No frontmatter — the BC name comes from the location. An optional `status: archived` line marks a frozen contract; nothing auto-sets it.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
-- Every boundary op traces to a requirement group (`Rn`); every requirement is ≥1 EARS statement, and every EARS statement traces to ≥1 test.
+- Every boundary op traces to a requirement group (`Rn`); every requirement is ≥1 EARS statement, and **each statement carries a stable id `Rn.m`** that ≥1 test embeds in its trace — so the spec↔test binding is per-statement and bijective. Ids are stable: never renumber on reorder; a removed statement's id is retired, not reused.
 - Keep it minimal — an empty `## Out of scope` is fine, but the heading stays to keep the boundary sharp.
 
 Requirements are written in [EARS](https://alistairmavin.com/ears/) — each statement fits one
@@ -44,10 +44,10 @@ The Markdown body (this is the whole spec):
 - `cancel-order` — withdraw an unfulfilled order
 
 ## Requirements
-<!-- EARS statements (the system is the BC); group related ones under a titled Rn; every boundary op traces to a requirement; every statement traces to >=1 test -->
+<!-- EARS statements (the system is the BC); group related ones under a titled Rn; give each statement a stable id Rn.m; every boundary op traces to a group; every statement id traces to >=1 test that embeds it -->
 ### R1: Place an order
-- When a cart with at least one item is submitted, the BC shall create and confirm an order.
-- If the cart is empty, then the BC shall reject the request.
+- R1.1 — When a cart with at least one item is submitted, the BC shall create and confirm an order.
+- R1.2 — If the cart is empty, then the BC shall reject the request.
 
 ## Entities (optional)
 <!-- stateful domain nouns this BC owns — names only, no fields, no types -->

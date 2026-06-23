@@ -15,7 +15,7 @@ Rules for filling it in:
 - **Cross-BC only.** Anything that belongs to a single boundary stays in that BC's spec.
 - **Never duplicate a BC's one-liner.** A hand-maintained BC index drifts and breaks the single-source-of-truth rule — *the gap is read, not stored*. If you want a BC map, mark it **generated** and regenerate it from the per-BC docs; never hand-type it.
 - **Composition is concrete wiring**, not generic rules — `/bce` owns BCE layering and naming bans; the system doc owns *this system's* allowed dependencies and integration events.
-- **System invariants** are EARS `shall` statements (the system is the assembly, not one BC). Same six patterns as a BC spec.
+- **System invariants** are EARS `shall` statements (the system is the assembly, not one BC). Same six patterns as a BC spec, and the same traceability: each carries a stable id `Sn` that ≥1 test embeds, so the spec↔test binding stays bijective at system altitude too.
 - **Ubiquitous language** defines shared nouns once, so each BC's `## Entities` stays terse — names plus a one-line meaning, no fields, no types.
 - It is not a tasks file and not a gap registry.
 
@@ -31,8 +31,8 @@ The Markdown body (this is the whole system doc — every section optional excep
 - `payment` is reached only via `checkout`'s `place-order`.
 
 ## System invariants
-<!-- cross-cutting EARS `shall` statements no single BC owns; the system is the assembly -->
-- The system shall never expose an unconfirmed order outside `checkout`.
+<!-- cross-cutting EARS `shall` statements no single BC owns; the system is the assembly; each carries a stable id Sn that >=1 test embeds -->
+- S1 — The system shall never expose an unconfirmed order outside `checkout`.
 
 ## Ubiquitous language
 <!-- shared domain nouns, defined once; names + one-line meaning, no fields, no types -->

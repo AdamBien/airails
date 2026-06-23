@@ -70,7 +70,7 @@ Guard:
 | Decompose a feature into BCs (new vs existing) | this skill's judgment, over a read-only scan of the source tree's package docs, **user-confirmed** | no — semantic |
 | Author the spec content (boundary ops, EARS requirements) | this skill's judgment | no — semantic |
 | Place the BC — package doc + layer dirs at the source location | the composed stack skill (owns the package base / source root) | yes — stack-defined |
-| Structural sync (op→method, requirement→test present) | this skill, made checkable by the stack's traceability convention | grep-level |
+| Structural sync (op→method, each `Rn.m` statement → test present) | this skill, made checkable by the stack's traceability convention | grep-level |
 | "Does this code satisfy the requirement" | this skill's judgment, **grounded by the requirement's passing test** | no — semantic |
 
 Rules:
@@ -130,7 +130,7 @@ Make reality match the declared spec — the kubectl/terraform "make it so" step
 1. Locate the BC's package doc (the spec — `package-info.java` / `package-info.md`); if missing, tell the user to run `/sbce new <bc-name>` first and stop.
 2. Detect the composed stack skill from `AGENTS.md`/`README` (here `java-cli-app`); ask once if it cannot be inferred.
 3. Run the stack's test loop. If it is green **and** the structural sync step finds no gap, stop — idempotent no-op; report "already converged".
-4. Else read the gap and close it: invoke `/bce` (invariants) + the stack skill (code idioms) to implement each undeclared boundary op as a method, add a traceable test per untested requirement, and write code to make the tests pass. The spec already lives in the package doc beside the code, so the intention stays co-located.
+4. Else read the gap and close it: invoke `/bce` (invariants) + the stack skill (code idioms) to implement each undeclared boundary op as a method, add a traceable test per untested statement id (`Rn.m`), and write code to make the tests pass. The spec already lives in the package doc beside the code, so the intention stays co-located.
 5. Re-run the test loop. Repeat steps 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 
 Guard: green build + no structural drift is the only definition of done; never self-certify; never bake in a stack or runner — ask the stack skill "are you green?".
@@ -145,7 +145,7 @@ run stack test loop + structural sync
 
 - Bounded: at most 3 passes, then surface remaining failures/drift to the user.
 - The sole termination condition is **green build with no structural drift**.
-- Each pass closes concrete gaps: an undeclared boundary op → add its method; a requirement with no test → add a traceable test; a failing test → fix the code.
+- Each pass closes concrete gaps: an undeclared boundary op → add its method; a statement id `Rn.m` with no test → add a test tracing that id; a failing test → fix the code.
 
 ## Composition
 
@@ -159,7 +159,7 @@ run stack test loop + structural sync
 
 - Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, `## Out of scope`.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
-- Requirements are [EARS](https://alistairmavin.com/ears/) statements — one of six patterns, the system is always **the BC**. Group related statements under a titled `### Rn`. Use the unwanted-behaviour (`If…then`) and state-driven (`While…`) patterns to capture error and edge cases.
+- Requirements are [EARS](https://alistairmavin.com/ears/) statements — one of six patterns, the system is always **the BC**. Group related statements under a titled `### Rn`, and give **each statement a stable id `Rn.m`** (group `n`, statement `m` within it). Use the unwanted-behaviour (`If…then`) and state-driven (`While…`) patterns to capture error and edge cases.
 
   | Pattern | Template |
   |---|---|
@@ -171,8 +171,9 @@ run stack test loop + structural sync
   | Complex | `While <precondition>, when <trigger>, the BC shall <response>.` |
 
 - Every EARS statement uses `shall` and is mandatory **and** tested. No `SHOULD`/`MAY` gradation (RFC 2119) — the test oracle is binary, so express optionality with the `Where` (optional-feature) pattern, never a weaker keyword.
-- Every boundary op traces to a requirement group; every EARS statement traces to ≥1 test.
-- The **form** of the statement→test trace is the stack skill's call — an `r1…` method name for `zunit`, a system-test name, an `@requirement` tag, a Playwright spec. SBCE only requires the trace exist and be grep-visible.
+- Ids are **stable**: never renumber a statement on reorder; a removed statement's id is retired, not reused. This keeps every test's trace valid across edits and makes the gap a pure id-set difference.
+- Every boundary op traces to a requirement group `Rn`; every EARS statement `Rn.m` traces to ≥1 test whose trace **embeds that exact id** — so the binding is per-statement and bijective, not per-group. A new `Rn.m` with no matching test is therefore a detectable gap even when its group already has tests.
+- The **form** of the statement→test trace is the stack skill's call — a method name embedding the id (`r1_1…` for `zunit`), a system-test name, an `@requirement("R1.1")` tag, a Playwright spec. SBCE only requires the id appear in the trace and be grep-visible.
 - Stack-neutral throughout: no types, no transports, no framework verbs, no *how*.
 
 ## Reference spec
@@ -190,12 +191,12 @@ In Java the spec is `src/main/java/airhacks/checkout/package-info.java`, written
 ///
 /// ## Requirements
 /// ### R1: Place an order
-/// - When a cart with at least one item is submitted, the BC shall create and confirm an order.
-/// - If the cart is empty, then the BC shall reject the request.
+/// - R1.1 — When a cart with at least one item is submitted, the BC shall create and confirm an order.
+/// - R1.2 — If the cart is empty, then the BC shall reject the request.
 ///
 /// ### R2: Cancel an order
-/// - While an order is unfulfilled, the BC shall allow it to be cancelled.
-/// - If the order is already fulfilled, then the BC shall reject the cancellation.
+/// - R2.1 — While an order is unfulfilled, the BC shall allow it to be cancelled.
+/// - R2.2 — If the order is already fulfilled, then the BC shall reject the cancellation.
 ///
 /// ## Entities
 /// - Order, Cart
@@ -209,7 +210,7 @@ package airhacks.checkout;
 The BC name `checkout` comes from the package — no frontmatter. The web equivalent is
 `app/src/checkout/package-info.md` with the same Markdown, minus the `///` prefixes. The stack
 skill places `boundary`/`control`/`entity` beside the doc with `placeOrder`/`cancelOrder` in the
-boundary, and a test tracing each EARS statement under R1, R2.
+boundary, and a test per statement id (`R1.1`, `R1.2`, `R2.1`, `R2.2`) whose trace embeds that id.
 
 ## What NOT to do
 
