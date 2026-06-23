@@ -49,13 +49,12 @@ The Markdown body (this is the whole spec):
 - R1.1 — When a cart with at least one item is submitted, the BC shall create and confirm an order.
 - R1.2 — If the cart is empty, then the BC shall reject the request.
 
-## Entities (optional)
-<!-- stateful domain nouns this BC owns — names only, no fields, no types -->
+## Entities
+<!-- optional — stateful domain nouns this BC owns; names only, no fields, no types; omit the whole section if none -->
 - Order, Cart
 
 ## Out of scope
-<!-- what this BC deliberately does not do -->
--
+<!-- what this BC deliberately does not do; keep the heading even when empty, to keep the boundary sharp -->
 ```
 
 In **Java**, prefix every line with `///` and end the file with the package declaration:
