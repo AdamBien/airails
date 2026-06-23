@@ -96,6 +96,21 @@ void main(String... args) throws Exception {
 }
 ```
 
+## Convenience Scripts for an Existing java-cli-app or JAR
+
+When asked for an executable convenience script for a `/java-cli-app` project or an existing JAR, do not replicate the application's logic in the script. The script stays a single-file source script whose `main` calls into the JAR's classes. Instead:
+
+- Keep source-file mode and add the JAR to the classpath in the same shebang — both are required so the source file compiles and can resolve the app's classes:
+
+```
+#!/usr/bin/env -S java --source 25 -cp /path/to/app.jar
+```
+
+- This is the one sanctioned exception to the "never add classpath entries to the shebang" rule under [Zero Dependencies](#zero-dependencies) — it applies only when wrapping an existing app, never for standalone scripts
+- Delegate to the existing functionality by calling the app's public API. Only fall back to invoking its `main(String[])` when no other entry point exists — calling `main` directly re-runs the app's startup banner and argument parsing
+- If the existing code is not callable from a single-file launcher (e.g., no accessible entry point, tightly coupled logic), recommend refactoring the `java-cli-app` to expose a public API or executable entry point rather than duplicating its behavior in the script
+- Never copy or paraphrase the application's logic into the convenience script
+
 ## Zero Dependencies
 
 - Only use the `java.base` module and standard JDK modules
