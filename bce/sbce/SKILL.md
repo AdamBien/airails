@@ -101,9 +101,7 @@ a guessed spec makes the oracle verify assumptions, not intent.
 4. Realise each entry via the BC-name steps: **new** → fresh doc + dirs; **extend-existing** → add ops / requirements to its **single** existing doc, never a second spec.
 5. If the carving introduces cross-BC wiring (a call, a shared noun, a system invariant), record it in the system doc — user-confirmed.
 
-Guard: output is always 1..N package-doc specs, each 1:1 with a BC; a feature is ephemeral input,
-never persisted. Confirm the carving and any coined name before writing; never write BC source
-here; never overwrite without confirmation.
+Guard: one capability ≡ one BC — output is 1..N package-doc specs, never a persisted feature artifact.
 
 ### apply — converge
 
