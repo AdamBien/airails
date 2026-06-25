@@ -48,6 +48,7 @@ Manage installed skills:
 
 ### BCE
 
+- [**sbce**](bce/sbce) — Spec-driven BCE ([sbce.space](https://sbce.space)): one capability spec equals one business component, the package doc is the boundary contract, driving declare → converge against the stack's test loop
 - [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
 
