@@ -1,6 +1,6 @@
 # sbce
 
-An [AIrails.dev](https://airails.dev) skill for **SBCE** (pronounced *"space"*) — Spec-driven
+An [AIrails.dev](https://airails.dev) skill for **[SBCE](https://sbce.space)** (pronounced *"space"*) — Spec-driven
 BCE — the workflow where one capability spec equals one business component (same name) and the
 spec is the boundary contract. One slash-invocable skill, two modes: `new → apply`
 (declare → converge).
@@ -11,6 +11,7 @@ spec is the boundary contract. One slash-invocable skill, two modes: `new → ap
   - **new** (declare) — author the spec into the BC's package doc (`package-info.java` / `package-info.md`) and scaffold the BC's empty `boundary/control/entity` dirs. Accepts a BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
 - The identity is the **BC name** (`checkout`); the spec **is** the BC's package doc, co-located with the code — Java: `package-info.java` (`///` Markdown, [JEP 467](https://openjdk.org/jeps/467)), web: `package-info.md`. No separate `specs/` tree
+- An **optional system doc** one altitude up — the base package's `package-info` — holds cross-BC concerns that have no other home: a one-line charter, the concrete BC-to-BC wiring and integration events, system-wide invariants, shared vocabulary, and the composed stack. Add it only when a real cross-cutting concern appears; a one-BC system needs none
 - Stack-neutral — owns only the workflow and the spec↔BC mapping; no transport, types, or framework verbs in a spec
 - No binary required: the **stack's own test loop is the oracle for "done"**.
 ## Composition
@@ -42,8 +43,11 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
    package doc per BC. Fill in the spec: boundary operations, requirements as EARS statements.
    Format: [references/spec-template.md](references/spec-template.md).
 2. **Converge** — `/sbce apply checkout`
-   Closes the gap (boundary methods, a test per EARS statement, the code) and loops the stack's
-   tests until green. Idempotent — re-run any time; an in-sync, green BC is a no-op.
+   Reads the gap **both directions** and closes it, bounded to ≤3 passes: *spec→code* adds the
+   missing boundary methods, a traceable test per EARS id, and the code to pass them; *code→spec*
+   surfaces drift — an undeclared method, an orphan trace id, an `entity` type absent from the spec
+   — for you to declare or delete, never silently absorbed into the spec. Loops the stack's tests
+   until green. Idempotent — re-run any time; an in-sync, green BC is a no-op.
 
 Omit the mode and the skill infers it: a BC name or a feature description with no spec yet →
 `new`; spec exists but not green → `apply`.
