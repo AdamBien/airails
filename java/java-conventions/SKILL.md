@@ -90,7 +90,6 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - never over-engineer; ask before adding optional features, extension points, or abstractions
 - code must be as simple, elegant, and understandable as possible
 - always choose the simplest API — prefer higher-level, concise APIs over verbose low-level ones
-- when multiple approaches exist, use the one with the fewest lines of code
 - prefer multiple simpler lines to one complex line
 - prefer text blocks (`"""`) over `+`-concatenated multi-line strings
 - prefer `String.formatted()` (instance) over `String.format(...)` (static) for readability at the call site
