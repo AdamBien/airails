@@ -34,7 +34,6 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - place facades in the boundary package
 - health checks must be placed in the boundary package
 - @Transactional is only allowed in boundary layer
-- a boundary must not call another BC's boundary — boundaries own the transaction, so boundary-to-boundary cascades transactions; call the other BC's control, which joins the current transaction
 - if there is no Boundary stereotype, use ApplicationScope instead
 
 ## Control Layer
