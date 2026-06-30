@@ -111,7 +111,7 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 2. Resolve the composed stack skill in order: the system doc's `Stack` line if present, else `AGENTS.md`/`README`, else ask once.
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → stop and report "already converged".
 4. Else read the gap — both directions — and close it:
-   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test; then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
+   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test (delegate the EARS→table transform to `/ears-tests` — one parameterized test per `### Rn`, one labeled row per `Rn.m`); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
    - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and stop on it. The spec is the source of truth, so the user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 
