@@ -12,7 +12,7 @@ spec is the boundary contract. One slash-invocable skill, two modes: `new → ap
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
 - The identity is the **BC name** (`checkout`); the spec **is** the BC's package doc, co-located with the code — Java: `package-info.java` (`///` Markdown, [JEP 467](https://openjdk.org/jeps/467)), web: `package-info.md`. No separate `specs/` tree
 - An **optional system doc** one altitude up — the base package's `package-info` — holds cross-BC concerns that have no other home: a one-line charter, an optional aspirational vision, the concrete BC-to-BC wiring and integration events, system-wide invariants, shared vocabulary, and the composed stack. Add it only when a real cross-cutting concern appears; a one-BC system needs none. Template: [references/system-doc-template.md](references/system-doc-template.md)
-- An **optional top-level `README.md`** — a human on-ramp that *projects* the specs: a generated block (charter, vision, BC map) regenerated on `apply` between the `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->` markers, plus hand-maintained sections no spec covers (`## Conventions` for project-local standards, build/run via the stack skill). Never a source of truth. It also **doubles as the optional inception seed** `/sbce new` (no argument) reads to bootstrap the vision and specs. Template: [references/readme-template.md](references/readme-template.md)
+- An **optional top-level `README.md`** — a human on-ramp that *projects* the specs: a generated block (charter, vision, BC map) regenerated on `apply` inside `<!-- sbce:generated -->` markers, plus hand-maintained sections no spec covers (`## Conventions` for project-local standards, build/run via the stack skill). Never a source of truth. It also **doubles as the optional inception seed** `/sbce new` (no argument) reads to bootstrap the vision and specs. Template: [references/readme-template.md](references/readme-template.md)
 - Stack-neutral — owns only the workflow and the spec↔BC mapping; no transport, types, or framework verbs in a spec
 - No binary required: the **stack's own test loop is the oracle for "done"**.
 ## Composition
@@ -42,9 +42,7 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
    (`package-info.java` as `///` Markdown, or `package-info.md` in web) and asks the stack skill to
    scaffold the BC's `boundary/control/entity` dirs. A feature description scans existing BCs,
    proposes a set (new ones + existing to extend) for you to confirm, then authors/extends one
-   package doc per BC. Fill in the spec: boundary operations, requirements as EARS statements — each
-   requirement (or boundary op) may carry an optional trailing `_(why: …)_` capturing the
-   rule's origin (rationale, not contract — never traced or tested).
+   package doc per BC. Fill in the spec: boundary operations, requirements as EARS statements.
    Format: [references/spec-template.md](references/spec-template.md).
 2. **Converge** — `/sbce apply checkout`
    Reads the gap **both directions** and closes it, bounded to ≤3 passes: *spec→code* adds the
