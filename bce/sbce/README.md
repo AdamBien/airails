@@ -12,6 +12,7 @@ spec is the boundary contract. One slash-invocable skill, two modes: `new → ap
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
 - The identity is the **BC name** (`checkout`); the spec **is** the BC's package doc, co-located with the code — Java: `package-info.java` (`///` Markdown, [JEP 467](https://openjdk.org/jeps/467)), web: `package-info.md`. No separate `specs/` tree
 - An **optional system doc** one altitude up — the base package's `package-info` — holds cross-BC concerns that have no other home: a one-line charter, an optional aspirational vision, the concrete BC-to-BC wiring and integration events, system-wide invariants, shared vocabulary, and the composed stack. Add it only when a real cross-cutting concern appears; a one-BC system needs none. Template: [references/system-doc-template.md](references/system-doc-template.md)
+- An **optional top-level `README.md`** — a human on-ramp that *projects* the specs: a generated block (charter, vision, BC map) regenerated on `apply` inside `<!-- sbce:generated -->` markers, plus hand-maintained sections no spec covers (`## Conventions` for project-local standards, build/run via the stack skill). Never a source of truth. Template: [references/readme-template.md](references/readme-template.md)
 - Stack-neutral — owns only the workflow and the spec↔BC mapping; no transport, types, or framework verbs in a spec
 - No binary required: the **stack's own test loop is the oracle for "done"**.
 ## Composition

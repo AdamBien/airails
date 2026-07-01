@@ -51,6 +51,18 @@ only when a real cross-BC concern appears; a one-BC system needs none. Author fr
 Never duplicate a BC's one-liner — a hand-typed BC index drifts; the gap is read, not stored. For
 a BC map, mark it **generated** and regenerate it from the per-BC docs.
 
+## Top-level README (optional projection)
+
+An **optional** repo-root `README.md` — a human on-ramp that is a **projection of the specs, not a
+source of truth**. Author from `references/readme-template.md`. Two slices, handled oppositely:
+
+- **Generated** (never hand-edited) — the system doc's Charter + Vision + a BC map (each BC name, its `>` one-liner, a link to its `package-info`), fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`. This is the "mark it generated, regenerate from the per-BC docs" rule made concrete at repo altitude.
+- **Hand-maintained** (outside the markers, since no spec covers it — so it can't drift): `## Conventions`, build/run/test delegated to the stack skill, plus free-form meta (license, links, motivation).
+
+- Never hand-write capability / charter / vision / BC content into the README — it is generated; hand-typing it recreates the drift SBCE bans.
+- `## Conventions` is the home for **project-specific, non-behavioral standards** (coverage target, "money is always cents", review policy): **declared, not verified** — no `Sn`, no test — and distinct from a `System invariant`, which must be behavioral *and* tested.
+- Optional: a one-BC project needs none. No markers → `apply` leaves the README untouched.
+
 ## Determinism boundary
 
 | Concern | Owner | Deterministic? |
@@ -61,6 +73,7 @@ a BC map, mark it **generated** and regenerate it from the per-BC docs.
 | Place the BC — package doc + layer dirs at the source location | the composed stack skill (owns the package base / source root) | yes — stack-defined |
 | Structural sync, **both directions** (spec→code: op→method, `Rn.m`→test · code→spec: method→op, test-id→statement, entity→`## Entities`) | this skill, made checkable by the stack's traceability convention | grep-level |
 | "Does this code satisfy the requirement" | this skill's judgment, **grounded by the requirement's passing test** | no — semantic |
+| Regenerate the README generated block (Charter/Vision/BC map) from the package docs | this skill | yes — mechanical projection |
 
 - Ask the stack skill "are you green?" — never name a runner or test kind, and never self-certify convergence.
 
