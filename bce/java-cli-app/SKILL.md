@@ -26,6 +26,7 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 - Use https://github.com/AdamBien/zb to create executable JARs — no Maven or Gradle required
 - Build by running `zb.sh` in the project root — it compiles all `.java` files from `src/main/java/` and packages them into `zbo/app.jar`
 - Run with `java -jar zbo/app.jar`
+- Offer to generate an executable launcher script with the `/java-cli-script` skill so the app runs by name instead of `java -jar zbo/app.jar`
 - Never use `--enable-preview` — Java 25 is a GA release, all features used here are standard
 - Source files use the `.java` extension and live in the project directory
 
