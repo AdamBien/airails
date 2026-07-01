@@ -42,6 +42,7 @@ only when a real cross-BC concern appears; a one-BC system needs none. Author fr
 `references/system-doc-template.md`.
 
 - **Charter** — one sentence for the whole assembly.
+- **Vision** *(optional)* — one aspirational sentence: the outcome the assembly chases. Rationale, not contract — no `Sn`, no test; the single non-verifiable line in the doc, and the deliberate exception to the traceability invariant.
 - **Components** — this system's concrete wiring: which BC may call which, which integration events cross boundaries (`/bce` owns the generic layering; this owns the concrete dependencies).
 - **System invariants** — cross-cutting EARS `shall` statements (id `Sn`) no single BC owns.
 - **Ubiquitous language** — shared domain nouns defined once, so each BC's `## Entities` stays terse.
