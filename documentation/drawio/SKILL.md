@@ -75,6 +75,7 @@ Color them by adding `fillColor=#ffffff;strokeColor=<layer-border>;`. Typical ic
 - black font color for all labels
 - do not use italic font
 - connection labels must be without shadow
+- connection labels must use `fontSize=16;`
 
 ## XML Structure
 
@@ -109,7 +110,7 @@ Minimal skeleton — every `.drawio` file must follow this hierarchy:
         <mxCell id="3" value="Payments" style="rounded=1;whiteSpace=wrap;html=1;shadow=1;arcSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;fontSize=13;fontStyle=0;" vertex="1" parent="1">
           <mxGeometry x="380" y="200" width="160" height="60" as="geometry"/>
         </mxCell>
-        <mxCell id="4" value="charges" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#000000;fontColor=#000000;fontSize=11;fontStyle=0;endArrow=block;endFill=1;shadow=0;" edge="1" source="2" target="3" parent="1">
+        <mxCell id="4" value="charges" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;strokeColor=#000000;fontColor=#000000;fontSize=16;fontStyle=0;endArrow=block;endFill=1;shadow=0;" edge="1" source="2" target="3" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
       </root>
