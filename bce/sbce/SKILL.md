@@ -42,7 +42,7 @@ only when a real cross-BC concern appears; a one-BC system needs none. Author fr
 `references/system-doc-template.md`.
 
 - **Charter** — one sentence for the whole assembly.
-- **Vision** *(optional)* — one aspirational sentence: the outcome the assembly chases. Rationale, not contract — no `Sn`, no test; the single non-verifiable line in the doc, and the deliberate exception to the traceability invariant.
+- **Vision** *(optional)* — one aspirational sentence: the outcome the assembly chases. Rationale, not contract — no `Sn`, no test; the single non-verifiable line in the doc, and the deliberate exception to the traceability invariant. May be proposed by `/sbce new` distilling a README seed (human accepts/edits).
 - **Components** — this system's concrete wiring: which BC may call which, which integration events cross boundaries (`/bce` owns the generic layering; this owns the concrete dependencies).
 - **System invariants** — cross-cutting EARS `shall` statements (id `Sn`) no single BC owns.
 - **Ubiquitous language** — shared domain nouns defined once, so each BC's `## Entities` stays terse.
@@ -59,7 +59,8 @@ source of truth**. Author from `references/readme-template.md`. Two slices, hand
 - **Generated** (never hand-edited) — the system doc's Charter + Vision + a BC map (each BC name, its `>` one-liner, a link to its `package-info`), fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`. This is the "mark it generated, regenerate from the per-BC docs" rule made concrete at repo altitude.
 - **Hand-maintained** (outside the markers, since no spec covers it — so it can't drift): `## Conventions`, build/run/test delegated to the stack skill, plus free-form meta (license, links, motivation).
 
-- Never hand-write capability / charter / vision / BC content into the README — it is generated; hand-typing it recreates the drift SBCE bans.
+- Never hand-write capability / charter / vision / BC content **into the generated block** — it is projected from the specs; hand-typing it there recreates the drift SBCE bans. (Free-form vision/intent framing in the seed prose *outside* the markers is fine — it seeds, it doesn't duplicate the canonical line.)
+- **Doubles as the inception seed.** The hand-written prose outside the markers is what `/sbce new` (no argument) reads to bootstrap vision + specs (see `new`); SBCE reads it, never rewrites it.
 - `## Conventions` is the home for **project-specific, non-behavioral standards** (coverage target, "money is always cents", review policy): **declared, not verified** — no `Sn`, no test — and distinct from a `System invariant`, which must be behavioral *and* tested.
 - Optional: a one-BC project needs none. No markers → `apply` leaves the README untouched.
 
@@ -85,9 +86,10 @@ split it.
 
 ### new — declare
 
-Declare a new feature from either a **BC name** (one precise BC) or a **natural-language feature
-description** (which may decompose into one *or several* BCs, new or existing). The novelty is the
-*intent*, not the artifact — coining a BC and extending one are both "new".
+Declare a new feature from a **BC name** (one precise BC), a **natural-language feature
+description** (which may decompose into one *or several* BCs, new or existing), or the **repo
+README seed** (`/sbce new` with no argument). The novelty is the *intent*, not the artifact —
+coining a BC and extending one are both "new".
 
 **Clarify first (both paths).** Resolve every ambiguity the contract needs before authoring. Vague
 input (`"store a session with title, description, conference, date"`) hides scope and edge cases —
@@ -114,6 +116,16 @@ a guessed spec makes the oracle verify assumptions, not intent.
 3. **Confirm the carving before any write** — decomposition has no test oracle, so the human approves the BC set.
 4. Realise each entry via the BC-name steps: **new** → fresh doc + dirs; **extend-existing** → add ops / requirements to its **single** existing doc, never a second spec.
 5. If the carving introduces cross-BC wiring (a call, a shared noun, a system invariant), record it in the system doc — user-confirmed.
+
+**README seed** (`/sbce new`, no argument):
+
+The repo-root `README.md` doubles as an optional **inception seed** — a human (often a product
+owner or analyst) writes free-form intent there and SBCE bootstraps from it. Read only the
+hand-written prose **outside** the `sbce:generated` markers.
+
+1. Treat the seed prose as the **feature description** and run the feature-description steps above (scan → propose carving → confirm → author), with the clarify loop filling every gap the prose leaves.
+2. Additionally **propose a `## Vision` line** distilled from the seed; the human accepts or edits it — never author it silently.
+3. The seed is **inception input, not a source of truth**: once specs exist they are authoritative; the seed prose stays human-owned and is not kept in sync. Re-running `/sbce new` simply re-reads it and re-proposes through the same confirm-first path.
 
 Guard: one capability ≡ one BC — output is 1..N package-doc specs, never a persisted feature artifact.
 

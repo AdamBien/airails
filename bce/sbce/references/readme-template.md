@@ -11,11 +11,13 @@ It has two slices, handled oppositely:
 - **Generated** — everything derivable from the specs (charter, vision, the BC map). Regenerated on
   `apply`; **never hand-edited**.
 - **Hand-maintained** — only what *no spec covers*, so it cannot drift from one: project-local
-  standards, build/run/test, and free-form meta.
+  standards, build/run/test, free-form meta, and the free-form **inception seed** (motivation,
+  domain, intent) that `/sbce new` reads.
 
 Rules for filling it in:
 
-- **Projection, not source.** Never hand-write capability, charter, vision, or BC content into the README — that lives in the specs and is *generated* here. Hand-typing it recreates the drift SBCE bans (*"the gap is read, not stored"*).
+- **Projection, not source (the generated block).** Never hand-write capability, charter, vision, or BC content **into the generated block** — that lives in the specs and is projected here; hand-typing it there recreates the drift SBCE bans (*"the gap is read, not stored"*).
+- **Doubles as the seed.** The hand-written sections outside the markers are the free-form inception **seed** `/sbce new` (no argument) reads to bootstrap vision + specs. Rich vision/intent framing is welcome here — it *seeds* the distilled `## Vision`, it isn't the canonical line. SBCE reads the seed, never rewrites it; once specs exist they are the source of truth.
 - **The generated slice is fenced** by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`. `apply` replaces only what is between the markers and preserves everything outside. **No markers → `apply` leaves the README untouched** — a README is opt-in, never forced.
 - **Generated content** = the system doc's **Charter** + **Vision** (if present) + a **BC map**: each BC name, its `>` responsibility one-liner, and a link to its `package-info`. Read from the per-BC docs — the *"mark it generated, regenerate it"* rule made concrete at repo altitude.
 - **Hand-maintained content** = only what no spec covers:
