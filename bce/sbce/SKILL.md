@@ -156,6 +156,7 @@ Green build + no structural gap or drift is the only definition of done.
 - Every statement uses `shall` and is mandatory **and** tested — no `SHOULD`/`MAY` gradation (the oracle is binary); express optionality with the `Where` (optional-feature) pattern.
 - Ids are **stable**: never renumber on reorder; a removed id is retired, not reused.
 - Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and **bijective both ways**: a new `Rn.m` with no test is a gap, and a method, trace id, or `entity` type with no spec counterpart is inverse drift (surfaced, never absorbed into the spec). The trace form is the stack skill's call (an `r1_2…` method, a `@requirement R1.2` JavaDoc tag on the test, a system-test or Playwright name); SBCE only requires the id be grep-visible.
+- **Optional `why`.** Any `Rn.m` statement (or boundary op) may carry a trailing `_(why: …)_` — terse *origin/intent* for the rule. **Rationale, not contract**: non-verified (the oracle ignores it), **not a trace target** (the statement still needs its test; a `why` is never drift), and **bound to its id** (retires with the statement, never orphans; the `Rn.m` prefix stays first so id-grep is unaffected). Capture *why the rule exists*, never *how it currently works* — immutable origin, not a description to re-sync.
 - The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
@@ -175,7 +176,7 @@ In Java the spec is `src/main/java/airhacks/checkout/package-info.java`, written
 /// ## Requirements
 /// ### R1: Place an order
 /// - R1.1 — When a cart with at least one item is submitted, the BC shall create and confirm an order.
-/// - R1.2 — If the cart is empty, then the BC shall reject the request.
+/// - R1.2 — If the cart is empty, then the BC shall reject the request. _(why: empty carts were the top source of phantom orders)_
 ///
 /// ### R2: Cancel an order
 /// - R2.1 — While an order is unfulfilled, the BC shall allow it to be cancelled.
