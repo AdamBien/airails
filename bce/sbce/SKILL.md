@@ -172,36 +172,8 @@ Green build + no structural gap or drift is the only definition of done.
 
 ## Reference spec
 
-In Java the spec is `src/main/java/airhacks/checkout/package-info.java`, written as `///` Markdown
-(JEP 467):
-
-```java
-/// # Checkout
-/// > Accept a cart and turn it into a confirmed, cancellable order.
-///
-/// ## Boundary
-/// - `place-order` — submit a cart for fulfilment
-/// - `cancel-order` — withdraw an unfulfilled order
-///
-/// ## Requirements
-/// ### R1: Place an order
-/// - R1.1 — When a cart with at least one item is submitted, the BC shall create and confirm an order.
-/// - R1.2 — If the cart is empty, then the BC shall reject the request. _(why: empty carts were the top source of phantom orders)_
-///
-/// ### R2: Cancel an order
-/// - R2.1 — While an order is unfulfilled, the BC shall allow it to be cancelled.
-/// - R2.2 — If the order is already fulfilled, then the BC shall reject the cancellation.
-///
-/// ## Entities
-/// - Order, Cart
-///
-/// ## Out of scope
-/// - payment capture
-/// - shipping
-package airhacks.checkout;
-```
-
-The BC name `checkout` comes from the package — no frontmatter. The web equivalent is
-`app/src/checkout/package-info.md` with the same Markdown, minus the `///` prefixes. The stack
-skill places `boundary`/`control`/`entity` beside the doc with `placeOrder`/`cancelOrder` in the
-boundary, and a test per statement id (`R1.1`, `R1.2`, `R2.1`, `R2.2`) whose trace embeds that id.
+The worked example — a `checkout` BC — lives in `references/spec-template.md`. The chain it
+illustrates: the BC name comes from the package/folder, no frontmatter; the stack skill places
+`boundary`/`control`/`entity` beside the doc; each boundary op becomes one boundary method
+(`place-order` → `placeOrder`); each statement id (`R1.1`, `R2.2`, …) gets a test whose trace
+embeds that id.

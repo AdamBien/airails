@@ -20,18 +20,9 @@ Rules for filling it in:
 - Keep it minimal — an empty `## Out of scope` is fine, but the heading stays to keep the boundary sharp.
 
 Requirements are written in [EARS](https://alistairmavin.com/ears/) — each statement fits one
-of six patterns, and the system is always **the BC**. Reach for the unwanted-behaviour
-(`If…then`) and state-driven (`While…`) patterns to capture the error and edge cases that
-otherwise go unwritten and untested.
-
-| Pattern | Template |
-|---|---|
-| Ubiquitous | `The BC shall <response>.` |
-| State-driven | `While <precondition>, the BC shall <response>.` |
-| Event-driven | `When <trigger>, the BC shall <response>.` |
-| Optional-feature | `Where <feature is included>, the BC shall <response>.` |
-| Unwanted-behaviour | `If <trigger>, then the BC shall <response>.` |
-| Complex | `While <precondition>, when <trigger>, the BC shall <response>.` |
+of the six patterns tabled in SKILL.md's "Spec format rules", and the system is always **the
+BC**. Reach for the unwanted-behaviour (`If…then`) and state-driven (`While…`) patterns to
+capture the error and edge cases that otherwise go unwritten and untested.
 
 The Markdown body (this is the whole spec):
 
@@ -49,6 +40,10 @@ The Markdown body (this is the whole spec):
 ### R1: Place an order
 - R1.1 — When a cart with at least one item is submitted, the BC shall create and confirm an order.
 - R1.2 — If the cart is empty, then the BC shall reject the request. _(why: empty carts were the top source of phantom orders)_
+
+### R2: Cancel an order
+- R2.1 — While an order is unfulfilled, the BC shall allow it to be cancelled.
+- R2.2 — If the order is already fulfilled, then the BC shall reject the cancellation.
 
 ## Entities
 <!-- optional — stateful domain nouns this BC owns; names only, no fields, no types; omit the whole section if none -->
