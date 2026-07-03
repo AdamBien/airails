@@ -54,6 +54,37 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 Omit the mode and the skill infers it: a BC name or a feature description with no spec yet →
 `new`; spec exists but not green → `apply`.
 
+## Example Prompts
+
+Each line below is a **complete prompt**: mode + BC name (or feature description) plus optional
+free-form instructions that steer how the skill runs the mode — within its rules (confirm-first,
+spec as source of truth, the stack's test loop as oracle).
+
+- `/sbce new [BC name] — author the spec from the existing code as ground truth; flag anything that looks like a bug rather than intent instead of speccing it.`
+
+  Brownfield adoption: reverse-engineer the spec for a BC that already has code but no package
+  doc. The steering text grounds the clarify loop in the code instead of Q&A, and suspected bugs
+  are surfaced for the user to decide — never silently codified as requirements.
+
+- `/sbce new "let a customer check out a cart"`
+
+  Feature declaration: decompose the description into BCs (new + existing to extend), confirm the
+  carving, then author one package-doc spec per BC.
+
+- `/sbce new`
+
+  Inception: bootstrap the vision and initial specs from the hand-written prose in the top-level
+  `README.md` seed.
+
+- `/sbce apply [BC name]`
+
+  Converge: read the spec↔code gap in both directions, close it, and loop the stack's tests until
+  green.
+
+- `/sbce apply [BC name] — report the gap only; list undeclared methods, orphan trace ids, and untested requirements without changing anything.`
+
+  Dry run: the steering text limits `apply` to the gap report, deferring the converge step.
+
 ## Test
 
 ```
