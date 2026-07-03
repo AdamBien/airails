@@ -56,12 +56,11 @@ a BC map, mark it **generated** and regenerate it from the per-BC docs.
 An **optional** repo-root `README.md` — a human on-ramp that is a **projection of the specs, not a
 source of truth**. Author from `references/readme-template.md`. Two slices, handled oppositely:
 
-- **Generated** (never hand-edited) — the system doc's Charter + Vision, a BC map (each BC name, its `>` one-liner, a link to its `package-info`), and a **Mermaid diagram of the declared `## Components` wiring**, fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`. This is the "mark it generated, regenerate from the per-BC docs" rule made concrete at repo altitude.
+- **Generated** (never hand-edited) — the system doc's Charter + Vision, a BC map (each BC name, its `>` one-liner, a link to its `package-info`), and a **Mermaid diagram of the declared `## Components` wiring**, fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`.
 - **Hand-maintained** (outside the markers, since no spec covers it — so it can't drift): `## Conventions`, build/run/test delegated to the stack skill, plus free-form meta (license, links, motivation).
 
-- Never hand-write capability / charter / vision / BC content **into the generated block** — it is projected from the specs; hand-typing it there recreates the drift SBCE bans. (Free-form vision/intent framing in the seed prose *outside* the markers is fine — it seeds, it doesn't duplicate the canonical line.)
 - **Doubles as the inception seed.** The hand-written prose outside the markers is what `/sbce new` (no argument) reads to bootstrap vision + specs (see `new`); SBCE reads it, never rewrites it.
-- **Components diagram — projection, never inference.** Render only the *declared* wiring in the system doc's `## Components` (allowed calls + integration events) as a Mermaid graph: nodes are BCs, edges the declared directed relationships. **Never infer edges by scanning code** — that is discovery, not projection, and drift-prone; it also doubles as a check (declared-vs-actual coupling is drift SBCE already surfaces). No `## Components` (a one-BC system) → nodes only, or omit. Basic Mermaid `flowchart`/`graph` syntax (version-stable, corpus-dense); delegate diagram style to `/mermaid` or `/bce-diagrams`.
+- **Components diagram — projection, never inference.** Render only the *declared* wiring in the system doc's `## Components` (allowed calls + integration events) as a Mermaid graph: nodes are BCs, edges the declared directed relationships. **Never infer edges by scanning code** — that is discovery, not projection, and drift-prone. No `## Components` (a one-BC system) → nodes only, or omit. Basic Mermaid `flowchart`/`graph` syntax (version-stable, corpus-dense); delegate diagram style to `/mermaid` or `/bce-diagrams`.
 - `## Conventions` is the home for **project-specific, non-behavioral standards** (coverage target, "money is always cents", review policy): **declared, not verified** — no `Sn`, no test — and distinct from a `System invariant`, which must be behavioral *and* tested.
 - Optional: a one-BC project needs none. No markers → `apply` leaves the README untouched.
 
@@ -82,8 +81,7 @@ source of truth**. Author from `references/readme-template.md`. Two slices, hand
 ## Invocation modes: new · apply
 
 Read mode + capability from the invocation (`/sbce apply checkout`). If mode is missing, infer: no
-spec yet → `new`; spec exists but not converged → `apply`; else ask. One skill, two modes — never
-split it.
+spec yet → `new`; spec exists but not converged → `apply`; else ask.
 
 ### new — declare
 
@@ -149,7 +147,6 @@ Green build + no structural gap or drift is the only definition of done.
 - Own the **workflow** and the **spec↔BC mapping**; delegate everything else.
 - BCE layering + naming bans (`*Impl`/`*Service`) → `/bce`. Code idioms + verification → the stack skill.
 - Never duplicate or contradict `/bce` or the stack skill; if either conflicts with a spec, surface it, don't guess.
-- Don't build the `sbce` binary until a headless need is real.
 
 ## Spec format rules
 
