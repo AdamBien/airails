@@ -130,9 +130,12 @@ be able to disagree.
 
 ### Baseline check
 
-Collect the CSS features the stylesheets use and confirm each is Baseline **Widely Available**
-(webstatus.dev, caniuse). A **Newly Available** feature passes only when wrapped in `@supports`
-with a graceful fallback (per the CSS rules above); **Limited availability** fails the loop.
+Classify each CSS feature the stylesheets use by its Baseline status from knowledge — no external
+validation services. A **Widely Available** feature passes; a **Newly Available** feature passes
+only when wrapped in `@supports` with a graceful fallback (per the CSS rules above); **Limited
+availability** fails the loop. One caveat keeps this honest: the DevTools browser is Chrome, so a
+page rendering correctly proves Chrome support, never Baseline — when a feature's status is
+uncertain, report the uncertainty instead of guessing.
 
 ### Green
 
