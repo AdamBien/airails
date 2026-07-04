@@ -1,6 +1,6 @@
 ---
 name: web-static
-description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems
+description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems. Also owns the verification loop for such sites — drives the rendered pages through Chrome DevTools MCP (console, accessibility snapshot, viewport resize, dark/reduced-motion emulation, Lighthouse), executes the checks.md manifest, and audits CSS against Google Baseline. Use when creating or editing static HTML/CSS sites, AND whenever a static site must be verified, audited, or declared green — triggers on "verify the site", "run the checks", "is it green", "lighthouse audit", "baseline check", "checks.md".
 argument-hint: "[description of the website or page to build]"
 ---
 
@@ -82,6 +82,63 @@ project/
 ```
 
 For small sites, a flat structure (HTML + single `style.css` + `images/`) is acceptable.
+
+## Verification Loop (Chrome DevTools MCP)
+
+The site ships with zero tooling, so verification happens from the outside: drive a real browser
+through the Chrome DevTools MCP tools (`chrome-devtools`) and assert against what it renders.
+This loop defines **green** for this stack — when a composed skill (`/sbce`, `/continuous-testing`)
+asks "are you green?", it means exactly this. Never declare a page done from reading its source;
+the rendered page is the oracle. If the `chrome-devtools` MCP tools are unavailable, report the
+loop as not runnable — do not silently skip it or self-certify.
+
+### Serve
+
+Serve the site root with [zws](https://github.com/AdamBien/zws), the zero-dependency single-file
+Java development server: `java zws <site-root>` (serves http://localhost:3000, caching disabled).
+Open pages via `new_page`/`navigate_page`. Verification tooling never ships with the site, so this
+violates no constraint — the no-JS/no-dependency rules govern the artifact, not the harness.
+`file://` URLs work for a single page but break root-relative links; prefer the server.
+`evaluate_script` is permitted for read-only inspection (e.g. `getComputedStyle`) — it runs in
+the test browser, not in the site.
+
+### Standard checks — every page, every run
+
+1. **Console** — `list_console_messages`: no errors, no failed requests (also proves the no-JavaScript constraint holds).
+2. **Structure** — `take_snapshot` (accessibility tree): exactly one `main`, no skipped heading levels, a label on every form input, `aria-label` on each nav when several exist, skip link first in tab order, alt text on every image.
+3. **Responsive** — `resize_page` to 375×667 and 1280×800: the layout adapts, and mobile patterns (hamburger, stacked columns) appear only at the narrow width.
+4. **Preferences** — `emulate` with `colorScheme: dark`: the page restyles. The MCP cannot emulate reduced motion, so check it statically: read-only `evaluate_script` over `document.styleSheets` (or a source grep) confirms the `prefers-reduced-motion: reduce` query exists and neutralizes animations/transitions.
+5. **Lighthouse** — `lighthouse_audit` (covers accessibility, best-practices, SEO — not performance): accessibility = 100 (includes WCAG AA contrast), best-practices and SEO ≥ 90. When performance is in question, run `performance_start_trace` and judge Core Web Vitals — on request, not part of standard green.
+
+### Project checks — checks.md
+
+Site-specific behavior lives in `checks.md` at the site root (one per BC directory when composed
+with `/bce`): one labeled line per check, mechanically executable — exact URL, viewport, and
+expected observation, resolved with the same MCP tools.
+
+```markdown
+# Checks
+- [nav-mobile] / at 375px: snapshot contains button "Menu"; nav links hidden until checked
+- [R1.2] /catalog/ at 1280px: every workshop is an <article> containing a <time>
+```
+
+Labels are stable identifiers — never renumber, retire instead of reuse. When composed with
+`/sbce`, the label **is** the requirement id (`R1.2`), which makes the spec↔check trace
+grep-visible — all `/sbce` needs. Write each check as an observation the browser can contradict
+("snapshot contains button 'Menu'"), never as a judgment ("menu looks right") — the next run must
+be able to disagree.
+
+### Baseline check
+
+Collect the CSS features the stylesheets use and confirm each is Baseline **Widely Available**
+(webstatus.dev, caniuse). A **Newly Available** feature passes only when wrapped in `@supports`
+with a graceful fallback (per the CSS rules above); **Limited availability** fails the loop.
+
+### Green
+
+Green = standard checks pass on every page, every `checks.md` line passes, and the Baseline check
+passes. Report per check — label → pass/fail with the observed evidence — then fix and re-run.
+Anything less than all-green is red; there is no "mostly green".
 
 ## What NOT to Do
 
