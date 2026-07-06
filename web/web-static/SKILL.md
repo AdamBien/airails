@@ -1,10 +1,16 @@
 ---
 name: web-static
-description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems. Also owns the verification loop for such sites — drives the rendered pages through Chrome DevTools MCP (console, accessibility snapshot, viewport resize, dark/reduced-motion emulation, Lighthouse), executes the checks.md manifest, and audits CSS against Google Baseline. Use when creating or editing static HTML/CSS sites, AND whenever a static site must be verified, audited, or declared green — triggers on "verify the site", "run the checks", "is it green", "lighthouse audit", "baseline check", "checks.md".
+description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems. Also owns the verification loop for such sites — drives the rendered pages through Chrome DevTools MCP (console, accessibility snapshot, viewport resize, dark/reduced-motion emulation, Lighthouse), executes the checks.md manifest, and audits CSS against Google Baseline. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Not for applications needing client-side state, routing, or JavaScript — use `web-components` for those. Use when creating or editing static HTML/CSS sites, AND whenever a static site must be verified, audited, or declared green — triggers on "verify the site", "run the checks", "is it green", "lighthouse audit", "baseline check", "checks.md".
 argument-hint: "[description of the website or page to build]"
 ---
 
 Build or maintain a static website using $ARGUMENTS. Apply all rules below strictly.
+
+## Composition
+
+Compose with `/web-conventions` — it provides the baseline rules for semantic HTML, accessibility,
+modern CSS, design tokens, and the Baseline browser-support policy. Rules in this skill override it.
+For applications that need client-side state, routing, or JavaScript, use `/web-components` instead.
 
 ## Hard Constraints
 
@@ -16,31 +22,15 @@ Build or maintain a static website using $ARGUMENTS. Apply all rules below stric
 
 ## HTML Rules
 
-- Semantic elements over generic `<div>`/`<span>` — use `<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>`, `<footer>`, `<figure>`, `<time>`, `<address>`
-- One `<main>` per page
-- Proper heading hierarchy (h1 → h2 → h3, no skipping)
-- `lang` attribute on `<html>`
-- `alt` on all images (empty `alt=""` for decorative)
-- `aria-label` on `<nav>` when multiple navs exist
-- `<label>` associated with every form input
-- Skip link for keyboard users
-- Use `<a>` for navigation, not buttons
-- Use `<br>` only for line breaks in content, never for spacing
+HTML semantics, heading hierarchy, labels, and skip links follow `/web-conventions`.
 
 ## CSS Rules
 
-- Use CSS custom properties for theming (`--color-primary`, `--spacing-unit`, etc.)
-- Use logical properties (`margin-block`, `padding-inline`, `inline-size`, `block-size`)
+Design tokens, logical properties, modern CSS features, accessibility, and the Baseline policy
+follow `/web-conventions`. This stack adds:
+
 - Mobile-first responsive design with `min-width` breakpoints
-- Use modern features: CSS nesting, container queries, cascade layers, subgrid, `oklch()` colors
-- Use `clamp()` for fluid typography
-- Prefer `gap` over margins for spacing in flex/grid layouts
-- Include `prefers-reduced-motion: reduce` and `prefers-color-scheme: dark` media queries
 - Use `content-visibility: auto` for off-screen sections
-- WCAG AA color contrast minimum (4.5:1)
-- Always maintain visible `:focus-visible` indicators
-- Use `@supports` for feature detection when applying Baseline Newly Available features, providing a graceful fallback for older browsers
-- When recommending a newer CSS feature, cite its Baseline status (Widely Available, Newly Available, or Limited) so the reader can judge browser support
 
 ## CSS Reset Baseline
 
@@ -132,7 +122,7 @@ be able to disagree.
 
 Classify each CSS feature the stylesheets use by its Baseline status from knowledge — no external
 validation services. A **Widely Available** feature passes; a **Newly Available** feature passes
-only when wrapped in `@supports` with a graceful fallback (per the CSS rules above); **Limited
+only when wrapped in `@supports` with a graceful fallback (per the `/web-conventions` Baseline policy); **Limited
 availability** fails the loop. One caveat keeps this honest: the DevTools browser is Chrome, so a
 page rendering correctly proves Chrome support, never Baseline — when a feature's status is
 uncertain, report the uncertainty instead of guessing.
@@ -145,9 +135,9 @@ Anything less than all-green is red; there is no "mostly green".
 
 ## What NOT to Do
 
-- Do not use tables for layout
-- Do not use `<br>` for spacing
-- Do not use non-semantic `<div>` when a semantic element exists
+In addition to the `/web-conventions` prohibitions (layout tables, `<br>` spacing, non-semantic
+`<div>`, inline styles):
+
 - Do not use `onclick` or any inline event handlers
 - Do not add JavaScript for interactions achievable with CSS
 - Do not use CSS frameworks or preprocessors

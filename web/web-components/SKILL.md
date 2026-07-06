@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Architecture and coding rules for single-page applications using web components, BCE layering, lit-html templating, Redux Toolkit state management, and client-side routing. Web standards and web platform first, minimal external dependencies. Use when creating, scaffolding, generating, writing, or reviewing web component applications, custom elements, state management, client-side routing, or frontend BCE architecture. Not for server-side rendering or framework-heavy applications.
+description: Architecture and coding rules for single-page applications using web components, BCE layering, lit-html templating, Redux Toolkit state management, and client-side routing. Web standards and web platform first, minimal external dependencies. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Use when creating, scaffolding, generating, writing, or reviewing web component applications, custom elements, state management, client-side routing, or frontend BCE architecture. Not for server-side rendering or framework-heavy applications, and not for static content sites without client-side state — use `web-static` for those.
 ---
 
 Build or maintain a web component application using $ARGUMENTS. Apply all rules below strictly.
@@ -12,6 +12,13 @@ Build or maintain a web component application using $ARGUMENTS. Apply all rules 
 - no frameworks — use the platform: custom elements, ES modules, import maps
 - no build step required for development — bundling is only for packaging third-party dependencies
 - progressive enhancement over JavaScript-first design
+
+## Composition
+
+Compose with `/web-conventions` — it provides the baseline rules for semantic HTML, accessibility,
+modern CSS, design tokens, and the Baseline browser-support policy. Rules in this skill override it
+(e.g. Bulma utility classes, container-query-first responsiveness). For static content sites without
+client-side state, use `/web-static` instead.
 
 ## Reference Implementation
 
@@ -236,6 +243,10 @@ router.setRoutes([
 
 ## CSS Rules
 
+Design tokens, logical properties, modern CSS features, accessibility, and the Baseline policy
+follow `/web-conventions`. This stack adds:
+
+- align design-token custom properties with Bulma's CSS variables (`--bulma-primary`, …) where they are overridden
 - use CSS Grid for page-level layout with named grid areas
 - use container queries (`@container`) over media queries for responsive design
 - set `container-type: inline-size` on `body`
