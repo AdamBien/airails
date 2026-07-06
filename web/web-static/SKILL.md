@@ -18,7 +18,7 @@ For applications that need client-side state, routing, or JavaScript, use `/web-
 - **No external dependencies** — no frameworks, libraries, CDNs, or package managers
 - **No build systems** — no transpilation, bundling, preprocessing, Sass, Less, or Tailwind
 - **No inline styles** — all CSS in separate `.css` files
-- **Baseline 2025** — only use CSS features widely available across modern browsers
+- **Baseline compliance** — CSS features per the `/web-conventions` Baseline policy, enforced by the verification loop below
 
 ## HTML Rules
 
