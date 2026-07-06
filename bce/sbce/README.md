@@ -17,12 +17,15 @@ spec is the boundary contract. One slash-invocable skill, two modes: `new → ap
 - No binary required: the **stack's own test loop is the oracle for "done"**.
 ## Composition
 
-`sbce` owns only the workflow and the spec↔BC mapping; it delegates everything else, so install
-these alongside it (all ship via airails `installSkills`):
+`sbce` is technology-agnostic: the only architecture it relies on are the [`bce`](../bce)
+principles. It owns the workflow and the spec↔BC mapping; it delegates everything else, so
+install these alongside it (all ship via airails `installSkills`):
 
-- [`bce`](../bce) — architecture invariants (BCE layering, naming).
+- [`bce`](../bce) — the technology-neutral architecture contract (BCE layering, naming) every
+  spec and BC is held against.
 - [`ears-tests`](../ears-tests) — the EARS→table-driven test transform; turns each `Rn.m` into one labeled row, preserving the spec↔test trace.
-- a **stack skill** — code idioms *and* verification: [`java-cli-app`](../java-cli-app)
+- a **stack skill** — a technology-specific *implementation* of the `bce` principles, adding
+  code idioms *and* verification: [`java-cli-app`](../java-cli-app)
   (`zunit`/`zb`), [`microprofile-server`](../microprofile-server) (integration + system tests),
   or [`web-components`](../web-components) (system tests + Playwright).
 
