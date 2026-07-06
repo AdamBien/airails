@@ -1,6 +1,6 @@
 ---
 name: web-conventions
-description: Generic, composable web platform conventions — semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy that apply across all web frontends (static sites, web component SPAs). Technology-neutral within the web platform; meant to be composed with context-specific skills (e.g. `web-static`, `web-components`). Use when writing, generating, or reviewing HTML or CSS anywhere the composed skill does not already specify a rule. Triggers on "web conventions", "semantic HTML", "accessibility review", "modern CSS", "design tokens", "Baseline status", or any request to write or review HTML/CSS where context-specific skills do not already cover it.
+description: Generic, composable web platform conventions — semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy that apply across all web frontends (static sites, web component SPAs). Technology-neutral within the web platform; meant to be composed with context-specific skills (e.g. `web-static`, `web-components`). Use when writing, generating, or reviewing HTML or CSS anywhere the composed skill does not already specify a rule. Triggers on "web conventions", "semantic HTML", "accessibility review", "modern CSS", "design tokens", "DESIGN.md", "Baseline status", or any request to write or review HTML/CSS where context-specific skills do not already cover it. Also use when a project contains a DESIGN.md that should guide HTML/CSS generation.
 ---
 
 Apply all rules below strictly to any HTML and CSS you write, generate, or review.
@@ -51,6 +51,9 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 - define design tokens as CSS custom properties on `:root` — colors, spacing, typography, radii
 - component and page rules reference tokens, never raw values
 - CSS custom properties are the token source of truth — do not adopt the DTCG token JSON format or token-translation tooling (Style Dictionary, Terrazzo, etc.)
+- when a `DESIGN.md` exists at the project root, read it before writing or reviewing any CSS — it declares the design intent: palette, typography, spacing scale, and component rules, with the reasoning behind them
+- `DESIGN.md` is context, not a build input: never generate CSS from it mechanically, and never edit it to match the CSS — it is human/tool-owned
+- when `:root` tokens contradict `DESIGN.md`, surface the drift and let the user decide which side changes — never silently pick one
 
 ## Baseline Policy
 
