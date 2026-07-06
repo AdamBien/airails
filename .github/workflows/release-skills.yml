@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           gh release delete skills --yes --cleanup-tag || true
           gh release create skills target/*.zip \
-            --title "skills ($(date -u +%Y-%m-%d))" \
+            --title "skills ($(date -u +%Y.%m.%d))" \
             --notes "Per-agent skill zips built from ${GITHUB_SHA}.
 
           Install by unzipping into your home directory, e.g.:
