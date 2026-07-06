@@ -1,24 +1,20 @@
 # web-conventions
 
-Generic, composable web platform conventions: semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy.
+Generic, composable web platform conventions: semantic HTML, accessibility, modern CSS, custom-property design tokens, and the Baseline browser-support policy.
 
-## Role
+## Composition
 
-This skill is the shared baseline for the stack-specific web skills:
+Shared baseline for the stack-specific web skills — both compose this skill:
 
-- **web-static** — no-JavaScript static sites (adds hard constraints, CSS-only interactivity, and the Chrome DevTools verification loop)
-- **web-components** — web component SPAs (adds BCE architecture, lit-html, Redux Toolkit, Vaadin Router, and Playwright testing)
+- [web-static](../web-static) — no-JavaScript static sites; adds hard constraints, CSS-only interactivity, and the Chrome DevTools verification loop
+- [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, Vaadin Router, and Playwright testing
 
-Both compose this skill. When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline.
+When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline. Stack-specific concerns (JavaScript policy, dependencies, responsive strategy, verification) are deliberately out of scope.
 
-## Contents
+## Baseline Policy
 
-- **HTML rules** — semantic elements, heading hierarchy, labels, skip links
-- **Accessibility rules** — WCAG AA contrast, focus indicators, keyboard operability, user-preference media queries
-- **CSS rules** — logical properties, modern features, fluid typography
-- **Design tokens** — CSS custom properties on `:root` as the single token source of truth (no DTCG tooling)
-- **Baseline policy** — Widely Available freely, Newly Available behind `@supports`, Limited never
+Widely Available features may be used freely; Newly Available features require `@supports` with a graceful fallback; Limited availability features are prohibited. Design tokens are CSS custom properties on `:root` — no DTCG token files or translation tooling.
 
 ## Usage
 
-`SKILL.md` can be used as a coding guide for developers or as a skill file for AI coding assistants — standalone for HTML/CSS reviews, or composed with `web-static` / `web-components`.
+`SKILL.md` contains the full ruleset. Use it standalone for HTML/CSS reviews, or composed with `web-static` / `web-components`. It can serve as a coding guide for developers or as a skill file for AI coding assistants.

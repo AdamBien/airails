@@ -43,8 +43,9 @@ Manage installed skills:
 
 ### Web
 
-- [**web-static**](web/web-static) — Modern static websites using semantic HTML and CSS without external dependencies or build systems
-- [**web-components**](web/web-components) — Single-page applications using web components, BCE layering, lit-html, Redux Toolkit, and client-side routing
+- [**web-conventions**](web/web-conventions) — Composable baseline for all web frontends: semantic HTML, accessibility, design tokens, and Baseline browser-support policy
+- [**web-static**](web/web-static) — Modern static websites using semantic HTML and CSS without external dependencies or build systems; composes web-conventions
+- [**web-components**](web/web-components) — Single-page applications using web components, BCE layering, lit-html, Redux Toolkit, and client-side routing; composes web-conventions
 
 ### BCE
 

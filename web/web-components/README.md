@@ -16,7 +16,10 @@ Architecture and coding rules for building single-page applications with web com
 - Minimal external dependencies — only lit-html, Redux Toolkit, and Vaadin Router
 - No frameworks, no build step for development, no Shadow DOM by default
 - Plain ES modules with import maps
-- Composes with the `web-conventions` skill (semantic HTML, accessibility, design tokens, Baseline policy)
+
+## Composition
+
+Composes with [web-conventions](../web-conventions) — the shared baseline for semantic HTML, accessibility, design tokens, and the Baseline browser-support policy. Rules in this skill override it. For static content sites without client-side state, use [web-static](../web-static).
 
 ## Project Structure
 
