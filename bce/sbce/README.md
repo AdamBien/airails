@@ -32,6 +32,35 @@ install these alongside it (all ship via airails `installSkills`):
 `sbce` never names a runner or a test kind; it asks the stack skill "are you green?". The spec
 format and rules live in [SKILL.md](SKILL.md).
 
+```mermaid
+graph TD
+    SBCE([sbce<br>workflow + spec↔BC mapping])
+    BCE([bce<br>architecture contract])
+    EARS([ears-tests<br>EARS→table-driven tests])
+
+    subgraph StackSkills[stack skills]
+        JavaCli([java-cli-app])
+        MicroProfile([microprofile-server])
+        WebComponents([web-components])
+    end
+
+    SBCE -->|relies on| BCE
+    SBCE -->|delegates spec→test| EARS
+    SBCE -->|"are you green?"| StackSkills
+    JavaCli -->|implements| BCE
+    MicroProfile -->|implements| BCE
+    WebComponents -->|implements| BCE
+
+    classDef workflow fill:#dae8fc,stroke:#6c8ebf,color:#000
+    classDef contract fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef transform fill:#e1d5e7,stroke:#9673a6,color:#000
+    classDef stack fill:#fff2cc,stroke:#d6b656,color:#000
+    class SBCE workflow
+    class BCE contract
+    class EARS transform
+    class JavaCli,MicroProfile,WebComponents stack
+```
+
 ## Usage
 
 Invoke `/sbce <mode> <bc-name>` (or just describe the intent — "declare a checkout
