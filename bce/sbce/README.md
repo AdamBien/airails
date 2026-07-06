@@ -68,6 +68,10 @@ capability", "converge this BC to its spec"). Run the lifecycle in order:
 
 1. **Declare** — `/sbce new checkout` *(BC name)* or
    `/sbce new "let a customer check out a cart"` *(feature description)*.
+   The two forms differ by altitude, not workflow: the feature description is **intent-level** —
+   domain language, no architecture presumed, so a PM/BA *or* a dev can drive it and the skill
+   proposes the carving — while the BC name is **structure-level** — a developer entry point
+   where the carving is already decided. Both land on the same artifact: one spec per BC.
    If the input is vague, `new` first **loops clarifying questions until no boundary op or EARS
    requirement has to be guessed** — the spec is the test oracle, so it's never invented from
    ambiguity. A BC name then writes the spec into the BC's package doc
@@ -94,14 +98,14 @@ spec as source of truth, the stack's test loop as oracle).
 
 - `/sbce new [BC name] — author the spec from the existing code as ground truth; flag anything that looks like a bug rather than intent instead of speccing it.`
 
-  Brownfield adoption: reverse-engineer the spec for a BC that already has code but no package
+  Brownfield adoption (structure-level — dev): reverse-engineer the spec for a BC that already has code but no package
   doc. The steering text grounds the clarify loop in the code instead of Q&A, and suspected bugs
   are surfaced for the user to decide — never silently codified as requirements.
 
 - `/sbce new "let a customer check out a cart"`
 
-  Feature declaration: decompose the description into BCs (new + existing to extend), confirm the
-  carving, then author one package-doc spec per BC.
+  Feature declaration (intent-level — PM/BA or dev): decompose the description into BCs (new +
+  existing to extend), confirm the carving, then author one package-doc spec per BC.
 
 - `/sbce new`
 
