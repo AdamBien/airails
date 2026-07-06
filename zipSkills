@@ -1,0 +1,108 @@
+#!/usr/bin/env -S java --source 25
+
+/// Builds one zip per supported AI agent into `target/`, with the agent's
+/// home-relative skill directory baked into the entry paths, so installation
+/// is a single command without a JDK or git:
+///
+/// ```
+/// unzip airails-claude.zip -d ~
+/// ```
+///
+/// Run from the repository root — locally or from the release-skills GitHub
+/// Actions workflow, which publishes `target/*.zip` as release assets. The
+/// `targets()` map and the noise filter mirror `installSkills`, which stays
+/// the managed, interactive install path — when an agent is added there, add
+/// it here too.
+String name = MethodHandles.lookup().lookupClass().getName();
+String version = "2026-07-06.2";
+
+/// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
+record Target(String agent, String prefix) {}
+
+List<Target> targets() {
+    return List.of(
+            new Target("claude", ".claude/skills"),
+            new Target("vibe", ".vibe/skills"),
+            new Target("kiro", ".kiro/skills"),
+            new Target("copilot", ".copilot/skills"),
+            new Target("codex", ".agents/skills"),
+            new Target("goose", ".config/goose/skills")
+    );
+}
+
+void main() throws Exception {
+    IO.println(name + " " + version);
+    var source = Path.of("").toAbsolutePath();
+    var skills = findSkillDirs(source);
+    var skillNames = skills.stream().map(this::skillName).collect(Collectors.joining(", "));
+    IO.println("%s: %d skill(s) in %s: %s".formatted(name, skills.size(), source, skillNames));
+    var output = Files.createDirectories(Path.of("target"));
+    for (var target : targets()) {
+        var zip = zipAgent(target.agent(), target.prefix(), skills, output);
+        IO.println("  %s <- %s".formatted(zip, target.prefix()));
+    }
+    IO.println(name + ": done");
+}
+
+/// One zip whose entries all live under `prefix/<skill>/`, so extracting into
+/// `$HOME` lands the skills exactly where the agent discovers them. Entries
+/// are sorted for reproducible archives.
+Path zipAgent(String agent, String prefix, List<Path> skills, Path output) throws IOException {
+    var zipFile = output.resolve("airails-" + agent + ".zip");
+    try (var zip = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+        for (var skill : skills) {
+            try (var paths = Files.walk(skill)) {
+                for (var file : (Iterable<Path>) paths.filter(Files::isRegularFile).sorted()::iterator) {
+                    var relative = skill.relativize(file);
+                    if (isNoise(relative)) {
+                        continue;
+                    }
+                    zip.putNextEntry(new ZipEntry(prefix + "/" + skillName(skill) + "/" + entryName(relative)));
+                    Files.copy(file, zip);
+                    zip.closeEntry();
+                }
+            }
+        }
+    }
+    return zipFile;
+}
+
+/// Zip entries use `/` regardless of the platform separator.
+String entryName(Path relative) {
+    return relative.toString().replace(File.separatorChar, '/');
+}
+
+/// Skill directories under `root` — the parent of every `SKILL.md`, skipping
+/// dot-directories below `root` (mirrors `installSkills`).
+List<Path> findSkillDirs(Path root) throws IOException {
+    try (var paths = Files.walk(root)) {
+        return paths
+                .filter(this::isSkillFile)
+                .map(Path::getParent)
+                .filter(dir -> isVisible(root, dir))
+                .sorted()
+                .toList();
+    }
+}
+
+boolean isNoise(Path relative) {
+    for (var segment : relative) {
+        var part = segment.toString();
+        if (part.startsWith(".") || part.equals("README.md")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+boolean isVisible(Path root, Path path) {
+    return !root.relativize(path).toString().contains(File.separator + ".");
+}
+
+boolean isSkillFile(Path path) {
+    return path.getFileName().toString().equals("SKILL.md");
+}
+
+String skillName(Path skillDir) {
+    return skillDir.getFileName().toString();
+}

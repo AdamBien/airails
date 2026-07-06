@@ -1,0 +1,58 @@
+# Builds one zip per supported AI agent with the agent's home-relative skill
+# directory baked into the entry paths, so installation is a single command:
+#
+#   unzip airails-claude.zip -d ~
+#
+# The zips are the "no JDK, no questions asked" install tier; ./installSkills
+# remains the managed, interactive path. The agent/prefix matrix and the noise
+# filter live in ./zipSkills, which mirrors targets() and isNoise() in
+# installSkills.
+name: release-skills
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Two rapid pushes must not interleave the delete/recreate of the rolling
+# release — later run supersedes earlier ones.
+concurrency:
+  group: release-skills
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Build per-agent zips
+        run: ./zipSkills
+
+      - name: Publish rolling release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release delete skills --yes --cleanup-tag || true
+          gh release create skills target/*.zip \
+            --title "skills ($(date -u +%Y-%m-%d))" \
+            --notes "Per-agent skill zips built from ${GITHUB_SHA}.
+
+          Install by unzipping into your home directory, e.g.:
+
+          \`\`\`
+          unzip airails-claude.zip -d ~
+          \`\`\`
+
+          Each zip contains the same skills under the agent's directory: claude (.claude/skills), vibe (.vibe/skills), kiro (.kiro/skills), copilot (.copilot/skills), codex (.agents/skills), goose (.config/goose/skills).
+
+          Note: unzipping overwrites existing skills of the same name without asking. For an interactive, managed install use \`./installSkills\` from the cloned repository."
