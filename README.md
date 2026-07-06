@@ -22,6 +22,8 @@ cd airails
 
 The installer finds all skills and prompts before copying to each supported agent directory (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`).
 
+AI agents installing the skills themselves should follow [AGENTS.md](AGENTS.md) — `installSkills` requires an interactive terminal.
+
 Manage installed skills:
 
 ```
