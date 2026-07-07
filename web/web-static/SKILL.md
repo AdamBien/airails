@@ -86,6 +86,8 @@ loop as not runnable — do not silently skip it or self-certify.
 
 Serve the site root with [zws](https://github.com/AdamBien/zws), the zero-dependency single-file
 Java development server: `java zws <site-root>` (serves http://localhost:3000, caching disabled).
+If `zws` is not on the PATH, use the copy bundled with the composed `web-conventions` skill:
+`java <web-conventions skill dir>/scripts/zws <site-root>`.
 Open pages via `new_page`/`navigate_page`. Verification tooling never ships with the site, so this
 violates no constraint — the no-JS/no-dependency rules govern the artifact, not the harness.
 `file://` URLs work for a single page but break root-relative links; prefer the server.

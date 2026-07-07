@@ -1,6 +1,6 @@
 ---
 name: web-conventions
-description: Generic, composable web platform conventions — semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy that apply across all web frontends (static sites, web component SPAs). Technology-neutral within the web platform; meant to be composed with context-specific skills (e.g. `web-static`, `web-components`). Use when writing, generating, or reviewing HTML or CSS anywhere the composed skill does not already specify a rule. Triggers on "web conventions", "semantic HTML", "accessibility review", "modern CSS", "design tokens", "DESIGN.md", "Baseline status", or any request to write or review HTML/CSS where context-specific skills do not already cover it. Also use when a project contains a DESIGN.md that should guide HTML/CSS generation.
+description: Generic, composable web platform conventions — semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy that apply across all web frontends (static sites, web component SPAs). Technology-neutral within the web platform; meant to be composed with context-specific skills (e.g. `web-static`, `web-components`). Use when writing, generating, or reviewing HTML or CSS anywhere the composed skill does not already specify a rule. Triggers on "web conventions", "semantic HTML", "accessibility review", "modern CSS", "design tokens", "DESIGN.md", "Baseline status", "serve the site", "dev server", "zws", or any request to write or review HTML/CSS where context-specific skills do not already cover it. Also use when a project contains a DESIGN.md that should guide HTML/CSS generation, or when a static site root needs to be served locally — this skill bundles zws, the zero-dependency Java dev server, in `scripts/zws`.
 ---
 
 Apply all rules below strictly to any HTML and CSS you write, generate, or review.
@@ -61,6 +61,13 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 - **Newly Available** features require `@supports` feature detection with a graceful fallback for older browsers
 - **Limited availability** features must not be used
 - when recommending a newer CSS feature, cite its Baseline status (Widely Available, Newly Available, or Limited) so the reader can judge browser support
+
+## Bundled Tooling
+
+- `scripts/zws` — a copy of [zws](https://github.com/AdamBien/zws), the zero-dependency single-file Java development server. Serves any static site root on http://localhost:3000 (loopback only, caching disabled, opens the browser). Requires JDK 25+.
+- invocation: `java <this skill's directory>/scripts/zws <site-root>` — prefer a `zws` already on the PATH (the maintained install); the bundled copy is the fallback so composed skills (`web-static` verification loop, `web-components` dev serving) work after a zip-only install.
+- the copy mirrors [AdamBien/zws](https://github.com/AdamBien/zws) — never edit it in place; when upstream changes, re-copy.
+- never serve with `python3 -m http.server` or Node-based dev servers.
 
 ## What NOT to Do
 
