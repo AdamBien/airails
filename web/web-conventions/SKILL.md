@@ -46,6 +46,13 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 - use `clamp()` for fluid typography
 - prefer `gap` over margins for spacing in flex/grid layouts
 
+## Scrolling
+
+- use CSS scroll snap (`scroll-snap-type`, `scroll-snap-align`) for carousels, galleries, and section-based scrolling — never JavaScript scroll hijacking (all scroll snap properties are Baseline Widely Available)
+- pair scroll snap with `scroll-padding` on the container so snapped content clears sticky headers
+- apply `scroll-behavior: smooth` only inside `@media (prefers-reduced-motion: no-preference)`
+- use `overscroll-behavior` to contain scroll chaining in nested scroll areas (modals, drawers)
+
 ## Design Tokens
 
 - define design tokens as CSS custom properties on `:root` — colors, spacing, typography, radii
