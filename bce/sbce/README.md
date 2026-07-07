@@ -27,7 +27,8 @@ install these alongside it (all ship via airails `installSkills`):
 - a **stack skill** — a technology-specific *implementation* of the `bce` principles, adding
   code idioms *and* verification: [`java-cli-app`](../java-cli-app)
   (`zunit`/`zb`), [`microprofile-server`](../microprofile-server) (integration + system tests),
-  or [`web-components`](../web-components) (system tests + Playwright).
+  [`web-components`](../../web/web-components) (system tests + Playwright), or
+  [`web-static`](../../web/web-static) (`checks.md` manifest + Chrome DevTools / Lighthouse).
 
 `sbce` never names a runner or a test kind; it asks the stack skill "are you green?". The spec
 format and rules live in [SKILL.md](SKILL.md).
@@ -42,6 +43,7 @@ graph TD
         JavaCli([java-cli-app])
         MicroProfile([microprofile-server])
         WebComponents([web-components])
+        WebStatic([web-static])
     end
 
     SBCE -->|relies on| BCE
@@ -50,6 +52,7 @@ graph TD
     JavaCli -->|implements| BCE
     MicroProfile -->|implements| BCE
     WebComponents -->|implements| BCE
+    WebStatic -->|implements| BCE
 
     classDef workflow fill:#dae8fc,stroke:#6c8ebf,color:#000
     classDef contract fill:#d5e8d4,stroke:#82b366,color:#000
@@ -58,7 +61,7 @@ graph TD
     class SBCE workflow
     class BCE contract
     class EARS transform
-    class JavaCli,MicroProfile,WebComponents stack
+    class JavaCli,MicroProfile,WebComponents,WebStatic stack
 ```
 
 ## Usage
