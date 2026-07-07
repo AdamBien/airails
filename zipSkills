@@ -14,7 +14,7 @@
 /// the managed, interactive install path — when an agent is added there, add
 /// it here too.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-07-06.2";
+String version = "2026-07-07.1";
 
 /// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
 record Target(String agent, String prefix) {}
@@ -46,10 +46,15 @@ void main() throws Exception {
 
 /// One zip whose entries all live under `prefix/<skill>/`, so extracting into
 /// `$HOME` lands the skills exactly where the agent discovers them. Entries
-/// are sorted for reproducible archives.
+/// are sorted for reproducible archives. Written through the zip filesystem
+/// provider with POSIX attributes enabled, so unix permissions (notably the
+/// exec bit of bundled `scripts/`) survive `unzip`.
 Path zipAgent(String agent, String prefix, List<Path> skills, Path output) throws IOException {
     var zipFile = output.resolve("airails-" + agent + ".zip");
-    try (var zip = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+    // `create=true` opens an existing archive instead of replacing it.
+    Files.deleteIfExists(zipFile);
+    var env = Map.of("create", "true", "enablePosixFileAttributes", "true");
+    try (var zip = FileSystems.newFileSystem(URI.create("jar:" + zipFile.toUri()), env)) {
         for (var skill : skills) {
             try (var paths = Files.walk(skill)) {
                 for (var file : (Iterable<Path>) paths.filter(Files::isRegularFile).sorted()::iterator) {
@@ -57,9 +62,10 @@ Path zipAgent(String agent, String prefix, List<Path> skills, Path output) throw
                     if (isNoise(relative)) {
                         continue;
                     }
-                    zip.putNextEntry(new ZipEntry(prefix + "/" + skillName(skill) + "/" + entryName(relative)));
-                    Files.copy(file, zip);
-                    zip.closeEntry();
+                    var entry = zip.getPath(prefix, skillName(skill), entryName(relative));
+                    Files.createDirectories(entry.getParent());
+                    Files.copy(file, entry);
+                    Files.setPosixFilePermissions(entry, Files.getPosixFilePermissions(file));
                 }
             }
         }
