@@ -30,13 +30,13 @@ Scripts are single-file source-mode programs ([JEP 458](https://openjdk.org/jeps
 
 ## Usage
 
-Invoke via Claude Code:
+Invoke via Claude Code with a description of the script you want:
 
 ```
-/java-cli-script
+/java-cli-script create a health check for port 3000
 ```
 
-Describe the script you want and the skill generates a single file plus installation instructions:
+The skill generates a single file plus installation instructions:
 
 ```bash
 chmod +x scriptname
