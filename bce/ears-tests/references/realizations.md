@@ -44,8 +44,8 @@ drift SBCE surfaces. For a single-statement group, a plain `@Test` named for the
 ## zunit — `java-cli-app`
 
 zunit has no annotations: a "parameterized test" is a **loop over a case list** inside `void main()`,
-each case carrying its `Rn.m` id in the `AssertionError` message (the grep token). Throw on first
-mismatch — zunit treats any thrown exception as failure.
+each case carrying its `Rn.m` id in the `assert` message (the grep token). zunit runs tests with
+`-ea` — a failing `assert` throws, and any thrown exception fails the file on first mismatch.
 
 ```java
 void main() {
@@ -56,9 +56,9 @@ void main() {
     );
     for (var c : cases) {
         var outcome = Checkout.placeOrder(c.cart());             // shared act
-        if (outcome.confirmed() != c.shouldConfirm())           // authored per row
-            throw new AssertionError("%s — expected confirmed=%s but was %s"
-                .formatted(c.req(), c.shouldConfirm(), outcome.confirmed()));
+        assert outcome.confirmed() == c.shouldConfirm()          // authored per row
+            : "%s — expected confirmed=%s but was %s"
+                .formatted(c.req(), c.shouldConfirm(), outcome.confirmed());
     }
 }
 ```

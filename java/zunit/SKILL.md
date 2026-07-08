@@ -30,18 +30,17 @@ void main() {
     // act
     var result = SomeClass.someMethod(input);
 
-    // assert — throw on failure
-    if (!expected.equals(result))
-        throw new AssertionError("expected %s but got %s".formatted(expected, result));
+    // assert
+    assert expected.equals(result) : "expected %s but got %s".formatted(expected, result);
 }
 ```
 
 ## Assertion Style
 
-- No assertion libraries — use plain `if` + `throw`
-- Throw `AssertionError` with a descriptive message including expected and actual values
+- No assertion libraries — use the built-in `assert` statement; zunit runs every test with `-ea`
+- Always attach a descriptive message including expected and actual values: `assert condition : message`
 - One test file can contain multiple assertions — the first failure stops the file
-- For testing exceptions, use try/catch:
+- For testing exceptions, use try/catch and throw `AssertionError` explicitly:
 
 ```java
 void main() {
@@ -53,6 +52,8 @@ void main() {
     }
 }
 ```
+
+Caveat: `assert` only executes with assertions enabled. Running a test file directly requires the flag: `java -ea FooTest.java`.
 
 ## Test Discovery for java-cli-app Projects
 
@@ -88,7 +89,7 @@ zunit auto-detects `zbo/app.jar` as the classpath. Tests import main classes dir
 - Use module imports for non-base modules (e.g., `import module java.net.http;`)
 - Use `var` for local variables
 - Use unnamed class style — `void main()` at top level, helper methods as needed
-- Do not use `IO.println()` for assertions — throw exceptions
+- Do not use `IO.println()` for assertions — use `assert`
 - Printing to stdout is fine for debugging but not required
 
 ## HTTP Client Timeouts
@@ -126,17 +127,14 @@ Generate `test/ConverterTest.java`:
 void main() {
     // freezing point
     var freezing = Converter.toFahrenheit(0);
-    if (freezing != 32)
-        throw new AssertionError("expected 32 but got " + freezing);
+    assert freezing == 32 : "expected 32 but got " + freezing;
 
     // boiling point
     var boiling = Converter.toFahrenheit(100);
-    if (boiling != 212)
-        throw new AssertionError("expected 212 but got " + boiling);
+    assert boiling == 212 : "expected 212 but got " + boiling;
 
     // negative
     var negative = Converter.toFahrenheit(-40);
-    if (negative != -40)
-        throw new AssertionError("expected -40 but got " + negative);
+    assert negative == -40 : "expected -40 but got " + negative;
 }
 ```
