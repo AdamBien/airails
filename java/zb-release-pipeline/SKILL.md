@@ -106,6 +106,10 @@ Summarize for the user:
   `GITHUB_TOKEN`, and `permissions: contents: write` (already in the template) is what
   lets it create releases.
 
+Then offer to generate a launcher with the `/java-cli-script` skill: a single-file,
+PATH-installed Java script that downloads the latest released JAR from the GitHub
+Release and runs it, so the app is invoked by name instead of `java -jar <artifact>`.
+
 ## Notes
 
 - Keep the workflow minimal. Do not add caching, matrices, or test steps unless the user
