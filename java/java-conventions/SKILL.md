@@ -91,7 +91,7 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 - code must be as simple, elegant, and understandable as possible
 - always choose the simplest API — prefer higher-level, concise APIs over verbose low-level ones
 - prefer multiple simpler lines to one complex line
-- prefer text blocks (`"""`) over `+`-concatenated multi-line strings
+- use text blocks (`"""`) for all multiline string content (JSON, SQL, HTML, help/usage text, templates) — never `+`-concatenation or embedded `\n` escapes
 - prefer `String.formatted()` (instance) over `String.format(...)` (static) for readability at the call site
 - prefer imports over fully qualified class names; remove unused imports
 - prefer `Files.readString` / `Files.writeString` / `Files.lines` over `BufferedReader`/`BufferedWriter` ceremony
