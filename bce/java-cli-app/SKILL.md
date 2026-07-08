@@ -7,16 +7,17 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply 
 
 ## Architecture
 
-- **Default: multi-file CLI apps compose with the `/bce` skill.** Feature business components (BCs) are direct children of the project package; `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the project root.
+- **Default: multi-file CLI apps compose with the `/bce` skill.** The package path follows `/bce`'s `[ORGANIZATION].[PROJECT].[BC].[layer]` scheme: the organization package (e.g. `airhacks`) contains the application-level project package (e.g. `zbl`), whose direct children are the feature business components (BCs); `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the application-level package.
   ```
   src/main/java/
-    Main.java                                  # unnamed package, compact source
-    <project>/<bc-a>/{boundary,control,entity}/
-    <project>/<bc-b>/{boundary,control,entity}/
-    <project>/<bc-c>/control/                  # BC may have only the layers it needs
+    Main.java                                              # unnamed package, compact source
+    <organization>/<project>/<bc-a>/{boundary,control,entity}/
+    <organization>/<project>/<bc-b>/{boundary,control,entity}/
+    <organization>/<project>/<bc-c>/control/               # BC may have only the layers it needs
   ```
   - Name BCs after their domain responsibilities (e.g., `auth`, `users`, `billing`), not technical concerns.
-  - If a design doc or input layout places `boundary/control/entity` directly under the project root, flag it as a BCE violation and propose feature BCs before scaffolding.
+  - Reserve the application-level package itself for trivial single-class plumbing (e.g. the `App` entry point); anything with business semantics belongs in a BC — `/bce` owns this rule.
+  - If a design doc or input layout places `boundary/control/entity` directly under the application-level package, flag it as a BCE violation and propose feature BCs before scaffolding.
 - Exception: small single-purpose tools (one screen of logic, no distinct concerns) — keep everything in one unnamed class with top-level methods, no BCs, no packages.
 
 ## Build
