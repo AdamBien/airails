@@ -7,13 +7,13 @@ Architecture and coding rules for building single-page applications with web com
 - **Custom Elements** via `BElement` base class with automatic Redux integration
 - **lit-html** for templating and efficient DOM rendering
 - **Redux Toolkit** for predictable state management
-- **Vaadin Router** for client-side routing
+- **Navigation API + URLPattern** for standards-based client-side routing — no router dependency
 - **BCE layering** (Boundary / Control / Entity) organized by feature module
 
 ## Principles
 
 - Web standards and web platform first
-- Minimal external dependencies — only lit-html, Redux Toolkit, and Vaadin Router
+- Minimal external dependencies — only lit-html and Redux Toolkit
 - No frameworks, no build step for development, no Shadow DOM by default
 - Plain ES modules with import maps
 
@@ -27,7 +27,8 @@ Composes with [web-conventions](../web-conventions) — the shared baseline for 
 app/src/
 ├── BElement.js          # base class for all custom elements
 ├── store.js             # Redux store configuration
-├── app.js               # entry point, routing, persistence
+├── router.js            # standards-based router (Navigation API + URLPattern)
+├── app.js               # entry point, route configuration, persistence
 ├── index.html           # single HTML entry point
 ├── libs/                # bundled third-party ESM modules
 └── [feature]/

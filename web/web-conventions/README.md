@@ -7,7 +7,7 @@ Generic, composable web platform conventions: semantic HTML, accessibility, mode
 Shared baseline for the stack-specific web skills — both compose this skill:
 
 - [web-static](../web-static) — no-JavaScript static sites; adds hard constraints, CSS-only interactivity, and the Chrome DevTools verification loop
-- [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, Vaadin Router, and Playwright testing
+- [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, standards-based routing (Navigation API + URLPattern), and Playwright testing
 
 When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline. Stack-specific concerns (JavaScript policy, dependencies, responsive strategy, verification) are deliberately out of scope.
 

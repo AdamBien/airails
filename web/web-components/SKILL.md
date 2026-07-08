@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Architecture and coding rules for single-page applications using web components, BCE layering, lit-html templating, Redux Toolkit state management, and client-side routing. Web standards and web platform first, minimal external dependencies. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Use when creating, scaffolding, generating, writing, or reviewing web component applications, custom elements, state management, client-side routing, or frontend BCE architecture. Not for server-side rendering or framework-heavy applications, and not for static content sites without client-side state — use `web-static` for those.
+description: Architecture and coding rules for single-page applications using web components, BCE layering, lit-html templating, Redux Toolkit state management, and standards-based client-side routing (Navigation API + URLPattern). Web standards and web platform first, minimal external dependencies. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Use when creating, scaffolding, generating, writing, or reviewing web component applications, custom elements, state management, client-side routing, or frontend BCE architecture. Not for server-side rendering or framework-heavy applications, and not for static content sites without client-side state — use `web-static` for those.
 ---
 
 Build or maintain a web component application using $ARGUMENTS. Apply all rules below strictly.
@@ -26,11 +26,13 @@ This skill is based on the [bce.design](https://github.com/AdamBien/bce.design) 
 
 ## Allowed Dependencies
 
-Only these three runtime dependencies are permitted. Do not add others without explicit approval:
+Only these two runtime dependencies are permitted. Do not add others without explicit approval:
 
 1. **lit-html** — templating and efficient DOM rendering
 2. **Redux Toolkit** — predictable state management with unidirectional data flow
-3. **Vaadin Router** — client-side routing via History API
+
+Client-side routing needs no dependency — it is implemented with web standards
+(Navigation API + URLPattern, both Baseline Newly Available; see Routing below).
 
 Development tooling: Vite (dev server), Rollup (dependency bundling), Playwright (E2E tests).
 
@@ -42,7 +44,8 @@ Structure code using the Boundary Control Entity pattern. Organize by feature mo
 app/src/
 ├── BElement.js              # base class for all custom elements
 ├── store.js                 # Redux store configuration
-├── app.js                   # entry point, routing, persistence
+├── router.js                # standards-based client-side router (Navigation API + URLPattern)
+├── app.js                   # entry point, route configuration, persistence
 ├── app.config.js            # application metadata (name, version)
 ├── index.html               # single HTML entry point
 ├── style.css                # application styles
@@ -207,20 +210,55 @@ User Event → Boundary Component → Control (dispatcher) → Redux Action
 
 ## Routing
 
-- use Vaadin Router with an HTML element as outlet
+Routing is implemented with web standards — no router library. URLPattern matches routes,
+the Navigation API intercepts same-origin navigations (link clicks, back/forward) with
+built-in focus and scroll handling.
+
+- keep the router mechanics in `router.js`; `app.js` only declares the route table
 - define routes mapping paths to custom element tag names
 - import all routed components before initializing the router
 - use standard `<a href="...">` for navigation — no programmatic routing unless necessary
+- non-matching and cross-origin URLs must fall through to regular browser navigation
+- serve the app with an `index.html` fallback for unknown paths (deep links)
 
 ```javascript
-import { Router } from "@vaadin/router";
-const outlet = document.querySelector('.view');
-const router = new Router(outlet, {});
-router.setRoutes([
+// router.js
+export const initRouter = (outlet, routeConfig) => {
+    const routes = routeConfig.map(({ path, component }) => ({
+        pattern: new URLPattern({ pathname: path }),
+        component
+    }));
+
+    const render = url => {
+        const route = routes.find(({ pattern }) => pattern.test(url));
+        if (!route) return false;
+        outlet.replaceChildren(document.createElement(route.component));
+        return true;
+    };
+
+    navigation.addEventListener('navigate', event => {
+        if (!event.canIntercept || event.hashChange || event.downloadRequest) return;
+        const url = new URL(event.destination.url);
+        if (!routes.some(({ pattern }) => pattern.test(url))) return;
+        event.intercept({ handler: () => render(url) });
+    });
+
+    render(new URL(location.href));
+}
+```
+
+```javascript
+// app.js
+import { initRouter } from "./router.js";
+
+initRouter(document.querySelector('.view'), [
   { path: '/',     component: 'b-item-list' },
   { path: '/add',  component: 'b-items' }
 ]);
 ```
+
+For parameterized routes, extend `router.js` only: match with `pattern.exec(url)` and pass
+the named groups (`/items/:id`) to the created element.
 
 ## HTML Structure
 
@@ -234,8 +272,7 @@ router.setRoutes([
 {
   "imports": {
     "lit-html": "./libs/lit-html.js",
-    "@reduxjs/toolkit": "./libs/redux-toolkit.modern.js",
-    "@vaadin/router": "./libs/router.js"
+    "@reduxjs/toolkit": "./libs/redux-toolkit.modern.js"
   }
 }
 </script>
@@ -268,7 +305,6 @@ follow `/web-conventions`. This stack adds:
 export default [{
   input: [
     './node_modules/lit-html/lit-html.js',
-    './node_modules/@vaadin/router/dist/router.js',
     './node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs'
   ],
   output: { dir: "../app/src/libs", format: "esm" },
@@ -301,6 +337,7 @@ export default [{
 - do not add CSS preprocessors (Sass, Less, PostCSS)
 - do not add bundlers for application code — only for third-party dependency packaging
 - do not use React, Angular, Vue, Svelte, or any component framework
+- do not add a routing library (Vaadin Router, page.js, …) — route with the Navigation API and URLPattern
 - do not use npm scripts for development workflow beyond `npx vite`
 - do not create package.json in the application root
 - do not dispatch Redux actions directly from boundary components — always go through control functions
