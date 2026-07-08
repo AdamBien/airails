@@ -52,6 +52,31 @@ When interactivity is needed, use these approaches — never JavaScript:
 - **Mobile hamburger**: hidden checkbox with `:checked` + sibling selectors
 - **Form styling**: `appearance: none` to customize native controls
 
+## Page Transitions (Cross-Document View Transitions)
+
+For multipage sites, animate navigation between pages with cross-document view transitions —
+pure CSS, no JavaScript:
+
+```css
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+```
+
+- Opt in on **every** page (both the outgoing and incoming page must carry the rule)
+- Always inside `prefers-reduced-motion: no-preference` — reduced motion means instant navigation
+- Give recurring elements (site header, logo) a `view-transition-name` for continuity across pages;
+  each name must be unique per page
+- Keep transitions subtle and fast; never let them delay content
+
+**Baseline exception**: cross-document view transitions are Limited availability, which the
+`/web-conventions` Baseline policy normally forbids. They are exempt because the failure mode is
+total graceful degradation — a browser that doesn't understand `@view-transition` ignores the
+at-rule and navigates instantly, losing nothing. No `@supports` wrapper is needed. The exception
+covers exactly the `@view-transition` at-rule, `view-transition-name`, and the
+`::view-transition-*` pseudo-elements — nothing else, and never anything JavaScript-driven
+(`document.startViewTransition` stays forbidden by the no-JavaScript constraint).
+
 ## Performance
 
 - `loading="lazy"` on below-fold images
@@ -125,7 +150,9 @@ be able to disagree.
 Classify each CSS feature the stylesheets use by its Baseline status from knowledge — no external
 validation services. A **Widely Available** feature passes; a **Newly Available** feature passes
 only when wrapped in `@supports` with a graceful fallback (per the `/web-conventions` Baseline policy); **Limited
-availability** fails the loop. One caveat keeps this honest: the DevTools browser is Chrome, so a
+availability** fails the loop — with one exception: the cross-document view-transition features
+named in the Page Transitions section pass despite Limited status, provided they sit inside a
+`prefers-reduced-motion: no-preference` media query. One caveat keeps this honest: the DevTools browser is Chrome, so a
 page rendering correctly proves Chrome support, never Baseline — when a feature's status is
 uncertain, report the uncertainty instead of guessing.
 
