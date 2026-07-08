@@ -106,9 +106,24 @@ Summarize for the user:
   `GITHUB_TOKEN`, and `permissions: contents: write` (already in the template) is what
   lets it create releases.
 
-Then offer to generate a launcher with the `/java-cli-script` skill: a single-file,
-PATH-installed Java script that downloads the latest released JAR from the GitHub
-Release and runs it, so the app is invoked by name instead of `java -jar <artifact>`.
+### 8. Offer launcher and installer
+
+Once the workflow is in place, offer two follow-ups generated with the
+`/java-cli-script` skill:
+
+- **Launcher** — a single-file, PATH-installed Java script that runs the app by name
+  instead of `java -jar <artifact>`.
+- **Installer** — a single-file script named `<short-prefix>install` (e.g. `zsinstall`
+  for zsmith) in the repository root that fetches
+  `https://github.com/<owner>/<repo>/releases/latest/download/<jar.file.name>` and
+  places it at the path the launcher and README expect (e.g. `zbo/<jar.file.name>`).
+  Download into a `.part` staging file next to the destination, then `Files.move` with
+  `ATOMIC_MOVE` so the JAR is never half-written; exit non-zero on a non-200 response.
+  Print the script name and version as the first line of output, no flag handling.
+
+When the installer is generated, update the application's README accordingly: add an
+Installation section that downloads and runs the installer (no JDK build, no `git
+clone` required), and keep build-from-source as the alternative for contributors.
 
 ## Notes
 
