@@ -163,6 +163,31 @@ the BC's full boundary contract (responsibility, `## Boundary` operations, `## R
 EARS statements, optional `## Entities`, `## Out of scope`). One `package-info.md` per business
 component; it is the single source of truth that `/sbce apply` converges the code to.
 
+### JSDoc
+
+Plain ES modules carry no type annotations — JSDoc provides them. Every method and function
+ships with a JSDoc comment declaring its types:
+
+- declare parameter and return types with `@param {Type} name` and `@returns {Type}`
+- describe entity and state shapes once with `@typedef` in the entity layer and reference them from the other layers
+- keep the comments type-focused — add prose only for intent the types cannot express
+
+```javascript
+/**
+ * @typedef {Object} Item
+ * @property {number} id
+ * @property {string} label
+ */
+
+/**
+ * @param {number} id
+ * @returns {void}
+ */
+export const deleteItem = (id) => {
+    store.dispatch(deleteItemAction(id));
+}
+```
+
 ## BElement Base Class
 
 The base class provides automatic Redux integration for all components:
@@ -354,7 +379,7 @@ export default [{
 ## What NOT to Do
 
 - do not use Shadow DOM unless encapsulation is explicitly required
-- do not use TypeScript — plain ES modules only
+- do not use TypeScript — plain ES modules with JSDoc type declarations only
 - do not install dependencies in the application root
 - do not import from `node_modules` paths — use import maps
 - do not add CSS preprocessors (Sass, Less, PostCSS)
