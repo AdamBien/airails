@@ -54,7 +54,7 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 
 - all CSS in separate `.css` files — no inline styles
 - use logical properties (`margin-block`, `padding-inline`, `inline-size`, `block-size`)
-- use modern features: CSS nesting, container queries, cascade layers, subgrid, `oklch()` colors — subject to the Baseline policy below
+- use modern features: CSS nesting, container queries, cascade layers, subgrid, `oklch()` colors, the `:has()` selector — subject to the Baseline policy below
 - use `clamp()` for fluid typography
 - prefer `gap` over margins for spacing in flex/grid layouts
 

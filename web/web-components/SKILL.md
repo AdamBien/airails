@@ -236,11 +236,18 @@ export const initRouter = (outlet, routeConfig) => {
         return true;
     };
 
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    const transitionTo = url => {
+        if (!document.startViewTransition || reducedMotion.matches) return render(url);
+        return document.startViewTransition(() => render(url)).finished;
+    };
+
     navigation.addEventListener('navigate', event => {
         if (!event.canIntercept || event.hashChange || event.downloadRequest) return;
         const url = new URL(event.destination.url);
         if (!routes.some(({ pattern }) => pattern.test(url))) return;
-        event.intercept({ handler: () => render(url) });
+        event.intercept({ handler: () => transitionTo(url) });
     });
 
     render(new URL(location.href));
@@ -260,12 +267,26 @@ initRouter(document.querySelector('.view'), [
 For parameterized routes, extend `router.js` only: match with `pattern.exec(url)` and pass
 the named groups (`/items/:id`) to the created element.
 
+### View Transitions (Same-Document)
+
+Route changes animate with same-document view transitions, as in the router above — the SPA
+counterpart of `web-static`'s cross-document `@view-transition` for multipage sites.
+
+- same-document view transitions are Baseline Newly Available — the `document.startViewTransition`
+  existence check in `transitionTo` is the required feature detection; browsers without it render instantly
+- skip the transition under `prefers-reduced-motion: reduce` — reduced motion means instant route changes
+- give elements that persist across routes (header, logo) a `view-transition-name` for continuity;
+  each name must be unique within the rendered page
+- customize the animation in CSS via `::view-transition-old(root)` / `::view-transition-new(root)` —
+  the default cross-fade needs no CSS at all
+
 ## HTML Structure
 
 - single `index.html` entry point with semantic HTML (`<main>`, `<header>`, `<nav>`, `<section>`, `<footer>`)
 - declare import maps in `<head>` to map bare module specifiers to local bundled files
 - load `init.js` (non-module) before `app.js` (module) to set up globals required by dependencies
 - the router outlet is a `<section>` element — router replaces its content with route components
+- use native `<dialog>` with `showModal()` for modal dialogs (Widely Available) — focus trapping, Esc dismissal, and `::backdrop` styling come for free; close with `dialog.close()` or `<form method="dialog">`
 
 ```html
 <script type="importmap">
@@ -344,3 +365,4 @@ export default [{
 - do not create package.json in the application root
 - do not dispatch Redux actions directly from boundary components — always go through control functions
 - do not put business logic in boundary components — delegate to control layer
+- do not hand-roll modal overlays from `<div>`s — use `<dialog>`
