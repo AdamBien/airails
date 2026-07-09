@@ -326,7 +326,9 @@ export default [{
 - use lit-html event bindings: `@click`, `@keyup`, `@input`
 - destructure event objects to extract relevant data: `({ target: { name, value } })`
 - use `event.preventDefault()` for form submissions
-- validate forms using native HTML validation: `form.reportValidity()` and `form.checkValidity()`
+- validate forms using native HTML validation: `form.reportValidity()` and `form.checkValidity()` — both only pay off when inputs declare standard types and constraint attributes (`required`, `pattern`, `min`/`max`) per `web-conventions`
+- for rules markup cannot express, use `setCustomValidity()` on the input so the error surfaces through the same native reporting — do not build a parallel error display
+- read submitted values with `new FormData(form)` instead of querying individual inputs
 
 ## What NOT to Do
 

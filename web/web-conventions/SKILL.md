@@ -1,6 +1,6 @@
 ---
 name: web-conventions
-description: Generic, composable web platform conventions — semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy that apply across all web frontends (static sites, web component SPAs). Technology-neutral within the web platform; meant to be composed with context-specific skills (e.g. `web-static`, `web-components`). Use when writing, generating, or reviewing HTML or CSS anywhere the composed skill does not already specify a rule. Triggers on "web conventions", "semantic HTML", "accessibility review", "modern CSS", "design tokens", "DESIGN.md", "Baseline status", "serve the site", "dev server", "zws", or any request to write or review HTML/CSS where context-specific skills do not already cover it. Also use when a project contains a DESIGN.md that should guide HTML/CSS generation, when a Baseline status must be looked up — this skill bundles a dated snapshot of the complete webstatus.dev feature set in `references/baseline-snapshot.md` — or when a static site root needs to be served locally — this skill bundles zws, the zero-dependency Java dev server, in `scripts/zws`.
+description: Generic, composable web platform conventions — semantic HTML, accessibility, modern CSS, custom-property design tokens, and Baseline browser-support policy that apply across all web frontends (static sites, web component SPAs). Technology-neutral within the web platform; meant to be composed with context-specific skills (e.g. `web-static`, `web-components`). Use when writing, generating, or reviewing HTML or CSS anywhere the composed skill does not already specify a rule. Triggers on "web conventions", "semantic HTML", "web forms", "form validation", "input types", "accessibility review", "modern CSS", "design tokens", "DESIGN.md", "Baseline status", "serve the site", "dev server", "zws", or any request to write or review HTML/CSS where context-specific skills do not already cover it. Also use when a project contains a DESIGN.md that should guide HTML/CSS generation, when a Baseline status must be looked up — this skill bundles a dated snapshot of the complete webstatus.dev feature set in `references/baseline-snapshot.md` — or when a static site root needs to be served locally — this skill bundles zws, the zero-dependency Java dev server, in `scripts/zws`.
 ---
 
 Apply all rules below strictly to any HTML and CSS you write, generate, or review.
@@ -30,6 +30,18 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 - skip link for keyboard users
 - use `<a>` for navigation, not buttons
 - use `<br>` only for line breaks in content, never for spacing
+
+## Form Rules
+
+- use the semantically correct input type — `email`, `url`, `tel`, `password`, `search`, `number`, `date`, `time`, `range`, `file`, `checkbox`, `radio` — never `type="text"` plus JavaScript re-implementation; the type alone provides the right mobile keyboard, native widget, and built-in validation (all Widely Available)
+- exception: `<input type="color">` is Baseline Limited — do not use it; fall back to a text input with a `pattern` for hex colors
+- declare constraints in markup: `required`, `pattern`, `min`/`max`/`step`, `minlength`/`maxlength` — built-in validation is the first line of defense, JavaScript only for rules markup cannot express (Constraint Validation API is Widely Available)
+- `autocomplete` on every field with a well-known meaning (`name`, `email`, `street-address`, `current-password`, …) — autofill is both UX and accessibility
+- `inputmode` only when no dedicated input type fits (Widely Available)
+- `placeholder` is a hint, never a substitute for a `<label>`
+- group related controls with `<fieldset>`/`<legend>`
+- give every `<button>` inside a form an explicit `type` — the default is `submit`, which makes stray buttons submit the form
+- style validation states with `:user-valid`/`:user-invalid` (Widely Available since 2026-05), not `:valid`/`:invalid` — the `:user-*` pseudo-classes wait for user interaction instead of flagging pristine fields
 
 ## Accessibility Rules
 
@@ -84,3 +96,5 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 - do not use `<br>` for spacing — use CSS spacing
 - do not use non-semantic `<div>`/`<span>` when a semantic element exists
 - do not use inline styles
+- do not re-implement in JavaScript what standard input types and constraint attributes already validate
+- do not add `novalidate` to a form unless the Constraint Validation API takes over the checks it disables

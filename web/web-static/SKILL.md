@@ -51,6 +51,7 @@ When interactivity is needed, use these approaches — never JavaScript:
 - **Dropdown menu**: `:hover` + `:focus-within`
 - **Mobile hamburger**: hidden checkbox with `:checked` + sibling selectors
 - **Form styling**: `appearance: none` to customize native controls
+- **Form validation**: standard input types plus constraint attributes (`required`, `pattern`, `min`/`max`) — the browser validates and blocks submission without any JavaScript; style feedback with `:user-invalid`/`:user-valid` (see `web-conventions` Form Rules)
 
 ## Page Transitions (Cross-Document View Transitions)
 
