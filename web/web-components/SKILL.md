@@ -114,11 +114,6 @@ export const newItemAction = createAction("newItemAction");
 export const newItem = _ => {
     store.dispatch(newItemAction(Date.now()));
 }
-
-export const deleteItemAction = createAction("deleteItemAction");
-export const deleteItem = (id) => {
-    store.dispatch(deleteItemAction(id));
-}
 ```
 
 ### Entity (Reducers & State)
@@ -130,7 +125,7 @@ export const deleteItem = (id) => {
 
 ```javascript
 import { createReducer } from "@reduxjs/toolkit";
-import { itemUpdatedAction, deleteItemAction, newItemAction } from "../control/CRUDControl.js";
+import { itemUpdatedAction, newItemAction } from "../control/CRUDControl.js";
 
 const initialState = {
     list: [],
@@ -143,8 +138,6 @@ export const items = createReducer(initialState, (builder) => {
     }).addCase(newItemAction, (state, { payload }) => {
         state.item["id"] = payload;
         state.list = state.list.concat(state.item);
-    }).addCase(deleteItemAction, (state, { payload }) => {
-        state.list = state.list.filter(item => item.id !== payload);
     });
 });
 ```
@@ -171,22 +164,6 @@ ships with a JSDoc comment declaring its types:
 - declare parameter and return types with `@param {Type} name` and `@returns {Type}`
 - describe entity and state shapes once with `@typedef` in the entity layer and reference them from the other layers
 - keep the comments type-focused — add prose only for intent the types cannot express
-
-```javascript
-/**
- * @typedef {Object} Item
- * @property {number} id
- * @property {string} label
- */
-
-/**
- * @param {number} id
- * @returns {void}
- */
-export const deleteItem = (id) => {
-    store.dispatch(deleteItemAction(id));
-}
-```
 
 ## BElement Base Class
 
@@ -346,18 +323,6 @@ follow `/web-conventions`. This stack adds:
 - import maps in `index.html` map bare specifiers to the bundled local files
 - the application source never imports from `node_modules` — always through import maps
 
-```javascript
-// rollup.config.js
-export default [{
-  input: [
-    './node_modules/lit-html/lit-html.js',
-    './node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs'
-  ],
-  output: { dir: "../app/src/libs", format: "esm" },
-  plugins: [nodeResolve({ browser: true })]
-}]
-```
-
 ## Testing
 
 - E2E tests with Playwright in a separate `tests/` directory
@@ -396,10 +361,6 @@ class TagPicker extends BElement {
         super();
         this.internals = this.attachInternals();
     }
-    /**
-     * @param {Array<string>} tags
-     * @returns {void}
-     */
     onTagsChanged(tags) {
         this.internals.setFormValue(tags.join(','));
         tags.length
