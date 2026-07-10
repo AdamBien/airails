@@ -31,14 +31,14 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 
 - keep coarse-grained classes in the boundary
 - place facades that adapt external protocols, transports, or UI events to internal operations in the boundary
-- boundary classes are the only entry points called from outside the BC
+- boundary classes are the only entry points called from outside the system; external actors (UI, protocols, transports, tests) never reach control or entity directly
 - cross-cutting concerns that wrap an operation (transactions, authorization checks, request/response mapping) belong in the boundary, not in control or entity
 
 ## Control Layer
 
 - implement procedural business logic in the control layer
 - prefer stateless, function-like units for procedural logic
-- control may be called by the boundary of the same BC or directly by other BCs when no boundary exists
+- control may be called by the boundary of the same BC or directly by other BCs; the boundary is not a gate for cross-BC calls
 
 ## Entity Layer
 
