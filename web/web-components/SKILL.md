@@ -376,6 +376,40 @@ export default [{
 - for rules markup cannot express, use `setCustomValidity()` on the input so the error surfaces through the same native reporting — do not build a parallel error display
 - read submitted values with `new FormData(form)` instead of querying individual inputs
 
+### Form-Associated Custom Elements
+
+Components rendering native inputs into their light DOM need nothing extra — the inputs participate
+in the surrounding `<form>` natively. Make a component form-associated (Baseline Widely Available)
+only when the element itself is the control — a composite input with no single native equivalent
+(rating widget, tag picker) — and must contribute to `FormData` and native validation:
+
+- declare `static formAssociated = true` and call `this.attachInternals()` in the constructor
+- report the current value with `internals.setFormValue()` on every change
+- express validity with `internals.setValidity()` so errors surface through the same native
+  reporting (`reportValidity()`) — the same rule as `setCustomValidity()` above: no parallel error display
+- prefer composing standard inputs first — reach for form association only when no standard input fits
+
+```javascript
+class TagPicker extends BElement {
+    static formAssociated = true;
+    constructor() {
+        super();
+        this.internals = this.attachInternals();
+    }
+    /**
+     * @param {Array<string>} tags
+     * @returns {void}
+     */
+    onTagsChanged(tags) {
+        this.internals.setFormValue(tags.join(','));
+        tags.length
+            ? this.internals.setValidity({})
+            : this.internals.setValidity({ valueMissing: true }, 'Add at least one tag');
+    }
+}
+customElements.define('b-tag-picker', TagPicker);
+```
+
 ## What NOT to Do
 
 - do not use Shadow DOM unless encapsulation is explicitly required
