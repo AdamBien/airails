@@ -9,11 +9,17 @@ import com.sun.net.httpserver.SimpleFileServer.OutputLevel;
 void main(String... args) throws IOException, InterruptedException {
     var port = 3000;
     var loopback = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
-    var directory = args.length > 0 ? args[0] : ".";
+    var arguments = List.of(args);
+    var single = arguments.contains("--single");
+    var directory = arguments.stream()
+            .filter(argument -> !argument.startsWith("--"))
+            .findFirst()
+            .orElse(".");
     var path = Path.of(directory).normalize().toAbsolutePath();
 
     var server = HttpServer.create(loopback, 0);
-    var handler = SimpleFileServer.createFileHandler(path);
+    var fileHandler = SimpleFileServer.createFileHandler(path);
+    var handler = single ? new SinglePageHandler(fileHandler, path) : fileHandler;
     server.createContext("/", new NoCacheHandler(handler));
     server.start();
 
@@ -21,9 +27,52 @@ void main(String... args) throws IOException, InterruptedException {
             server.getAddress().getHostString(),
             server.getAddress().getPort());
     IO.println("Serving files from: " + path);
+    if (single) {
+        IO.println("SPA mode: unknown extension-less paths fall back to index.html");
+    }
     IO.println(url);
     Browser.open(url);
     IO.println("browser opened ");
+}
+
+/**
+ * SPA fallback (--single): GET requests for paths that do not exist on disk
+ * and have no file extension (client-side routes like /add) are answered with
+ * index.html, so deep links and reloads reach the application instead of a 404.
+ * Requests with an extension (assets) still 404 to keep typos visible.
+ */
+record SinglePageHandler(HttpHandler handler, Path root) implements HttpHandler {
+
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        if (fallsBackToIndex(exchange)) {
+            serveIndex(exchange);
+            return;
+        }
+        handler.handle(exchange);
+    }
+
+    boolean fallsBackToIndex(HttpExchange exchange) {
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            return false;
+        }
+        var requested = root.resolve(exchange.getRequestURI().getPath().substring(1)).normalize();
+        var fileName = requested.getFileName();
+        return requested.startsWith(root)
+                && fileName != null
+                && !fileName.toString().contains(".")
+                && !Files.exists(requested)
+                && Files.exists(root.resolve("index.html"));
+    }
+
+    void serveIndex(HttpExchange exchange) throws IOException {
+        var content = Files.readAllBytes(root.resolve("index.html"));
+        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+        exchange.sendResponseHeaders(200, content.length);
+        try (var body = exchange.getResponseBody()) {
+            body.write(content);
+        }
+    }
 }
 
 record NoCacheHandler(HttpHandler handler) implements HttpHandler {
