@@ -71,6 +71,7 @@ app/src/
 - register every component with `customElements.define('prefix-name', ClassName)`
 - use `b-` prefix for component tag names
 - composite components import and compose child components
+- when a module exposes a composite entry point, it is a facade component named after the module: `bookmarks/boundary/Bookmarks.js` registering `b-bookmarks` — this is the module's default routing target
 
 ```javascript
 import BElement from "../../BElement.js";
