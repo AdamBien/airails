@@ -23,6 +23,8 @@ client-side state, use `/web-static` instead.
 ## Reference Implementation
 
 This skill is based on the [bce.design](https://github.com/AdamBien/bce.design) quickstarter.
+The naming rules below are stricter than the single-module quickstarter (which registers unprefixed
+tags like `b-add`) — multi-module applications need module-prefixed tag names.
 
 ## Allowed Dependencies
 
@@ -71,7 +73,8 @@ app/src/
 - register every component with `customElements.define('prefix-name', ClassName)`
 - use `b-` prefix for component tag names
 - composite components import and compose child components
-- when a module exposes a composite entry point, it is a facade component named after the module: `bookmarks/boundary/Bookmarks.js` registering `b-bookmarks` — this is the module's default routing target
+- each module's boundary exposes one primary entry point named after the module — `bookmarks/boundary/Bookmarks.js` registering `b-bookmarks` — the module's default routing target
+- additional routed views and child components carry the module prefix in their tag name (`b-bookmarks-add`) — tag names are global, so unprefixed names collide across modules
 
 ```javascript
 import BElement from "../../BElement.js";
@@ -92,7 +95,7 @@ class ItemList extends BElement {
         `;
     }
 }
-customElements.define('b-item-list', ItemList);
+customElements.define('b-items-list', ItemList);
 ```
 
 ### Control (Actions & Dispatchers)
@@ -262,8 +265,8 @@ export const initRouter = (outlet, routeConfig) => {
 import { initRouter } from "./router.js";
 
 initRouter(document.querySelector('.view'), [
-  { path: '/',     component: 'b-item-list' },
-  { path: '/add',  component: 'b-items' }
+  { path: '/',     component: 'b-items' },
+  { path: '/add',  component: 'b-items-add' }
 ]);
 ```
 
@@ -312,7 +315,7 @@ follow `/web-conventions`. This stack adds:
 - use container queries (`@container`) over media queries for responsive design
 - set `container-type: inline-size` on `body`
 - use `dvh` units for viewport height (`min-height: 100dvh`)
-- style custom elements directly by tag name (`b-list { ... }`)
+- style custom elements directly by tag name (`b-items { ... }`)
 - use a lightweight CSS framework (Bulma) for utility classes — no Tailwind
 - keep custom styles in a separate `style.css`
 - use flexbox for component-level layout
