@@ -45,12 +45,18 @@ Manage installed skills:
 
 ### Java
 
+- [**java-conventions**](java/java-conventions) — Composable Java 25 code conventions: modern syntax, naming, visibility, streams, and exceptions across all Java contexts
 - [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH
+- [**java-distiller**](java/java-distiller) — Simplifies, modernizes, and refactors existing code into idiomatic Java 25
+- [**python-to-java**](java/python-to-java) — Converts Python scripts to zero-dependency Java 25 CLI programs
+- [**enterprisifier**](java/enterprisifier) — Deliberately overengineers code with maximum patterns, indirections, and abstractions, for comedic or educational purposes
 - [**zb**](java/zb) — Zero Dependencies Builder for compiling, building, and packaging Java 21+ projects
+- [**zb-release-pipeline**](java/zb-release-pipeline) — GitHub Actions pipeline that builds a zb project and publishes the JAR as a GitHub Release
 - [**zargs**](java/zargs) — Zero-dependency, enum-based argument parsing for Java CLI applications
 - [**zcfg**](java/zcfg) — Zero Dependency Configuration Utility for loading properties and application configuration
 - [**zcl**](java/zcl) — Zero-dependency Colour Logger for colored terminal output in Java applications
 - [**zjson**](java/zjson) — JSON parsing and generation by copying the org.json source into the project, no Maven/Gradle dependency
+- [**zunit**](java/zunit) — Generates and runs zunit tests for java-cli-app projects
 
 ### Web
 
@@ -61,8 +67,12 @@ Manage installed skills:
 ### BCE
 
 - [**sbce**](bce/sbce) — Spec-driven BCE: one capability spec equals one business component, the package doc is the boundary contract, driving declare → converge against the stack's test loop
+- [**bce**](bce/bce) — Composable, technology-neutral architecture rules for the Boundary-Control-Entity pattern: business components, layer responsibilities, and package structure
+- [**ears-tests**](bce/ears-tests) — Parameterized (table-driven) tests generated from EARS requirement statements in SBCE capability specs
 - [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
+- [**continuous-testing**](bce/continuous-testing) — Test-driven loop on top of microprofile-server: builds, starts the server, and runs Unit, Integration, and System Tests after every change
+- [**showtime**](bce/showtime) — Live coding mode on top of any project skill: generates code without running tests or builds, for demos and workshops
 
 ### Documentation
 
