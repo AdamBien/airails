@@ -43,6 +43,13 @@ Manage installed skills:
 
 ## What's Inside
 
+### Spec-Driven BCE (SBCE)
+
+One capability spec equals one business component, and the spec is the boundary contract ([sbce.space](https://sbce.space)). Declare the capability, then converge the code against the stack's own test loop.
+
+- [**sbce**](bce/sbce) — The workflow: `new` decomposes a feature into capability specs, `apply` converges code to spec; composes with bce and a stack skill (java-cli-app, microprofile-server, web-components)
+- [**ears-tests**](bce/ears-tests) — Parameterized (table-driven) tests generated from the EARS requirement statements in a capability spec, one labeled row per requirement id
+
 ### Java
 
 - [**java-conventions**](java/java-conventions) — Composable Java 25 code conventions: modern syntax, naming, visibility, streams, and exceptions across all Java contexts
@@ -66,9 +73,7 @@ Manage installed skills:
 
 ### BCE
 
-- [**sbce**](bce/sbce) — Spec-driven BCE: one capability spec equals one business component, the package doc is the boundary contract, driving declare → converge against the stack's test loop
 - [**bce**](bce/bce) — Composable, technology-neutral architecture rules for the Boundary-Control-Entity pattern: business components, layer responsibilities, and package structure
-- [**ears-tests**](bce/ears-tests) — Parameterized (table-driven) tests generated from EARS requirement statements in SBCE capability specs
 - [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
 - [**continuous-testing**](bce/continuous-testing) — Test-driven loop on top of microprofile-server: builds, starts the server, and runs Unit, Integration, and System Tests after every change
