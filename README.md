@@ -1,51 +1,80 @@
-# web-components
+# airails.dev
 
-An [AIrails.dev](https://airails.dev) skill defining architecture and coding rules for building single-page applications with web components, BCE architecture, and zero frameworks.
+Home of Spec-Driven BCE ([**sbce.space**](https://sbce.space)) — development conventions, [SKILLS.md](https://agentskills.io/specification), and [AGENTS.md](https://agents.md) for building modern Java and web applications.
 
-## Stack
+## Installation
 
-- **Custom Elements** via `BElement` base class with automatic Redux integration
-- **lit-html** for templating and efficient DOM rendering
-- **Redux Toolkit** for predictable state management
-- **Navigation API + URLPattern** for standards-based client-side routing — no router dependency
-- **BCE layering** (Boundary / Control / Entity) organized by feature module
-
-## Principles
-
-- Web standards and web platform first
-- Minimal external dependencies — only lit-html and Redux Toolkit
-- No frameworks, no build step for development, no Shadow DOM by default
-- Plain ES modules with import maps
-
-## Composition
-
-Composes with [web-conventions](../web-conventions) — the shared baseline for semantic HTML, accessibility, design tokens, and the Baseline browser-support policy. Rules in this skill override it. For static content sites without client-side state, use [web-static](../web-static).
-
-Serves as a stack skill for [SBCE](https://sbce.dev) — spec-driven BCE, where each capability spec lives in the BC's `package-info.md` and converges via `/sbce apply`.
-
-## Project Structure
+Download the repository without `git`, then run the installer:
 
 ```
-app/src/
-├── BElement.js          # base class for all custom elements
-├── store.js             # Redux store configuration
-├── router.js            # standards-based router (Navigation API + URLPattern)
-├── app.js               # entry point, route configuration, persistence
-├── index.html           # single HTML entry point
-├── libs/                # bundled third-party ESM modules
-└── [feature]/
-    ├── boundary/        # UI web components
-    ├── control/         # actions and dispatchers
-    └── entity/          # reducers and state shape
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin
+cd airails
+./installSkills
 ```
 
-## Data Flow
+Or clone it with `git` instead of the first step:
 
 ```
-User Event → Boundary → Control (dispatcher) → Redux Action
-→ Entity (reducer) → Store → BElement → view() → lit-html → DOM
+git clone https://github.com/AdamBien/airails
+cd airails
+./installSkills
 ```
 
-## Usage
+The installer finds all skills and prompts before copying to each supported agent directory (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`).
 
-`SKILL.md` contains the full architectural reference. It can be used as a coding guide for developers or as a skill file for AI coding assistants.
+Without a JDK or `git`, download the prepacked zip for your agent from the rolling [skills release](https://github.com/AdamBien/airails/releases/tag/skills) and unzip it into the home directory:
+
+```
+curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-claude.zip
+unzip -o airails-claude.zip -d ~
+```
+
+Each zip contains all skills with the agent's skills directory baked into the entry paths: `airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`.
+
+AI agents installing the skills themselves should follow [AGENTS.md](AGENTS.md) — `installSkills` requires an interactive terminal.
+
+Manage installed skills:
+
+```
+./installSkills -l           # list available and installed skills
+./installSkills -d <name>    # delete a skill by name
+./installSkills -h           # show help
+```
+
+## What's Inside
+
+### Java
+
+- [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH
+- [**zb**](java/zb) — Zero Dependencies Builder for compiling, building, and packaging Java 21+ projects
+- [**zargs**](java/zargs) — Zero-dependency, enum-based argument parsing for Java CLI applications
+- [**zcfg**](java/zcfg) — Zero Dependency Configuration Utility for loading properties and application configuration
+- [**zcl**](java/zcl) — Zero-dependency Colour Logger for colored terminal output in Java applications
+- [**zjson**](java/zjson) — JSON parsing and generation by copying the org.json source into the project, no Maven/Gradle dependency
+
+### Web
+
+- [**web-conventions**](web/web-conventions) — Composable baseline for all web frontends: semantic HTML, accessibility, design tokens, and Baseline browser-support policy
+- [**web-static**](web/web-static) — Modern static websites using semantic HTML and CSS without external dependencies or build systems; composes web-conventions
+- [**web-components**](web/web-components) — Single-page applications using web components, BCE layering, lit-html, Redux Toolkit, and client-side routing; composes web-conventions
+
+### BCE
+
+- [**sbce**](bce/sbce) — Spec-driven BCE: one capability spec equals one business component, the package doc is the boundary contract, driving declare → converge against the stack's test loop
+- [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
+- [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
+
+### Documentation
+
+- [**bce-diagrams**](documentation/bce-diagrams) — High-level overview diagrams showing interactions between business components, subsystems, and services
+- [**drawio**](documentation/drawio) — Draw.io overview diagrams with BCE shape mapping and consistent visual style
+- [**mermaid**](documentation/mermaid) — Mermaid overview diagrams for architecture and component visualization
+- [**readme**](documentation/readme) — Conventions for writing README.md files targeting advanced developers
+
+### Quickstarters
+
+- [**quarkus-microprofile**](https://github.com/AdamBien/quarkus-microprofile) — Quarkus MicroProfile template with BCE architecture, REST endpoints, CDI, and System Tests
+- [**bce.design**](https://github.com/AdamBien/bce.design) — Web Components starter with lit-html, Redux Toolkit, and standards-based routing (Navigation API + URLPattern)
+- [**ebank**](https://github.com/AdamBien/ebank) — CRUD with Quarkus, JPA, and PostgreSQL
+- [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
+- [**zeeds**](https://github.com/AdamBien/zeeds) — Zero-dependency Java 25+ source files as starting points, run directly with `java filename.java`
