@@ -88,6 +88,7 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 
 - `scripts/zws` — a copy of [zws](https://github.com/AdamBien/zws), the zero-dependency single-file Java development server. Serves any static site root on http://localhost:3000 (loopback only, caching disabled, opens the browser). Requires JDK 25+.
 - invocation: `java <this skill's directory>/scripts/zws <site-root>` — prefer a `zws` already on the PATH (the maintained install); the bundled copy is the fallback so composed skills (`web-static` verification loop, `web-components` dev serving) work after a zip-only install.
+- flags: `--live` reloads connected browsers on file changes (injects a one-line SSE script into served HTML — authoring only, never under a verification run, where the injected script would contaminate the evidence); `--single` serves `index.html` for extension-less unknown paths (SPA fallback for `web-components` routing — wrong for multi-page static sites, where it masks broken links). The flags compose.
 - the copy mirrors [AdamBien/zws](https://github.com/AdamBien/zws) — never edit it in place; when upstream changes, re-copy.
 - never serve with `python3 -m http.server` or Node-based dev servers.
 

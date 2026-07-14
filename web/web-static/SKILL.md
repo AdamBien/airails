@@ -114,6 +114,17 @@ Serve the site root with [zws](https://github.com/AdamBien/zws), the zero-depend
 Java development server: `java zws <site-root>` (serves http://localhost:3000, caching disabled).
 If `zws` is not on the PATH, use the copy bundled with the composed `web-conventions` skill:
 `java <web-conventions skill dir>/scripts/zws <site-root>`.
+
+Two optional flags:
+
+- `--live` — watches the site root and reloads connected browsers on every file change, via a
+  one-line SSE script injected into served HTML. Use it while authoring, **never during the
+  verification loop**: the injected script and its `/reload` stream would show up in the console,
+  network, and snapshot checks and contaminate the no-JavaScript evidence. Verify against a plain
+  `java zws <site-root>` instance.
+- `--single` — SPA fallback (extension-less unknown paths serve `index.html`). Not for this stack:
+  static multi-page sites have a real file behind every URL, and the fallback would mask broken
+  links as false 200s. It belongs to `web-components`.
 Open pages via `new_page`/`navigate_page`. Verification tooling never ships with the site, so this
 violates no constraint — the no-JS/no-dependency rules govern the artifact, not the harness.
 `file://` URLs work for a single page but break root-relative links; prefer the server.

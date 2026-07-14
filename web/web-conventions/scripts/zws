@@ -6,11 +6,15 @@ import module jdk.httpserver;
 import com.sun.net.httpserver.SimpleFileServer.OutputLevel;
 
 
-void main(String... args) throws IOException, InterruptedException {
+static final String VERSION = "2026.07.14.01";
+
+void main(String... args) throws Exception{
+    IO.println("zws " + VERSION);
     var port = 3000;
     var loopback = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
     var arguments = List.of(args);
     var single = arguments.contains("--single");
+    var live = arguments.contains("--live");
     var directory = arguments.stream()
             .filter(argument -> !argument.startsWith("--"))
             .findFirst()
@@ -20,7 +24,14 @@ void main(String... args) throws IOException, InterruptedException {
     var server = HttpServer.create(loopback, 0);
     var fileHandler = SimpleFileServer.createFileHandler(path);
     var handler = single ? new SinglePageHandler(fileHandler, path) : fileHandler;
+    if (live) {
+        var reload = new ReloadEndpoint();
+        server.createContext("/reload", reload);
+        Watcher.watch(path, reload::broadcast);
+        handler = new LiveReloadHandler(handler, path, single);
+    }
     server.createContext("/", new NoCacheHandler(handler));
+    server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
     server.start();
 
     var url = "http://%s:%d".formatted(
@@ -29,6 +40,9 @@ void main(String... args) throws IOException, InterruptedException {
     IO.println("Serving files from: " + path);
     if (single) {
         IO.println("SPA mode: unknown extension-less paths fall back to index.html");
+    }
+    if (live) {
+        IO.println("Live reload: browsers refresh on file changes");
     }
     IO.println(url);
     Browser.open(url);
@@ -71,6 +85,150 @@ record SinglePageHandler(HttpHandler handler, Path root) implements HttpHandler 
         exchange.sendResponseHeaders(200, content.length);
         try (var body = exchange.getResponseBody()) {
             body.write(content);
+        }
+    }
+}
+
+/**
+ * Live reload (--live): GET requests for HTML pages (direct, directory index,
+ * or SPA fallback when --single is active) are served with a script injected
+ * before the closing body tag that listens on the /reload SSE endpoint and
+ * reloads the page whenever a file changes. Everything else is delegated.
+ */
+record LiveReloadHandler(HttpHandler handler, Path root, boolean single) implements HttpHandler {
+
+    static final String SCRIPT = """
+            <script>new EventSource("/reload").onmessage = () => location.reload()</script>""";
+
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        var page = htmlPage(exchange);
+        if (page == null) {
+            handler.handle(exchange);
+            return;
+        }
+        var html = Files.readString(page);
+        var content = (html.contains("</body>")
+                ? html.replace("</body>", SCRIPT + "\n</body>")
+                : html + SCRIPT).getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+        exchange.sendResponseHeaders(200, content.length);
+        try (var body = exchange.getResponseBody()) {
+            body.write(content);
+        }
+    }
+
+    Path htmlPage(HttpExchange exchange) {
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            return null;
+        }
+        var requested = root.resolve(exchange.getRequestURI().getPath().substring(1)).normalize();
+        if (!requested.startsWith(root)) {
+            return null;
+        }
+        if (Files.isDirectory(requested)) {
+            requested = requested.resolve("index.html");
+        }
+        if (single && !Files.exists(requested) && !requested.getFileName().toString().contains(".")) {
+            requested = root.resolve("index.html");
+        }
+        return requested.toString().endsWith(".html") && Files.isRegularFile(requested)
+                ? requested
+                : null;
+    }
+}
+
+/**
+ * Server-sent events endpoint (/reload): browsers connect via EventSource and
+ * receive an event whenever the watcher detects a file change. Connections
+ * stay open on virtual threads; disconnected browsers are pruned on the next
+ * broadcast.
+ */
+record ReloadEndpoint(List<HttpExchange> clients) implements HttpHandler {
+
+    ReloadEndpoint() {
+        this(new CopyOnWriteArrayList<>());
+    }
+
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", "text/event-stream");
+        exchange.sendResponseHeaders(200, 0);
+        clients.add(exchange);
+    }
+
+    void broadcast() {
+        for (var client : clients) {
+            try {
+                var body = client.getResponseBody();
+                body.write("data: reload\n\n".getBytes(StandardCharsets.UTF_8));
+                body.flush();
+            } catch (IOException disconnected) {
+                clients.remove(client);
+            }
+        }
+    }
+}
+
+/**
+ * Watches the site root recursively and notifies on any change. WatchService
+ * does not watch subdirectories by itself, so the whole tree is registered
+ * up front and newly created directories as they appear. Events are debounced
+ * because editors typically emit several events per save.
+ */
+interface Watcher {
+
+    static void watch(Path root, Runnable onChange) throws IOException {
+        var watchService = root.getFileSystem().newWatchService();
+        registerTree(root, watchService);
+        Thread.ofVirtual().start(() -> observe(watchService, onChange));
+    }
+
+    private static void observe(WatchService watchService, Runnable onChange) {
+        try {
+            while (true) {
+                var key = watchService.take();
+                Thread.sleep(50);
+                do {
+                    registerCreatedDirectories(key, watchService);
+                    key.reset();
+                } while ((key = watchService.poll()) != null);
+                onChange.run();
+            }
+        } catch (InterruptedException stopped) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static void registerCreatedDirectories(WatchKey key, WatchService watchService) {
+        for (var event : key.pollEvents()) {
+            if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE
+                    && key.watchable() instanceof Path directory) {
+                var created = directory.resolve((Path) event.context());
+                if (Files.isDirectory(created)) {
+                    registerTree(created, watchService);
+                }
+            }
+        }
+    }
+
+    private static void registerTree(Path root, WatchService watchService) {
+        try (var directories = Files.walk(root)) {
+            directories.filter(Files::isDirectory)
+                    .forEach(directory -> register(directory, watchService));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void register(Path directory, WatchService watchService) {
+        try {
+            directory.register(watchService,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_MODIFY,
+                    StandardWatchEventKinds.ENTRY_DELETE);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 }

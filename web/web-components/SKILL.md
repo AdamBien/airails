@@ -42,7 +42,8 @@ Client-side routing needs no dependency — it is implemented with web standards
 (Navigation API + URLPattern, both Baseline Newly Available; see Routing below).
 
 Development tooling: any static web server with an `index.html` fallback (e.g. zws,
-bundled with `web-conventions`) and Playwright (E2E tests). There is no build system.
+bundled with `web-conventions`, where `--single` provides the fallback and `--live`
+adds reload-on-save while authoring) and Playwright (E2E tests). There is no build system.
 
 ## BCE Architecture (Boundary Control Entity)
 
