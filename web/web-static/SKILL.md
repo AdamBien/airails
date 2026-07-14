@@ -157,6 +157,9 @@ named in the Page Transitions section pass despite Limited status, provided they
 page rendering correctly proves Chrome support, never Baseline — when a feature's status is
 uncertain, report the uncertainty instead of guessing.
 
+When composed with `/web-latest` (experiments and PoCs), this check is replaced by that
+skill's support-floor report — an inventory of below-Widely features instead of a gate.
+
 ### Green
 
 Green = standard checks pass on every page, every `checks.md` line passes, and the Baseline check

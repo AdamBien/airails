@@ -18,7 +18,8 @@ Build or maintain a web component application using $ARGUMENTS. Apply all rules 
 Compose with `/web-conventions` — it provides the baseline rules for semantic HTML, accessibility,
 modern CSS, design tokens, and the Baseline browser-support policy. Rules in this skill override it
 (e.g. container-query-first responsiveness). For static content sites without
-client-side state, use `/web-static` instead.
+client-side state, use `/web-static` instead. For experiments and PoCs, `/web-latest`
+may be composed on top to lift the Baseline browser-support constraints.
 
 ## Reference Implementation
 
