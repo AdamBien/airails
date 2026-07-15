@@ -137,7 +137,7 @@ the test browser, not in the site.
 2. **Structure** — `take_snapshot` (accessibility tree): exactly one `main`, no skipped heading levels, a label on every form input, `aria-label` on each nav when several exist, skip link first in tab order, alt text on every image.
 3. **Responsive** — `resize_page` to 375×667 and 1280×800: the layout adapts, and mobile patterns (hamburger, stacked columns) appear only at the narrow width.
 4. **Preferences** — `emulate` with `colorScheme: dark`: the page restyles. The MCP cannot emulate reduced motion, so check it statically: read-only `evaluate_script` over `document.styleSheets` (or a source grep) confirms the `prefers-reduced-motion: reduce` query exists and neutralizes animations/transitions.
-5. **Lighthouse** — `lighthouse_audit` (covers accessibility, best-practices, SEO — not performance): accessibility = 100 (includes WCAG AA contrast), best-practices and SEO ≥ 90. When performance is in question, run `performance_start_trace` and judge Core Web Vitals — on request, not part of standard green.
+5. **Lighthouse** — `lighthouse_audit` (covers accessibility, best-practices, SEO — not performance): accessibility = 100 (includes WCAG AA contrast), best-practices and SEO ≥ 90. When performance is in question, invoke `/web-performance-reviewer` (throttled traces, Core Web Vitals, waterfall) — on explicit request, never part of standard green.
 
 ### Project checks — checks.md
 
