@@ -50,9 +50,13 @@ Regenerable, evidence-oriented, diffable. Use this structure:
 <stripped words with counts — makes the extraction auditable>
 
 ## Open Questions
-<unresolved ambiguities: suspected synonyms across sources, homonyms
-appearing in different contexts — often the first hint of a BC boundary>
+### Q<n> — <one-line question>
+<evidence pointers; candidate answers when enumerable — suspected synonyms
+across sources, homonyms in different contexts (often the first hint of a
+BC boundary), unexpandable abbreviations>
 ```
+
+Q-ids are stable across re-runs: never renumber, new questions get new ids. They are the contract `concept-clarifier` resolves against.
 
 Confidence: **high** = present in several source kinds, **medium** = one kind with many occurrences, **low** = single source or unresolved abbreviation. Order concepts by frequency — the reader reviews the top entries carefully and skims the tail.
 
@@ -76,5 +80,6 @@ The glossary outlives `migration/`: its canonical terms feed the new system's sb
 - Every claim carries an evidence pointer — review must be spot-checkable, not trust-based.
 - All output goes to `migration/` — a well-known path is the contract downstream skills read from, and one folder keeps the legacy repo clean (one `.gitignore` line, one `rm -r` after migration).
 - Never overwrite a human-edited file: regenerate `CONCEPTS.md` to `migration/CONCEPTS.new.md` when the original was modified; only ever append to `GLOSSARY.md`.
+- Confirmed glossary entries and its `## Decisions` section are ground truth: on re-runs keep their merges, splits, and canonical terms, and do not re-open answered questions — resolved Q-ids stay resolved in `CONCEPTS.new.md`.
 - Noise is contextual — a pattern word can be a domain term (Booking in payments, Position in trading). When a noise-list word appears in DB columns or UI labels, keep it as a concept.
 - Do not carve business components or propose architecture — downstream skills (`bce`, `sbce`) consume the output.
