@@ -1,6 +1,7 @@
 ---
 name: concept-extractor
-description: Mine candidate domain concepts and their vocabulary from every naming source of a legacy system — database schema, UI labels, REST/URL paths, configuration, code identifiers, documentation. Produces a regenerable CONCEPTS.md (aliases, evidence, frequency, co-occurrence) and seeds a human-owned GLOSSARY.md with canonical terms. First step of a legacy-to-BCE migration; composes with bce and sbce. Use when analyzing a legacy or unfamiliar system for its domain vocabulary or recovering the ubiquitous language. Triggers on "extract concepts", "concept extraction", "mine the domain", "domain concepts", "domain vocabulary", "ubiquitous language", "concept inventory", "glossary from code". Not for mechanical 1:1 ports (use j2ee-migration) and not for carving business components — it only produces the vocabulary later steps consume.
+description: Mine candidate domain concepts and their vocabulary from every naming source of a legacy system — database schema, UI labels, REST/URL paths, configuration, code identifiers, documentation. Produces a regenerable CONCEPTS.md (aliases, evidence, frequency, co-occurrence) and seeds a human-owned GLOSSARY.md with canonical terms. First step of a legacy-to-BCE migration; composes with bce and sbce. Invoke explicitly as /concept-extractor on the system to analyze. Not for mechanical 1:1 ports (use j2ee-migration) and not for carving business components — it only produces the vocabulary later steps consume.
+disable-model-invocation: true
 ---
 
 # Concept Extractor
