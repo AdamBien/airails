@@ -12,10 +12,13 @@ graph TD
     Carver -->|CARVING.md| SBCE([sbce + stack skill])
     Carver -.-> Annotator([concept-annotator])
     Annotator -.->|package-info notes| SBCE
+    Legacy -.->|record| Charact([characterization-tests])
+    Lift -.->|replay| Charact
+    SBCE -.->|replay| Charact
 
     classDef bc fill:#dae8fc,stroke:#6c8ebf,color:#000
     classDef ext fill:#fff2cc,stroke:#d6b656,color:#000,stroke-dasharray:5 5
-    class Extractor,Clarifier,Carver,Annotator bc
+    class Extractor,Clarifier,Carver,Annotator,Charact bc
     class Legacy,Lift,SBCE ext
 ```
 
@@ -25,6 +28,7 @@ graph TD
 - [**concept-clarifier**](concept-clarifier/) — Resolves open questions and glossary hypotheses with a domain expert, live or via `migration/INTERVIEW.md`; records answers with provenance
 - [**bc-carver**](bc-carver/) — Clusters confirmed concepts into candidate business components; documents the as-is → to-be diff in `migration/CARVING.md`
 - [**concept-annotator**](concept-annotator/) — Projects concepts, target BC, and refactoring hints into per-package `package-info.java` migration notes
+- [**characterization-tests**](characterization-tests/) — Pins observed behavior of the running legacy system as replayable golden masters in `migration/characterization/`; system tests with recorded expectations, records before, replays after the lift and each carving step; surface-dependent (HTTP bundled), test syntax follows the composed stack skill
 
 ## Conventions
 
@@ -43,4 +47,3 @@ Steps are optional: on small systems the clarifier can be a single live round; t
 ## Open Gaps
 
 - **1:1 lift skill** — planned; a j2ee-migration PoC exists outside this repo
-- **Characterization tests** — capture behavior before the lift, replay after the lift and after each carving step; not yet covered
