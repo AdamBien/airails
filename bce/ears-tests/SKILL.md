@@ -9,7 +9,9 @@ collects statements that share **one boundary operation** — same arrange/act s
 data differs. That is the textbook precondition for parameterization, so the mapping is mechanical.
 
 Own only the **transform and the trace**. The concrete test syntax is the composed stack skill's
-call — never name a runner or framework verb here.
+call — never name a runner or framework verb here. When the generated tests exercise the running
+system, the system-tests skill owns the contract (black box, coordinates as configuration, total
+verdict reporting).
 
 ## The mapping
 

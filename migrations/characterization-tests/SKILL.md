@@ -1,6 +1,6 @@
 ---
 name: characterization-tests
-description: Pin the observed behavior of a running legacy system as replayable golden masters — record normalized stimulus/observation pairs into migration/characterization/, replay them against the lifted or re-architected system, report behavior diffs. Owns the record/replay/reconcile discipline; the observable surface (HTTP, messaging, batch files, CLI, database state) is system-dependent, and test syntax follows the composed stack skill. Characterization tests are system tests whose expectations are recorded, not specified. Brackets every code-changing migration step; retires as sbce specs and ears-tests take over. Invoke explicitly as /characterization-tests record|replay. Not for spec-derived tests — use ears-tests.
+description: Pin the observed behavior of a running legacy system as replayable golden masters — record normalized stimulus/observation pairs into migration/characterization/, replay them against the lifted or re-architected system, report behavior diffs. Owns the record/replay/reconcile discipline; the observable surface (HTTP, messaging, batch files, CLI, database state) is system-dependent. Characterization tests are system tests whose expectations are recorded, not specified — composes with system-tests (contract) and the stack skill (test syntax). Brackets every code-changing migration step; retires as sbce specs and ears-tests take over. Invoke explicitly as /characterization-tests record|replay. Not for spec-derived tests — use ears-tests.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 A regular test fails when behavior is wrong; a characterization test fails when behavior is *different*. Record what the system does — bugs included — and pin it as the expected value. Correctness is the information the legacy system lost; observed behavior is the only surviving specification, and downstream consumers may depend on the bugs.
 
-Characterization tests are **system tests**: black-box, against the running system, from the outside. The only difference from ordinary system tests is the origin of the expectations — recorded, not specified.
+Characterization tests are **system tests**: black-box, against the running system, from the outside — the system-tests skill owns that contract. The only difference from ordinary system tests is the origin of the expectations — recorded, not specified.
 
 ## Surfaces
 

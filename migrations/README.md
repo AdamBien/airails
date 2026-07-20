@@ -28,7 +28,7 @@ graph TD
 - [**concept-clarifier**](concept-clarifier/) — Resolves open questions and glossary hypotheses with a domain expert, live or via `migration/INTERVIEW.md`; records answers with provenance
 - [**bc-carver**](bc-carver/) — Clusters confirmed concepts into candidate business components; documents the as-is → to-be diff in `migration/CARVING.md`
 - [**concept-annotator**](concept-annotator/) — Projects concepts, target BC, and refactoring hints into per-package `package-info.java` migration notes
-- [**characterization-tests**](characterization-tests/) — Pins observed behavior of the running legacy system as replayable golden masters in `migration/characterization/`; system tests with recorded expectations, records before, replays after the lift and each carving step; surface-dependent (HTTP bundled), test syntax follows the composed stack skill
+- [**characterization-tests**](characterization-tests/) — Pins observed behavior of the running legacy system as replayable golden masters in `migration/characterization/`; system tests with recorded expectations, records before, replays after the lift and each carving step; surface-dependent (HTTP bundled), composes with [system-tests](../bce/system-tests/) and the stack skill
 
 ## Conventions
 
