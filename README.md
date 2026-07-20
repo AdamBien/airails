@@ -81,6 +81,18 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**continuous-testing**](bce/continuous-testing) — Test-driven loop on top of microprofile-server: builds, starts the server, and runs Unit, Integration, and System Tests after every change
 - [**showtime**](bce/showtime) — Live coding mode on top of any project skill: generates code without running tests or builds, for demos and workshops
 
+### Migrations
+
+Migrate legacy, overengineered enterprise systems — Java or web — onto a modern stack ([migrations/](migrations/)). Three entry paths: rehost unchanged, replatform by simplifying in place, or rearchitect toward BCE by recovering the domain vocabulary and carving business components. Every code-changing step is bracketed by recorded behavior; analysis steps produce documentation for human review before any code changes.
+
+- [**migration-advisor**](migrations/migration-advisor) — Front door: assesses the system from shallow read-only signals plus a short interview, recommends an entry path and an ordered skill sequence in `migration/PLAN.md`; routes, never executes
+- [**concept-extractor**](migrations/concept-extractor) — Mines candidate domain concepts from every naming source (schema, UI labels, contracts, code); writes `migration/CONCEPTS.md`, seeds `migration/GLOSSARY.md`
+- [**concept-clarifier**](migrations/concept-clarifier) — Resolves open questions and glossary hypotheses with a domain expert, live or via `migration/INTERVIEW.md`; records answers with provenance
+- [**bc-carver**](migrations/bc-carver) — Clusters confirmed concepts into candidate business components; documents the as-is → to-be diff in `migration/CARVING.md`
+- [**concept-annotator**](migrations/concept-annotator) — Projects concepts, target BC, and refactoring hints into per-package `package-info.java` migration notes
+- [**characterization-tests**](migrations/characterization-tests) — Pins observed behavior of the running legacy system as replayable golden masters; records before, replays after the lift and each carving step; composes with system-tests and the stack skill
+- [**simplifier**](migrations/simplifier) — Replatform mode: modernizes code and removes external dependencies on the lifted system, one pass at a time under the characterization green bar; structure preserved
+
 ### Documentation
 
 - [**bce-diagrams**](documentation/bce-diagrams) — High-level overview diagrams showing interactions between business components, subsystems, and services
