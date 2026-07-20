@@ -1,6 +1,6 @@
 # Migrations
 
-Skills for migrating legacy enterprise systems to BCE: recover the domain vocabulary from the system's names, decide the component cut, execute it incrementally with [sbce](../bce/sbce) and a stack skill. All steps before execution produce documentation for human review — no code changes.
+Skills for migrating legacy, overengineered enterprise systems — Java or web — onto a modern stack. Three entry paths (see below): rehost the system unchanged, replatform it by simplifying in place, or rearchitect it toward BCE by recovering the domain vocabulary from the system's names and carving business components. Every step is bracketed by recorded behavior; the analysis steps produce documentation for human review before any code changes.
 
 ```mermaid
 graph TD
