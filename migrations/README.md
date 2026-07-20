@@ -1,6 +1,6 @@
 # Migrations
 
-Skills for migrating legacy, overengineered, untested enterprise systems to BCE — first recovering the domain language buried in the system's names, then deciding the component cut, then executing it incrementally with [sbce](../bce/sbce/) and a stack skill. Every step until execution is documentation-only: the running system is never at risk, and each stage produces a reviewable artifact a human confirms before the next stage consumes it.
+Skills for migrating legacy enterprise systems to BCE: recover the domain vocabulary from the system's names, decide the component cut, execute it incrementally with [sbce](../bce/sbce) and a stack skill. All steps before execution produce documentation for human review — no code changes.
 
 ```mermaid
 graph TD
@@ -21,25 +21,26 @@ graph TD
 
 ## Skills
 
-| Skill | Produces |
-|---|---|
-| [concept-extractor](concept-extractor/) | `migration/CONCEPTS.md` — mined concepts with aliases, evidence, co-occurrence; seeds `migration/GLOSSARY.md` |
-| [concept-clarifier](concept-clarifier/) | confirmed glossary entries with provenance — resolves open questions with a domain expert, live or via `migration/INTERVIEW.md` |
-| [bc-carver](bc-carver/) | `migration/CARVING.md` — candidate BC map plus the as-is → to-be diff; the incremental-refactoring backlog |
-| [concept-annotator](concept-annotator/) | `package-info.java` migration notes per package — the code describes its own concepts, target BC, and refactoring hints |
+- [**concept-extractor**](concept-extractor/) — Mines candidate domain concepts from every naming source (database schema, UI labels, external contracts, code); writes `migration/CONCEPTS.md`, seeds `migration/GLOSSARY.md`
+- [**concept-clarifier**](concept-clarifier/) — Resolves open questions and glossary hypotheses with a domain expert, live or via `migration/INTERVIEW.md`; records answers with provenance
+- [**bc-carver**](bc-carver/) — Clusters confirmed concepts into candidate business components; documents the as-is → to-be diff in `migration/CARVING.md`
+- [**concept-annotator**](concept-annotator/) — Projects concepts, target BC, and refactoring hints into per-package `package-info.java` migration notes
 
-All skills are explicitly invoked (`/concept-extractor`, …), write candidates for human review — never verdicts — and share contracts: pipeline artifacts live in the analyzed project's `migration/` folder, open questions carry stable Q-ids across artifacts, and `GLOSSARY.md` is the single durable decision store. The `migration/` folder is disposable after the migration; the glossary is cargo — it becomes the ubiquitous language of the new system.
+## Conventions
 
-## Choosing the Entry Path
+- All skills are invoked explicitly (`/concept-extractor`, …) and produce candidates for human review
+- Pipeline artifacts live in the analyzed project's `migration/` folder; open questions carry stable Q-ids across artifacts
+- `GLOSSARY.md` records confirmed terms and decisions; extractor and carver re-runs treat it as ground truth
+- `migration/` is deleted after the migration; `GLOSSARY.md` is promoted into the new system
 
-Project-dependent — some projects lift, others rearchitect directly:
+## Entry Paths
 
-- **Lift-and-shift first** when the system must keep running through a long migration, platform EOL pressure is real, or behavior risk dominates. A lift is a first step with an expiry date, not a destination — the `CARVING.md` diff and package-info notes are the written record that it isn't done.
-- **Rearchitect directly** when the system is small or well-understood enough that double handling isn't worth it.
+- **Lift-and-shift first** — 1:1 lift onto the target runtime, then the pipeline on the lifted tree; for systems that must keep running during a long migration or under platform EOL pressure
+- **Rearchitect directly** — the pipeline on the original tree; for small or well-understood systems
 
-Steps are individually skippable: on small systems the clarifier may be a single live round, and the annotator is optional throughout. Use what the project needs — the pipeline is a menu, not a liturgy.
+Steps are optional: on small systems the clarifier can be a single live round; the annotator can be skipped.
 
 ## Open Gaps
 
-- **1:1 lift skill** — planned; a `j2ee-migration` PoC exists outside this repo as raw material.
-- **Behavior recovery / characterization tests** — specs need behavior, not just names; an untested legacy system's rules live only in its code. Capture before the lift, replay after — not yet covered.
+- **1:1 lift skill** — planned; a j2ee-migration PoC exists outside this repo
+- **Characterization tests** — capture behavior before the lift, replay after the lift and after each carving step; not yet covered
