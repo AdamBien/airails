@@ -1,6 +1,6 @@
 # airails.dev
 
-Home of Spec-Driven BCE ([**sbce.space**](https://sbce.space)) — development conventions, [SKILLS.md](https://agentskills.io/specification), and [AGENTS.md](https://agents.md) for building modern Java and web applications.
+Home of Spec-Driven BCE ([**sbce.space**](https://sbce.space)) — development conventions, [SKILLS.md](https://agentskills.io/specification), and [AGENTS.md](https://agents.md) for building modern Java and web applications, and for migrating legacy enterprise systems onto that stack.
 
 ## Installation
 
@@ -107,3 +107,5 @@ Migrate legacy, overengineered enterprise systems — Java or web — onto a mod
 - [**ebank**](https://github.com/AdamBien/ebank) — CRUD with Quarkus, JPA, and PostgreSQL
 - [**java-cli-app**](https://github.com/AdamBien/java-cli-app) — Template for building zero-dependency Java CLI applications with zb
 - [**zeeds**](https://github.com/AdamBien/zeeds) — Zero-dependency Java 25+ source files as starting points, run directly with `java filename.java`
+
+powered by [airhacks.industries](https://airhacks.industries)
