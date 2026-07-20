@@ -1,6 +1,6 @@
 ---
 name: concept-clarifier
-description: Resolve the open questions and hypothesis-marked glossary definitions produced by concept-extractor together with a human domain expert — via live interview or an async questionnaire (migration/INTERVIEW.md) — and fold confirmed answers into migration/GLOSSARY.md with provenance. Second step of a legacy-to-BCE migration; composes with concept-extractor. Invoke explicitly as /concept-clarifier in the analyzed project. Not for scoping a task or gathering requirements for a request — use clarify for that.
+description: Resolve the open questions and hypothesis-marked glossary definitions produced by concept-extractor and bc-carver together with a human domain expert — via live interview or an async questionnaire (migration/INTERVIEW.md) — and fold confirmed answers into migration/GLOSSARY.md with provenance. Second step of a legacy-to-BCE migration; composes with concept-extractor. Invoke explicitly as /concept-clarifier in the analyzed project. Not for scoping a task or gathering requirements for a request — use clarify for that.
 disable-model-invocation: true
 ---
 
@@ -14,8 +14,9 @@ Build one work queue from:
 
 1. `migration/CONCEPTS.md` → `## Open Questions`, by Q-id.
 2. Every `migration/GLOSSARY.md` entry still carrying a `(hypothesis …)` marker.
+3. `migration/CARVING.md` → `## Open Questions`, when present — BC-assignment questions share the same Q-id space and resolve through the same flow; their answers land in `GLOSSARY.md` `## Decisions` keyed by Q-id.
 
-Group the queue by theme: synonym merges, homonym splits, abbreviation expansions, canonical-term and language choices. Do not mine the codebase — evidence shown to the expert comes verbatim from the CONCEPTS.md pointers; if evidence is missing, that is an extractor defect, not a reason to search.
+Group the queue by theme: synonym merges, homonym splits, abbreviation expansions, canonical-term and language choices, BC assignments. Do not mine the codebase — evidence shown to the expert comes verbatim from the CONCEPTS.md pointers; if evidence is missing, that is an extractor defect, not a reason to search.
 
 ## Mode Selection
 
