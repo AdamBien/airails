@@ -4,8 +4,9 @@ Skills for migrating legacy, overengineered enterprise systems — Java or web �
 
 ```mermaid
 graph TD
-    Legacy([Legacy System]) -->|rearchitect first| Extractor([concept-extractor])
-    Legacy -.->|lift-and-shift first| Lift([1:1 lift — planned])
+    Legacy([Legacy System]) --> Advisor([migration-advisor])
+    Advisor -->|PLAN.md| Extractor([concept-extractor])
+    Advisor -.->|rehost/replatform| Lift([1:1 lift — planned])
     Lift -.-> Extractor
     Extractor -->|CONCEPTS.md| Clarifier([concept-clarifier])
     Clarifier -->|GLOSSARY.md| Carver([bc-carver])
@@ -21,12 +22,13 @@ graph TD
 
     classDef bc fill:#dae8fc,stroke:#6c8ebf,color:#000
     classDef ext fill:#fff2cc,stroke:#d6b656,color:#000,stroke-dasharray:5 5
-    class Extractor,Clarifier,Carver,Annotator,Charact,Simplifier bc
+    class Advisor,Extractor,Clarifier,Carver,Annotator,Charact,Simplifier bc
     class Legacy,Lift,SBCE ext
 ```
 
 ## Skills
 
+- [**migration-advisor**](migration-advisor/) — Front door: assesses the system from shallow read-only signals (repo probe, git history, a running instance) plus a short interview, recommends an entry path and an ordered skill sequence in `migration/PLAN.md`; routes, never executes
 - [**concept-extractor**](concept-extractor/) — Mines candidate domain concepts from every naming source (database schema, UI labels, external contracts, code); writes `migration/CONCEPTS.md`, seeds `migration/GLOSSARY.md`
 - [**concept-clarifier**](concept-clarifier/) — Resolves open questions and glossary hypotheses with a domain expert, live or via `migration/INTERVIEW.md`; records answers with provenance
 - [**bc-carver**](bc-carver/) — Clusters confirmed concepts into candidate business components; documents the as-is → to-be diff in `migration/CARVING.md`
