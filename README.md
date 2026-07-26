@@ -78,6 +78,7 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**bce**](bce/bce) — Composable, technology-neutral architecture rules for the Boundary-Control-Entity pattern: business components, layer responsibilities, and package structure
 - [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
+- [**aws-cdk**](bce/aws-cdk) — Create and review Java AWS CDK v2 infrastructure with BCE layering: thin stacks over reusable constructs, business components named after AWS services, region pinning, `grant*` permissions, and synthesis-based tests
 - [**continuous-testing**](bce/continuous-testing) — Test-driven loop on top of microprofile-server: builds, starts the server, and runs Unit, Integration, and System Tests after every change
 - [**showtime**](bce/showtime) — Live coding mode on top of any project skill: generates code without running tests or builds, for demos and workshops
 
