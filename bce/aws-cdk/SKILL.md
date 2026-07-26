@@ -110,10 +110,10 @@ IAM (roles, policy statements) belongs in a dedicated `iam` component. Cognito a
 
 ## Java conventions for CDK
 
-- Java 25, modern syntax (`var`, records, pattern matching, text blocks)
+Language-level rules (syntax, naming, visibility, structure) come from `java-conventions`. CDK-specific deltas only:
+
+- a stack class must end in `Stack` — the exception to the no-suffix rule; `*Construct` remains forbidden
 - prefer `interface` with `static` methods for stateless `control` factories and helpers
-- avoid `private`; prefer package-private (default) so tests in the same package can reach internals
-- avoid meaningless suffixes (`*Impl`, `*Manager`, `*Helper`, `*Construct`); a stack is the exception — it must end in `Stack`
 - for synth-time diagnostics a tiny `Log` control over `System.Logger` (as in the reference) is fine; `System.out.println` is acceptable for one-off output
 
 ## Testing
