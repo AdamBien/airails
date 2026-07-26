@@ -13,10 +13,10 @@ Governing rule: **CloudFormation logical IDs and CDK construct paths are deploym
 
 | Casing | Use for | Examples |
 | --- | --- | --- |
-| **PascalCase** | CloudFormation logical IDs; CDK classes, records, interfaces, and construct IDs | `OrdersTable`, `OrdersApiStack`, `VpcId` |
+| **PascalCase** | CloudFormation logical IDs; CDK classes, records, interfaces, and construct IDs | `OrdersTable`, `OrderingStack`, `VpcId` |
 | **lowerCamelCase** | Java fields, variables, methods | `ordersTable`, `environmentName`, `getOrdersTable()` |
 | **UPPER_SNAKE_CASE** | Constants and enum members | `DEFAULT_RETENTION_DAYS`, `PAY_PER_REQUEST` |
-| **lowercase-kebab-case** | Stack names, necessary physical names, template filenames, tag-key components | `acme-orders-api-prod`, `orders-api.yaml` |
+| **lowercase-kebab-case** | Stack names, necessary physical names, template filenames, tag-key components | `acme-orders-ordering-prod`, `orders-ordering.yaml` |
 | **namespace:lowercase-kebab-case** | Organization-controlled tag keys | `acme:application-id` |
 
 Acronyms are ordinary words in Pascal/camel case: `VpcId`, `ApiUrl`, `JsonPolicy`, `iamRole` — never `VPCID`, `APIURL`, `JSONPolicy`.
@@ -25,7 +25,7 @@ Acronyms are ordinary words in Pascal/camel case: `VpcId`, `ApiUrl`, `JsonPolicy
 
 | Element | Convention | Example | Key rule |
 | --- | --- | --- | --- |
-| Stack name | `<org>-<workload>-<component>-<environment>`, lowercase kebab | `acme-orders-api-prod` | Start with a letter; letters/digits/hyphens only; ≤128 chars. |
+| Stack name | `<org>-<workload>-<component>-<environment>`, lowercase kebab | `acme-orders-ordering-prod` | Start with a letter; letters/digits/hyphens only; ≤128 chars. |
 | Resource logical ID | PascalCase describing business purpose | `OrdersTable`, `ApiExecutionRole` | Alphanumeric only; unique per template; stable deployment identity. |
 | Output logical ID | PascalCase subject + attribute | `ApiUrl`, `OrdersTableArn` | Avoid generic `Output1`. |
 | Export name | Stack name + value | `${AWS::StackName}-ApiUrl` | Unique per account+Region. |
@@ -41,8 +41,8 @@ Acronyms are ordinary words in Pascal/camel case: `VpcId`, `ApiUrl`, `JsonPolicy
 | Application package | `[organization].[application]`, reflects the app name; holds `Configuration` / `Stacks` | `airhacks.website` |
 | Entry-point class | Always `CDKApp`, at the root (application or organization package) | `CDKApp` |
 | Deployment name | `appName` constant used to derive stack names — not the `[application]` segment | `aws-cicd-website-cdk` |
-| Stack class | PascalCase ending in `Stack` | `OrdersApiStack` |
-| Reusable construct / factory | PascalCase business capability | `OrdersApi`, `Buckets`, `Route53` |
+| Stack class | PascalCase ending in `Stack` | `OrderingStack` |
+| Reusable construct / factory | PascalCase business capability | `Ordering`, `Buckets`, `Route53` |
 | Configuration record | PascalCase, often nested in a `Configuration` interface | `DomainEntriesConfiguration`, `BuildConfiguration` |
 | Field | lowerCamelCase | `ordersTable` |
 | Method | lowerCamelCase | `getOrdersTable()` |
@@ -50,7 +50,7 @@ Acronyms are ordinary words in Pascal/camel case: `VpcId`, `ApiUrl`, `JsonPolicy
 | Construct ID (2nd `Builder.create` arg) | Stable PascalCase string | `"OrdersTable"`, `"CloudFrontDistribution"` |
 | Primary L1 construct ID inside a wrapper | `"Resource"` | `"Resource"` |
 | Behavioral interface (CDK library) | `I` + PascalCase | `IBucket`, `ITable`, `IDistribution` |
-| Source filename | Same as the public class | `OrdersApiStack.java` |
+| Source filename | Same as the public class | `OrderingStack.java` |
 
 Prefer capability names over service-only names for constructs where a capability fits (`EncryptedDataStore` over `S3`), but naming a plain resource factory after its service (`Buckets`, `Route53`) is idiomatic in infrastructure-only projects.
 
@@ -60,7 +60,7 @@ Prefer capability names over service-only names for constructs where a capabilit
 | --- | --- | --- |
 | Application entry point | Environment discovery + top-level composition in one class | Reading env vars throughout stacks/constructs |
 | Stage (optional) | A `Stage` groups the stacks of one environment | Treating a stage as a reusable component |
-| Stack boundaries | Define by deployment lifecycle, ownership, failure domain | One stack per AWS service (`S3Stack`, `IamStack`) |
+| Stack boundaries | Define by deployment lifecycle, ownership, failure domain | Mechanically one stack per AWS service with no lifecycle rationale |
 | Stack responsibility | Compose constructs, connect dependencies, apply settings | Putting all resource configuration in the stack |
 | Construct responsibility | Model one cohesive capability | Grouping unrelated resources |
 | Construct granularity | Group resources that operate as one unit | One construct per individual resource |
@@ -78,13 +78,13 @@ Prefer capability names over service-only names for constructs where a capabilit
 ### Recommended hierarchy
 
 ```
-App                              selects accounts, Regions, environments
-└── (optional) Stage             groups the stacks of one environment
-    ├── DataStack (boundary)     stateful data lifecycle boundary
-    │   └── data control/entity  reusable data capability + domain data
-    ├── ApiStack (boundary)      application deployment boundary
-    │   └── api control          API Gateway, functions, grants, alarms
-    └── MonitoringStack          independently owned observability
+App                                   selects accounts, Regions, environments
+└── (optional) Stage                  groups the stacks of one environment
+    ├── DynamoDBStack (boundary)      stateful lifecycle boundary — isolated because stateful
+    │   └── dynamodb control/entity   table factory + domain data
+    ├── OrderingStack (boundary)      application deployment boundary
+    │   └── ordering control          API Gateway, functions, grants, alarms
+    └── MonitoringStack               independently owned observability
 ```
 
 ### Core design rule

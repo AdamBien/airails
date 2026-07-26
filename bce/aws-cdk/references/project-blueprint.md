@@ -2,6 +2,8 @@
 
 A domain-neutral walkthrough of a Java AWS CDK v2 app structured as BCE business components. The example domain (an `orders` service with a DynamoDB data store and a Lambda-backed API) is illustrative — **copy the shapes, not the domain**. Any AWS capability maps onto the same layout: a thin stack in `boundary`, reusable resource factories in `control`, immutable data in `entity`.
 
+The two business components also demonstrate both naming rules: `dynamodb` provisions a single service and is named after it; `ordering` spans Lambda and API Gateway and is therefore named after its domain responsibility, never after a technical layer (`api`, `data`).
+
 ## Contents
 
 - [Project layout](#project-layout)
@@ -17,28 +19,28 @@ A domain-neutral walkthrough of a Java AWS CDK v2 app structured as BCE business
 
 ## Project layout
 
-Packages are BCE business components named after the AWS capability they provision. `boundary` holds stacks, `control` holds reusable factories, `entity` holds immutable data. A component uses only the layers it needs — a stateless factory is a `control`-only component.
+Packages are BCE business components — named after the single AWS capability they provision, or after their domain responsibility when they span multiple services. `boundary` holds stacks, `control` holds reusable factories, `entity` holds immutable data. A component uses only the layers it needs — a stateless factory is a `control`-only component.
 
 ```
 src/main/java/
-  com/acme/                                   ← organization root
-    CDKApp.java                               ← app entry point (appName constant lives here)
-    orders/                                   ← application package [organization].[application]
-      Configuration.java                      ← typed config records (shared concern)
-      Stacks.java                             ← pinned StackProps per region
-      data/boundary/OrdersDataStack.java      ← stateful data deployment boundary
-      data/control/Tables.java                ← DynamoDB table factory
-      api/boundary/OrdersApiStack.java        ← application deployment boundary
-      api/control/Functions.java              ← Lambda + grants factory
-      api/entity/RouteKey.java                ← value object
-      iam/Roles.java                          ← shared IAM (no BCE substructure needed)
+  com/acme/                                     ← organization root
+    CDKApp.java                                 ← app entry point (appName constant lives here)
+    orders/                                     ← application package [organization].[application]
+      Configuration.java                        ← typed config records (shared concern)
+      Stacks.java                               ← pinned StackProps per region
+      dynamodb/boundary/DynamoDBStack.java      ← stateful deployment boundary (single service)
+      dynamodb/control/Tables.java              ← DynamoDB table factory
+      ordering/boundary/OrderingStack.java      ← application deployment boundary (multi-service)
+      ordering/control/Functions.java           ← Lambda + grants factory
+      ordering/entity/RouteKey.java             ← value object
+      iam/Roles.java                            ← shared IAM (no BCE substructure needed)
 src/test/java/
   com/acme/orders/
-    data/boundary/OrdersDataStackTest.java    ← synthesis test
-    api/entity/RouteKeyTest.java              ← parameterized test
+    dynamodb/boundary/DynamoDBStackTest.java    ← synthesis test
+    ordering/entity/RouteKeyTest.java           ← parameterized test
 ```
 
-Business components (`data`, `api`, `iam`) are direct children of the **application package** `com.acme.orders` (`[organization].[application]`), not of the organization. `CDKApp` sits at the organization root (keeping it in the root is fine); the deployment name `acme-orders` is carried by its `appName` constant — distinct from the `orders` application package segment.
+Business components (`dynamodb`, `ordering`, `iam`) are direct children of the **application package** `com.acme.orders` (`[organization].[application]`), not of the organization. `CDKApp` sits at the organization root (keeping it in the root is fine); the deployment name `acme-orders` is carried by its `appName` constant — distinct from the `orders` application package segment.
 
 ## Build files (pom.xml + cdk.json)
 
@@ -109,8 +111,8 @@ public interface CDKApp {
         Tags.of(app).add("acme:environment-type", environmentName);
         Tags.of(app).add("acme:managed-by", "cdk");
 
-        var dataStack = new OrdersDataStack(app, configuration);
-        new OrdersApiStack(app, configuration, dataStack.getOrdersTable());  // pass ITable, not the stack
+        var dynamoDBStack = new DynamoDBStack(app, configuration);
+        new OrderingStack(app, configuration, dynamoDBStack.getOrdersTable());  // pass ITable, not the stack
         app.synth();
     }
 
@@ -145,7 +147,7 @@ A `Configuration` interface groups immutable records and `static` factory method
 ```java
 public interface Configuration {
     record OrdersConfiguration(String appName, String environmentName) {
-        // "acme-orders-api-dev"
+        // "acme-orders-ordering-dev"
         String stackName(String component) {
             return "%s-%s-%s".formatted(appName, component, environmentName);
         }
@@ -162,12 +164,12 @@ public interface Configuration {
 A stack derives its CloudFormation name from configuration, delegates resource creation to `control` factories, wires cross-stack dependencies, and exposes only interfaces via getters. It holds almost no resource configuration itself. Stateful stacks are isolated and their resources retained.
 
 ```java
-public class OrdersDataStack extends Stack {
-    static String component = "data";
+public class DynamoDBStack extends Stack {
+    static String component = "dynamodb";
     ITable ordersTable;
 
-    public OrdersDataStack(Construct scope, OrdersConfiguration configuration) {
-        super(scope, "OrdersData",                                  // stable construct id
+    public DynamoDBStack(Construct scope, OrdersConfiguration configuration) {
+        super(scope, "DynamoDB",                                    // stable construct id
                 Stacks.PRIMARY.toBuilder()
                         .stackName(configuration.stackName(component)).build());
         this.ordersTable = Tables.createOrdersTable(this);
@@ -180,11 +182,11 @@ public class OrdersDataStack extends Stack {
 The consuming stack accepts the interface and passes it into its own factory — CDK derives the cross-stack reference from the object:
 
 ```java
-public class OrdersApiStack extends Stack {
-    static String component = "api";
+public class OrderingStack extends Stack {
+    static String component = "ordering";
 
-    public OrdersApiStack(Construct scope, OrdersConfiguration configuration, ITable ordersTable) {
-        super(scope, "OrdersApi",
+    public OrderingStack(Construct scope, OrdersConfiguration configuration, ITable ordersTable) {
+        super(scope, "Ordering",
                 Stacks.PRIMARY.toBuilder()
                         .stackName(configuration.stackName(component)).build());
         var handler = Functions.createApiHandler(this, ordersTable);
@@ -253,7 +255,7 @@ public enum RouteKey {
 **Synthesis test** — build an `App`, instantiate the stack, `synth()`, and assert the template has the expected resources (extend with property, count, and grant assertions where they matter):
 
 ```java
-class OrdersDataStackTest {
+class DynamoDBStackTest {
     static final ObjectMapper JSON =
             new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
 
@@ -261,7 +263,7 @@ class OrdersDataStackTest {
     void ordersTableIsSynthesized() {
         var app = new App();
         var configuration = Configuration.of("acme-orders", "test");
-        var stack = new OrdersDataStack(app, configuration);
+        var stack = new DynamoDBStack(app, configuration);
         var template = JSON.valueToTree(
                 app.synth().getStackArtifact(stack.getArtifactId()).getTemplate());
         assertThat(template.get("Resources")).isNotEmpty();
