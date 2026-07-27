@@ -19,6 +19,8 @@ verdict reporting).
 - One **statement `Rn.m` → one row** in the parameter source.
 - The **statement id `Rn.m` is the row's display name** — so the spec↔test binding stays per-statement
   and grep-visible, exactly as SBCE requires (a removed id retires its row; a row with no statement is drift).
+- The id MUST surface in the **runner-visible case label** — as a string literal or as a symbol whose
+  display form is the literal id. An id that appears only in a comment is not a trace.
 - The EARS pattern fixes the row's **role and shape** — you do not invent the columns, you read them off the pattern.
 
 ## EARS pattern → row shape
@@ -43,8 +45,8 @@ EARS hands you the *enumeration*, not the *data*. Keep the two honestly separate
 test never silently asserts an assumption:
 
 - **Deterministic (generate without judgment):** the method-per-group, the row-per-statement, the
-  `Rn.m` row labels, which boundary op the body calls, the row role from the pattern, and the
-  bijection check (every `Rn.m` ↔ exactly one row).
+  `Rn.m` row labels (in Java, the generated per-BC trace symbols), which boundary op the body calls,
+  the row role from the pattern, and the bijection check (every `Rn.m` ↔ exactly one row).
 - **Authored (leave a clearly marked stub for human/LLM):** the concrete input fixture and the
   assertion that expresses `<response>`. EARS abstracts the response in prose ("create and confirm
   an order") and carries no values — do not fabricate them. Emit a failing/`TODO` stub a human or a
@@ -55,7 +57,10 @@ test never silently asserts an assumption:
 This skill is stack-neutral. The parameter-source mechanism and display-name form belong to the
 composed stack skill — read `references/realizations.md` for the per-stack shape (JUnit 5
 `@ParameterizedTest` + `@MethodSource`, zunit's table form, Playwright `test.describe` per group).
-Pick the one the project already uses; never introduce a second test idiom.
+Java stacks materialize the `Rn.m` ids as a generated per-BC `Requirement` annotation with a nested
+`Rn` enum — the label contract is unchanged because the enum's display form is the literal id; web
+stacks and the black-box `-st` module keep literal strings. Pick the one the project already uses;
+never introduce a second test idiom.
 
 ## Composition
 
