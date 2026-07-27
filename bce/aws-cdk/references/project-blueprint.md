@@ -4,6 +4,8 @@ A domain-neutral walkthrough of a Java AWS CDK v2 app structured as BCE business
 
 The two business components also demonstrate both naming rules: `dynamodb` provisions a single service and is named after it; `ordering` spans Lambda and API Gateway and is therefore named after its domain responsibility, never after a technical layer (`api`, `data`).
 
+A compilable starter template is available at [AdamBien/aws-cdk-plain](https://github.com/AdamBien/aws-cdk-plain) — clone it to start a project, then grow it into the shapes below. When template and blueprint disagree, this blueprint governs.
+
 ## Contents
 
 - [Project layout](#project-layout)

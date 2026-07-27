@@ -19,7 +19,7 @@ A generic, domain-neutral blueprint — the BCE layout, build files, and one wor
 
 ## Scaffolding a new project
 
-When asked to create a new CDK app, work in this order — it mirrors the dependency direction of synthesis:
+A clone of [AdamBien/aws-cdk-plain](https://github.com/AdamBien/aws-cdk-plain) is a valid starting point; otherwise generate the files directly. Either way, work in this order — it mirrors the dependency direction of synthesis:
 
 1. **`pom.xml` + `cdk.json`** — Maven with `aws-cdk-lib` and `constructs`, Java 25 source/target, the `exec-maven-plugin` pointing `mainClass` at the app class. `cdk.json` sets `"app": "mvn -e -q compile exec:java"`. Templates in `references/project-blueprint.md`. Ask before adding any dependency beyond these.
 2. **Application entry point** — the `CDKApp` class at the root. It reads CDK context, loads configuration, applies app-level tags, instantiates stacks in dependency order, and calls `app.synth()`. Its `appName` constant is the deployment name used to derive stack names.
@@ -135,3 +135,4 @@ Language-level rules (syntax, naming, visibility, structure) come from `java-con
 
 - `references/naming-conventions.md` — full CloudFormation, CDK, and Java naming tables (casing for logical IDs, stack names, construct IDs, tags, physical names). Read when unsure how to name any element.
 - `references/project-blueprint.md` — a domain-neutral CDK app walked through file by file: `pom.xml`, `cdk.json`, app entry point, `Stacks`, `Configuration` records, a boundary stack, `control` factories, an `entity`, and the two test styles. Read when scaffolding or when you need a concrete template; copy the shapes, not the example domain.
+- [AdamBien/aws-cdk-plain](https://github.com/AdamBien/aws-cdk-plain) — a compilable starter template (`CDKApp`, `Configuration`, a placeholder stack) for clone-and-go project starts. It is a seed, not the worked example; when it and this skill or the blueprint disagree, the blueprint governs.
