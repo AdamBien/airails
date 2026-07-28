@@ -8,13 +8,17 @@
 /// unzip airails-claude.zip -d ~
 /// ```
 ///
+/// Additionally builds an agent-neutral `airails-skills.zip` whose entries
+/// live under a plain `skills/` prefix, for agents not listed in `targets()`
+/// or for manual installs into a custom location.
+///
 /// Run from the repository root — locally or from the release-skills GitHub
 /// Actions workflow, which publishes `target/*.zip` as release assets. The
 /// `targets()` map and the noise filter mirror `installSkills`, which stays
 /// the managed, interactive install path — when an agent is added there, add
 /// it here too.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-07-07.1";
+String version = "2026-07-28.1";
 
 /// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
 record Target(String agent, String prefix) {}
@@ -41,6 +45,8 @@ void main() throws Exception {
         var zip = zipAgent(target.agent(), target.prefix(), skills, output);
         IO.println("  %s <- %s".formatted(zip, target.prefix()));
     }
+    var generic = zipAgent("skills", "skills", skills, output);
+    IO.println("  %s <- %s".formatted(generic, "skills"));
     IO.println(name + ": done");
 }
 

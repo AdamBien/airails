@@ -55,4 +55,6 @@ jobs:
 
           Each zip contains the same skills under the agent's directory: claude (.claude/skills), vibe (.vibe/skills), kiro (.kiro/skills), copilot (.copilot/skills), codex (.agents/skills), goose (.config/goose/skills).
 
+          \`airails-skills.zip\` is agent-neutral: the same skills under a plain \`skills/\` prefix, for agents not listed above or for manual installs into a custom location.
+
           Note: unzipping overwrites existing skills of the same name without asking. For an interactive, managed install use \`./installSkills\` from the cloned repository."
