@@ -29,7 +29,12 @@ curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails
 unzip -o airails-claude.zip -d ~
 ```
 
-Each zip contains all skills with the agent's skills directory baked into the entry paths: `airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`. The agent-neutral `airails-skills.zip` holds the same skills under a plain `skills/` prefix, for other agents or custom locations.
+Each zip contains all skills with the agent's skills directory baked into the entry paths: `airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`. The agent-neutral `airails-skills.zip` holds the same skills under a plain `skills/` prefix — unzip it into any agent's configuration directory or a custom location:
+
+```
+curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-skills.zip
+unzip -o airails-skills.zip -d ~/.claude
+```
 
 AI agents installing the skills themselves should follow [AGENTS.md](AGENTS.md) — `installSkills` requires an interactive terminal.
 
