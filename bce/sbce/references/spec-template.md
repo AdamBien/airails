@@ -17,6 +17,7 @@ Rules for filling it in:
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
 - Every boundary op traces to a requirement group (`Rn`); every requirement is ≥1 EARS statement, and **each statement carries a stable id `Rn.m`** that ≥1 test embeds in its trace — so the spec↔test binding is per-statement and bijective. Ids are stable: never renumber on reorder; a removed statement's id is retired, not reused.
 - **Optional `why`.** A statement (or boundary op) may end with a terse `_(why: …)_` — the rule's *origin/intent*. Rationale, not contract: non-verified, **not a trace target** (the statement still needs its test), and bound to the id (retires with the statement; the `Rn.m` prefix stays first). Capture *why the rule exists*, never *how it currently works*.
+- **Optional `## Decisions`.** A BC-local confirmed choice may be logged before `## Out of scope`, under the same rules as the system doc's `## Decisions`: stable `Dn`, rejected alternatives in a trailing `_(why: …; rejected: …)_`, append-only (supersede, never edit), rationale not contract — no test, not a trace target.
 - Keep it minimal — an empty `## Out of scope` is fine, but the heading stays to keep the boundary sharp.
 
 Requirements are written in [EARS](https://alistairmavin.com/ears/) — each statement fits one

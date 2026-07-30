@@ -18,6 +18,7 @@ Rules for filling it in:
 - **Vision is the one exception.** Optional, one aspirational sentence — the outcome the assembly chases, distinct from the Charter's mandate ("what this assembly is"). Pure rationale: it carries **no `Sn`**, traces to **no test**, and is the single non-verifiable line in the doc. May be proposed by `/sbce new` distilling a README seed (the human accepts or edits). Omit it unless a real aspiration exists.
 - **System invariants** are EARS `shall` statements (the system is the assembly, not one BC). Same six patterns as a BC spec, and the same traceability: each carries a stable id `Sn` that ≥1 test embeds, so the spec↔test binding stays bijective at system altitude too.
 - **Ubiquitous language** defines shared nouns once, so each BC's `## Entities` stays terse — names plus a one-line meaning, no fields, no types.
+- **Decisions are append-only rationale.** Optional. Each confirmed choice carries a stable id `Dn`, states the decision, and names the rejected alternatives in a trailing `_(why: …; rejected: …)_`. Like Vision: no test, not a trace target. Immutable — a reversed decision gets a new entry and the old one is marked `superseded by Dm`, never edited or deleted. Testable behaviour belongs in an EARS statement instead; a standing project rule in the README's `## Conventions`.
 - It is not a tasks file and not a gap registry.
 
 The Markdown body (this is the whole system doc — every section optional except the charter):
@@ -43,6 +44,11 @@ The Markdown body (this is the whole system doc — every section optional excep
 <!-- shared domain nouns, defined once; names + one-line meaning, no fields, no types -->
 - Order — a confirmed, cancellable intent to buy. Owned by `checkout`.
 - Cart — a mutable pre-order collection of items.
+
+## Decisions
+<!-- optional; append-only confirmed choices with rejected alternatives; rationale, not contract — no test; supersede, never edit -->
+- D1 — Routing uses the Navigation API. _(why: web-platform first; rejected: router libraries)_
+- D2 — `payment` is its own BC, not a `checkout` control. _(why: independent provider swap; rejected: folding into `checkout`)_
 
 ## Stack
 <!-- the composed stack skill + package base, so `apply` reads it instead of re-inferring -->

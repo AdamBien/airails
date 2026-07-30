@@ -46,6 +46,7 @@ only when a real cross-BC concern appears; a one-BC system needs none. Author fr
 - **Components** — this system's concrete wiring: which BC may call which, which integration events cross boundaries (`/bce` owns the generic layering; this owns the concrete dependencies).
 - **System invariants** — cross-cutting EARS `shall` statements (id `Sn`) no single BC owns.
 - **Ubiquitous language** — shared domain nouns defined once, so each BC's `## Entities` stays terse.
+- **Decisions** *(optional)* — append-only log of confirmed choices and their rejected alternatives (a stack pick, a carving, an integration style): `Dn — <choice>. _(why: …; rejected: …)_`. Rationale, not contract — like Vision and a statement's `why`: no test, not a trace target. Ids stable; a reversed decision gets a new entry, the old one marked `superseded by Dm` — never edited or deleted. Litmus: testable behaviour → an EARS statement (tested); a standing project rule → README `## Conventions`; a point-in-time choice with rejected alternatives → `Dn`. A decision owned by a single BC may live in that BC's package doc under the same rules.
 - **Stack** — the composed stack skill + package base, so `apply` reads it instead of re-inferring.
 
 Never duplicate a BC's one-liner — a hand-typed BC index drifts; the gap is read, not stored. For
@@ -61,7 +62,7 @@ source of truth**. Author from `references/readme-template.md`. Two slices, hand
 
 - **Doubles as the inception seed.** The hand-written prose outside the markers is what `/sbce new` (no argument) reads to bootstrap vision + specs (see `new`); SBCE reads it, never rewrites it.
 - **Components diagram — projection, never inference.** Render only the *declared* wiring in the system doc's `## Components` (allowed calls + integration events) as a Mermaid graph: nodes are BCs, edges the declared directed relationships. **Never infer edges by scanning code** — that is discovery, not projection, and drift-prone. No `## Components` (a one-BC system) → nodes only, or omit. Basic Mermaid `flowchart`/`graph` syntax (version-stable, corpus-dense); delegate diagram style to `/mermaid` or `/bce-diagrams`.
-- `## Conventions` is the home for **project-specific, non-behavioral standards** (coverage target, "money is always cents", review policy): **declared, not verified** — no `Sn`, no test — and distinct from a `System invariant`, which must be behavioral *and* tested.
+- `## Conventions` is the home for **project-specific, non-behavioral standards** (coverage target, "money is always cents", review policy): **declared, not verified** — no `Sn`, no test — and distinct from a `System invariant`, which must be behavioral *and* tested, and from a `Dn` decision, which records a point-in-time choice with its rejected alternatives.
 - Optional: a one-BC project needs none. No markers → `apply` leaves the README untouched.
 
 ## Determinism boundary
@@ -70,6 +71,7 @@ source of truth**. Author from `references/readme-template.md`. Two slices, hand
 |---|---|---|
 | Run tests / "is it green" | the **stack's verification loop** (the composed stack skill) | yes — existing tooling, no LLM |
 | Decompose a feature into BCs (new vs existing) | this skill's judgment, over a read-only scan of the source tree's package docs, **user-confirmed** | no — semantic |
+| Record a confirmed choice as a `Dn` decision | this skill offers, **user-confirmed** — never recorded silently | no — semantic |
 | Author the spec content (boundary ops, EARS requirements) | this skill's judgment | no — semantic |
 | Place the BC — package doc + layer dirs at the source location | the composed stack skill (owns the package base / source root) | yes — stack-defined |
 | Structural sync, **both directions** (spec→code: op→method, `Rn.m`→test · code→spec: method→op, test-id→statement, entity→`## Entities`) | this skill, made checkable by the stack's traceability convention | grep-level |
@@ -110,11 +112,12 @@ a guessed spec makes the oracle verify assumptions, not intent.
 
 **Feature description** (`/sbce new "let a customer check out a cart"`):
 
-1. Scan existing BCs — read their package docs for responsibilities.
+1. Scan existing BCs — read their package docs for responsibilities, and the system doc's `## Decisions` if present: never propose an alternative a `Dn` records as rejected.
 2. **Propose** a BC set — each tagged **new** (coin a verb-noun name) or **extend-existing**, each with the one-line responsibility it owns.
 3. **Confirm the carving before any write** — decomposition has no test oracle, so the human approves the BC set.
 4. Realise each entry via the BC-name steps: **new** → fresh doc + dirs; **extend-existing** → add ops / requirements to its **single** existing doc, never a second spec.
 5. If the carving introduces cross-BC wiring (a call, a shared noun, a system invariant), record it in the system doc — user-confirmed.
+6. A carving or stack choice the user confirmed **against** a proposed alternative is a decision — offer to record it as a `Dn` in the system doc's `## Decisions`; never record one silently.
 
 **README seed** (`/sbce new`, no argument):
 
@@ -133,7 +136,7 @@ Guard: one capability ≡ one BC — output is 1..N package-doc specs, never a p
 Make reality match the declared spec — the "make it so" step. Idempotent.
 
 1. Locate the package doc (the spec); if missing, tell the user to run `/sbce new <bc-name>` first and stop.
-2. Resolve the composed stack skill in order: the system doc's `Stack` line if present, else `AGENTS.md`/`README`, else ask once.
+2. Resolve the composed stack skill in order: the system doc's `Stack` line if present, else `AGENTS.md`/`README`, else ask once. Read the system doc's `## Decisions` if present — never close a gap with an approach a `Dn` rejected.
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → stop and report "already converged".
 4. Else read the gap — both directions — and close it:
    - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test (delegate the EARS→table transform to `/ears-tests` — one parameterized test per `### Rn`, one labeled row per `Rn.m`); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
@@ -150,7 +153,7 @@ Green build + no structural gap or drift is the only definition of done.
 
 ## Spec format rules
 
-- Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, `## Out of scope`.
+- Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, optional `## Decisions` (BC-local confirmed choices — same rules as the system doc's section), `## Out of scope`.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
 - Requirements are [EARS](https://alistairmavin.com/ears/) statements — one of six patterns, the system always **the BC** — grouped under a titled `### Rn`, each statement carrying a stable id `Rn.m` (group `n`, statement `m`). Reach for `If…then` and `While…` to capture error and edge cases.
 
