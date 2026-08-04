@@ -9,7 +9,9 @@ Shared baseline for the stack-specific web skills — both compose this skill:
 - [web-static](../web-static) — no-JavaScript static sites; adds hard constraints, CSS-only interactivity, and the Chrome DevTools verification loop
 - [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, standards-based routing (Navigation API + URLPattern), and Playwright testing
 
-When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline. Stack-specific concerns (JavaScript policy, dependencies, responsive strategy, verification) are deliberately out of scope.
+The JavaScript half of the baseline is the sibling skill [javascript-conventions](../javascript-conventions) — language-level rules plus the Baseline lookup for JavaScript features. This skill owns HTML and CSS only.
+
+When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline. Stack-specific concerns (whether JavaScript is used at all, dependencies, responsive strategy, verification) are deliberately out of scope.
 
 ## Baseline Policy
 

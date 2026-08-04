@@ -16,8 +16,10 @@ Build or maintain a web component application using $ARGUMENTS. Apply all rules 
 ## Composition
 
 Compose with `/web-conventions` — it provides the baseline rules for semantic HTML, accessibility,
-modern CSS, design tokens, and the Baseline browser-support policy. Rules in this skill override it
-(e.g. container-query-first responsiveness). For static content sites without
+modern CSS, design tokens, and the Baseline browser-support policy — and with `/javascript-conventions`,
+which provides the language-level JavaScript rules (modules, syntax, functions, collections,
+asynchrony, errors, JSDoc types) and the Baseline lookup for JavaScript features. Rules in this skill
+override both (e.g. container-query-first responsiveness). For static content sites without
 client-side state, use `/web-static` instead. For experiments and PoCs, `/web-latest`
 may be composed on top to lift the Baseline browser-support constraints.
 
@@ -175,12 +177,9 @@ component; it is the single source of truth that `/sbce apply` converges the cod
 
 ### JSDoc
 
-Plain ES modules carry no type annotations — JSDoc provides them. Every method and function
-ships with a JSDoc comment declaring its types:
-
-- declare parameter and return types with `@param {Type} name` and `@returns {Type}`
-- describe entity and state shapes once with `@typedef` in the entity layer and reference them from the other layers
-- keep the comments type-focused — add prose only for intent the types cannot express
+Plain ES modules carry no type annotations — JSDoc provides them, per `/javascript-conventions`.
+In this stack, the `@typedef` for an entity and its state shape lives in the entity layer of the
+owning module; boundary and control reference it rather than redeclaring it.
 
 ## BElement Base Class
 
