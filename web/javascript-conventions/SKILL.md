@@ -9,7 +9,7 @@ Apply all rules below strictly to any JavaScript you write, generate, or review.
 
 - Language-level rules for JavaScript only — modules, syntax, functions, data, asynchrony, errors, JSDoc types, naming, comments.
 - HTML, CSS, accessibility, and design tokens are **not** in this skill — see `web-conventions`.
-- Architecture, state management, routing, dependency and build policy, project layout, dev server, and verification loops are **not** in this skill — see `web-components` (`web-static` forbids JavaScript entirely).
+- Architecture, state management, routing, dependency and build policy, project layout, dev server, and verification loops are **not** in this skill — see `web-components` (SPAs) and `web-sprinkles` (static sites with bounded enhancements); `web-static` forbids JavaScript entirely.
 - When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline.
 
 ## Language Level
@@ -228,7 +228,7 @@ Statuses from the 2026-07-08 snapshot, with the date each became Widely Availabl
 
 ## Composition with Other Skills
 
-- this skill defines only language-level JavaScript conventions; HTML, CSS, accessibility, and design tokens come from `web-conventions`, and architecture, state management, routing, dependency policy, project layout, dev server, and verification come from the stack skill (`web-components`) and `bce`
+- this skill defines only language-level JavaScript conventions; HTML, CSS, accessibility, and design tokens come from `web-conventions`, and architecture, state management, routing, dependency policy, project layout, dev server, and verification come from the stack skill (`web-components`, `web-sprinkles`) and `bce`
 - the Baseline snapshot is bundled with `web-conventions` (`references/baseline-snapshot.md`); this skill applies that policy to JavaScript syntax and APIs
 - `web-latest` overrides the Baseline policy for experiments and PoCs — any status becomes usable, with a declared support floor instead of fallbacks
 - when a composed skill adds or refines a rule, apply it on top of these; the composed skill always specializes, never contradicts

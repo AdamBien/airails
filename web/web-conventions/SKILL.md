@@ -9,7 +9,7 @@ Apply all rules below strictly to any HTML and CSS you write, generate, or revie
 
 - Platform-level rules for HTML and CSS only — semantics, accessibility, styling, theming, browser-support policy.
 - JavaScript language-level rules — modules, syntax, functions, collections, asynchrony, errors, JSDoc types — are **not** in this skill; they are the sibling baseline `javascript-conventions`, which applies the Baseline policy below to JavaScript syntax and APIs.
-- JavaScript *policy* (whether JavaScript is used at all), architecture, state management, routing, dependencies, project structure, and verification loops are **not** in this skill — see the context-specific skills `web-static` (no-JavaScript static sites) and `web-components` (web component SPAs).
+- JavaScript *policy* (whether JavaScript is used at all), architecture, state management, routing, dependencies, project structure, and verification loops are **not** in this skill — see the context-specific skills `web-static` (no-JavaScript static sites), `web-sprinkles` (static sites with bounded JavaScript enhancements), and `web-components` (web component SPAs).
 - Responsive strategy (media queries vs container queries) is stack-specific — the composed skill decides.
 - When a composed skill specifies a rule, the composed skill wins; this skill is the fallback baseline.
 

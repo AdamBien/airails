@@ -29,7 +29,8 @@ install these alongside it (all ship via airails `installSkills`):
   code idioms *and* verification: [`java-cli-app`](../java-cli-app)
   (`zunit`/`zb`), [`microprofile-server`](../microprofile-server) (integration + system tests),
   [`web-components`](../../web/web-components) (system tests + Playwright), or
-  [`web-static`](../../web/web-static) (`checks.md` manifest + Chrome DevTools / Lighthouse).
+  [`web-static`](../../web/web-static) / [`web-sprinkles`](../../web/web-sprinkles)
+  (`checks.md` manifest + Chrome DevTools / Lighthouse).
 
 `sbce` never names a runner or a test kind; it asks the stack skill "are you green?". The spec
 format and rules live in [SKILL.md](SKILL.md).
@@ -45,6 +46,7 @@ graph TD
         MicroProfile([microprofile-server])
         WebComponents([web-components])
         WebStatic([web-static])
+        WebSprinkles([web-sprinkles])
     end
 
     SBCE -->|relies on| BCE
@@ -54,6 +56,7 @@ graph TD
     MicroProfile -->|implements| BCE
     WebComponents -->|implements| BCE
     WebStatic -->|implements| BCE
+    WebSprinkles -->|implements| BCE
 
     classDef workflow fill:#dae8fc,stroke:#6c8ebf,color:#000
     classDef contract fill:#d5e8d4,stroke:#82b366,color:#000
@@ -62,7 +65,7 @@ graph TD
     class SBCE workflow
     class BCE contract
     class EARS transform
-    class JavaCli,MicroProfile,WebComponents,WebStatic stack
+    class JavaCli,MicroProfile,WebComponents,WebStatic,WebSprinkles stack
 ```
 
 ## Usage

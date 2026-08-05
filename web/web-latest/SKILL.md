@@ -1,6 +1,6 @@
 ---
 name: web-latest
-description: Composable modifier for experimentation and PoCs that lifts the `/web-conventions` Baseline browser-support policy so the newest web platform features — Newly Available, Limited availability, even experimental or flag-gated — can be used freely, without `@supports` wrappers or fallbacks. Composes on top of `web-static` or `web-components`; only the browser-support policy changes, every other rule of the composed skills stays in force. Use whenever a prototype, proof of concept, demo, or experiment should showcase the most recent browser features. Triggers on "latest browser features", "newest CSS", "most recent web features", "bleeding edge", "cutting edge", "experimental feature", "PoC", "proof of concept", "prototype", "try out a new feature", "ignore baseline", "modern browsers only", "no fallbacks needed". Not for production sites — without this modifier, the composed skills' default Baseline policy applies.
+description: Composable modifier for experimentation and PoCs that lifts the `/web-conventions` Baseline browser-support policy so the newest web platform features — Newly Available, Limited availability, even experimental or flag-gated — can be used freely, without `@supports` wrappers or fallbacks. Composes on top of `web-static`, `web-sprinkles`, or `web-components`; only the browser-support policy changes, every other rule of the composed skills stays in force. Use whenever a prototype, proof of concept, demo, or experiment should showcase the most recent browser features. Triggers on "latest browser features", "newest CSS", "most recent web features", "bleeding edge", "cutting edge", "experimental feature", "PoC", "proof of concept", "prototype", "try out a new feature", "ignore baseline", "modern browsers only", "no fallbacks needed". Not for production sites — without this modifier, the composed skills' default Baseline policy applies.
 ---
 
 Use the most recent web platform features freely in $ARGUMENTS. This is a modifier skill —
@@ -10,7 +10,7 @@ it changes exactly one thing about the composed stack: the browser-support polic
 
 Experiments and PoCs exist to explore what the newest browsers can do; a support policy
 designed for production audiences would defeat their purpose. When composed with
-`/web-static` or `/web-components` (and their shared `/web-conventions`), this skill overrides:
+`/web-static`, `/web-sprinkles`, or `/web-components` (and their shared `/web-conventions`), this skill overrides:
 
 - the **Baseline Policy** section of `/web-conventions`
 - the **Baseline check** of `/web-static`'s verification loop (replaced below)
@@ -22,6 +22,8 @@ Everything else in the composed skills remains binding. Explicitly **not** relax
 - accessibility rules, including `prefers-reduced-motion` and `prefers-color-scheme`
 - semantic HTML and heading hierarchy
 - `/web-static`'s no-JavaScript constraint
+- `/web-sprinkles`' enhancement contract — detection becomes optional, but a page whose content
+  depends on an experimental API is broken, not experimental
 - `/web-components`' dependency and architecture rules
 - design-token discipline
 
@@ -53,15 +55,15 @@ actually run it, so:
 - never present the PoC as production-ready; when an experiment graduates, drop this
   modifier and converge to the composed skill's default Baseline policy
 
-## Verification Loop Amendment (with `/web-static`)
+## Verification Loop Amendment (with `/web-static` or `/web-sprinkles`)
 
 The verification loop runs unchanged with one substitution: the **Baseline check** becomes a
 **support-floor report** — an inventory, not a gate:
 
 - list each below-Widely feature the site uses with its status (Newly / Limited /
   experimental) and the browsers that run it; confirm the declared support floor matches
-- all other standard checks (console, structure, responsive, preferences, Lighthouse) and
-  every `checks.md` line still apply and still define **green**
+- all other standard checks (console, structure, responsive, preferences, Lighthouse), the
+  `/web-sprinkles` no-JavaScript pass, and every `checks.md` line still apply and still define **green**
 - if a feature does not run in the DevTools Chrome, that is still red — unless the
   support-floor declaration documents it as needing a flag or a different browser, in which
   case report it as "not verifiable in this browser" rather than silently passing it

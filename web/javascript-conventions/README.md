@@ -12,11 +12,13 @@ graph TD
     WC[web-conventions<br/>HTML / CSS baseline]
     JS --> COMP[web-components]
     WC --> COMP
+    JS --> SPRINKLES[web-sprinkles]
+    WC --> SPRINKLES
     WC --> STATIC[web-static]
     JS -.->|Baseline snapshot| WC
 ```
 
-`web-static` forbids JavaScript, so `web-components` is the composing stack skill today. Composed skills always specialize, never contradict. When silent, `javascript-conventions` applies.
+`web-components` and `web-sprinkles` are the composing stack skills; `web-static` forbids JavaScript and composes `web-conventions` only. Composed skills always specialize, never contradict. When silent, `javascript-conventions` applies.
 
 ## Language Level
 

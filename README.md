@@ -75,9 +75,10 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**web-conventions**](web/web-conventions) — Composable baseline for all web frontends: semantic HTML, accessibility, design tokens, and Baseline browser-support policy
 - [**javascript-conventions**](web/javascript-conventions) — Composable JavaScript baseline: ES modules, syntax, collections, asynchrony, errors, JSDoc types, and the per-feature Baseline lookup that picks the newest usable ECMAScript
 - [**web-static**](web/web-static) — Modern static websites using semantic HTML and CSS without external dependencies or build systems; composes web-conventions
+- [**web-sprinkles**](web/web-sprinkles) — Static sites enhanced with small, self-contained ES modules: enhancement contract, the CSS-versus-script cut line, and a verification pass with the scripts removed; composes web-static and javascript-conventions
 - [**web-components**](web/web-components) — Single-page applications using web components, BCE layering, lit-html, Redux Toolkit, and client-side routing; composes web-conventions
-- [**web-latest**](web/web-latest) — Modifier for experiments and PoCs that lifts the Baseline browser-support policy: newest web platform features without fallbacks, with a declared support floor; composes on top of web-static or web-components
-- [**web-performance-reviewer**](web/web-performance-reviewer) — Opt-in performance review of the rendered site through Chrome DevTools MCP: throttled traces, Core Web Vitals thresholds, network waterfall, heap-snapshot leak checks for SPAs; never part of the verification loop; composes on top of web-static or web-components
+- [**web-latest**](web/web-latest) — Modifier for experiments and PoCs that lifts the Baseline browser-support policy: newest web platform features without fallbacks, with a declared support floor; composes on top of web-static, web-sprinkles, or web-components
+- [**web-performance-reviewer**](web/web-performance-reviewer) — Opt-in performance review of the rendered site through Chrome DevTools MCP: throttled traces, Core Web Vitals thresholds, network waterfall, heap-snapshot leak checks for SPAs; never part of the verification loop; composes on top of web-static, web-sprinkles, or web-components
 
 ### BCE
 

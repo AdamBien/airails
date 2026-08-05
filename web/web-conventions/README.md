@@ -4,9 +4,10 @@ Generic, composable web platform conventions: semantic HTML, accessibility, mode
 
 ## Composition
 
-Shared baseline for the stack-specific web skills — both compose this skill:
+Shared baseline for the stack-specific web skills — all three compose this skill:
 
 - [web-static](../web-static) — no-JavaScript static sites; adds hard constraints, CSS-only interactivity, and the Chrome DevTools verification loop
+- [web-sprinkles](../web-sprinkles) — static sites with bounded JavaScript enhancements; adds the enhancement contract, the CSS-versus-script cut line, and a no-JavaScript verification pass
 - [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, standards-based routing (Navigation API + URLPattern), and Playwright testing
 
 The JavaScript half of the baseline is the sibling skill [javascript-conventions](../javascript-conventions) — language-level rules plus the Baseline lookup for JavaScript features. This skill owns HTML and CSS only.
@@ -21,4 +22,4 @@ Statuses are looked up in [`references/baseline-snapshot.md`](references/baselin
 
 ## Usage
 
-`SKILL.md` contains the full ruleset. Use it standalone for HTML/CSS reviews, or composed with `web-static` / `web-components`. It can serve as a coding guide for developers or as a skill file for AI coding assistants.
+`SKILL.md` contains the full ruleset. Use it standalone for HTML/CSS reviews, or composed with `web-static` / `web-sprinkles` / `web-components`. It can serve as a coding guide for developers or as a skill file for AI coding assistants.

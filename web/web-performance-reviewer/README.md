@@ -4,7 +4,7 @@ Reviews web frontends for performance issues by measuring the rendered site in a
 
 ## Composition
 
-Composes on top of [web-static](../web-static) or [web-components](../web-components) and their shared [web-conventions](../web-conventions). It is strictly opt-in: the `web-static` verification loop stays fast and deterministic and deliberately excludes performance — noisy, slow measurements make a bad gate. This review runs on explicit request (before publishing, after adding images/fonts/JS, when something feels slow), and a red finding here never turns the composed stack's green red.
+Composes on top of [web-static](../web-static), [web-sprinkles](../web-sprinkles), or [web-components](../web-components) and their shared [web-conventions](../web-conventions). It is strictly opt-in: the `web-static` verification loop stays fast and deterministic and deliberately excludes performance — noisy, slow measurements make a bad gate. This review runs on explicit request (before publishing, after adding images/fonts/JS, when something feels slow), and a red finding here never turns the composed stack's green red.
 
 ## Lab, Not Field
 

@@ -14,7 +14,7 @@ Drives the rendered pages through Chrome DevTools MCP: console messages, accessi
 
 ## Composition
 
-Composes with [web-conventions](../web-conventions) — the shared baseline for semantic HTML, accessibility, design tokens, and the Baseline browser-support policy. Rules in this skill override it. For applications that need client-side state, routing, or JavaScript, use [web-components](../web-components).
+Composes with [web-conventions](../web-conventions) — the shared baseline for semantic HTML, accessibility, design tokens, and the Baseline browser-support policy. Rules in this skill override it. For a page needing a small, bounded amount of JavaScript, use [web-sprinkles](../web-sprinkles); for applications that need client-side state, routing, or templating, use [web-components](../web-components).
 
 ## Usage
 

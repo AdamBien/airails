@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Architecture and coding rules for single-page applications using web components, BCE layering, lit-html templating, unidirectional Redux-style state management (reduction.js, standards-based), and standards-based client-side routing (Navigation API + URLPattern). Web standards and web platform first, minimal external dependencies. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Use when creating, scaffolding, generating, writing, or reviewing web component applications, custom elements, state management, client-side routing, or frontend BCE architecture. Not for server-side rendering or framework-heavy applications, and not for static content sites without client-side state — use `web-static` for those.
+description: Architecture and coding rules for single-page applications using web components, BCE layering, lit-html templating, unidirectional Redux-style state management (reduction.js, standards-based), and standards-based client-side routing (Navigation API + URLPattern). Web standards and web platform first, minimal external dependencies. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Use when creating, scaffolding, generating, writing, or reviewing web component applications, custom elements, state management, client-side routing, or frontend BCE architecture. Not for server-side rendering or framework-heavy applications, not for static content sites without client-side state — use `web-static` — and not for static sites needing only a few isolated enhancements — use `web-sprinkles`.
 ---
 
 Build or maintain a web component application using $ARGUMENTS. Apply all rules below strictly.
@@ -20,7 +20,8 @@ modern CSS, design tokens, and the Baseline browser-support policy — and with 
 which provides the language-level JavaScript rules (modules, syntax, functions, collections,
 asynchrony, errors, JSDoc types) and the Baseline lookup for JavaScript features. Rules in this skill
 override both (e.g. container-query-first responsiveness). For static content sites without
-client-side state, use `/web-static` instead. For experiments and PoCs, `/web-latest`
+client-side state, use `/web-static` instead; for a static site needing only a few isolated
+enhancements, `/web-sprinkles`. For experiments and PoCs, `/web-latest`
 may be composed on top to lift the Baseline browser-support constraints.
 
 ## Reference Implementation

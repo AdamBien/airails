@@ -4,13 +4,13 @@ Composable modifier for experiments, prototypes, and PoCs: lifts the Baseline br
 
 ## Composition
 
-Composes on top of [web-static](../web-static) or [web-components](../web-components) and their shared [web-conventions](../web-conventions). It overrides exactly one concern — the browser-support policy:
+Composes on top of [web-static](../web-static), [web-sprinkles](../web-sprinkles), or [web-components](../web-components) and their shared [web-conventions](../web-conventions). It overrides exactly one concern — the browser-support policy:
 
 - the `web-conventions` Baseline Policy
 - the Baseline check in the `web-static` verification loop, replaced by a support-floor report (an inventory, not a gate)
 - any `@supports`/feature-detection requirements on Newly Available features
 
-Everything else stays binding: accessibility (including `prefers-reduced-motion` and `prefers-color-scheme`), semantic HTML, the `web-static` no-JavaScript constraint, dependency rules, and design-token discipline.
+Everything else stays binding: accessibility (including `prefers-reduced-motion` and `prefers-color-scheme`), semantic HTML, the `web-static` no-JavaScript constraint, the `web-sprinkles` enhancement contract, dependency rules, and design-token discipline.
 
 ## Support Floor Instead of Fallbacks
 

@@ -1,6 +1,6 @@
 ---
 name: web-static
-description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems. Also owns the verification loop for such sites — drives the rendered pages through Chrome DevTools MCP (console, accessibility snapshot, viewport resize, dark/reduced-motion emulation, Lighthouse), executes the checks.md manifest, and audits CSS against Google Baseline. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Not for applications needing client-side state, routing, or JavaScript — use `web-components` for those. Use when creating or editing static HTML/CSS sites, AND whenever a static site must be verified, audited, or declared green — triggers on "verify the site", "run the checks", "is it green", "lighthouse audit", "baseline check", "checks.md".
+description: Build modern static websites using semantic HTML and CSS without external dependencies or build systems. Also owns the verification loop for such sites — drives the rendered pages through Chrome DevTools MCP (console, accessibility snapshot, viewport resize, dark/reduced-motion emulation, Lighthouse), executes the checks.md manifest, and audits CSS against Google Baseline. Composes with `web-conventions` (semantic HTML, accessibility, design tokens, Baseline policy). Not for sites needing a small amount of JavaScript — use `web-sprinkles`; not for applications needing client-side state, routing, or templating — use `web-components`. Use when creating or editing static HTML/CSS sites, AND whenever a static site must be verified, audited, or declared green — triggers on "verify the site", "run the checks", "is it green", "lighthouse audit", "baseline check", "checks.md".
 argument-hint: "[description of the website or page to build]"
 ---
 
@@ -10,11 +10,15 @@ Build or maintain a static website using $ARGUMENTS. Apply all rules below stric
 
 Compose with `/web-conventions` — it provides the baseline rules for semantic HTML, accessibility,
 modern CSS, design tokens, and the Baseline browser-support policy. Rules in this skill override it.
-For applications that need client-side state, routing, or JavaScript, use `/web-components` instead.
+When a page needs a small, bounded amount of JavaScript — a theme toggle, a copy button, a
+client-side filter — use `/web-sprinkles`, which keeps every rule below except the no-JavaScript
+constraint. For applications that need client-side state, routing, or templating, use
+`/web-components` instead.
 
 ## Hard Constraints
 
-- **No JavaScript** — no `<script>` tags, no inline event handlers, no `.js` files
+- **No JavaScript** — no `<script>` tags, no inline event handlers, no `.js` files; a page that
+  genuinely needs a script belongs to `/web-sprinkles`, not to an exception here
 - **No external dependencies** — no frameworks, libraries, CDNs, or package managers
 - **No build systems** — no transpilation, bundling, preprocessing, Sass, Less, or Tailwind
 - **No inline styles** — all CSS in separate `.css` files
