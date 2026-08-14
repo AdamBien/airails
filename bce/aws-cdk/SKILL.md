@@ -132,6 +132,14 @@ Language-level rules (syntax, naming, visibility, structure) come from `java-con
 - deploy multi-stack apps with `cdk deploy --all --context key=value`; a bare `cdk deploy` errors when the app synthesizes more than one stack
 - provide `buildAndDeploy.sh` (`mvn -DskipTests clean package && cdk deploy --all`) and `destroy.sh` (`cdk destroy`) helper scripts
 
+## README
+
+The README's map is the **deployables**, not the business components: every stack by the CloudFormation name an operator types, what it creates, and whose credentials apply it. A reader arrives to deploy — the BCE structure is authoring shape, visible in the packages.
+
+- one bullet per stack: the deployed stack name (or its pattern, e.g. `app-workload-[ACCOUNT_ID]-stack` for a per-account stack), what it provisions, and a link to its `package-info` spec when the project carries one
+- state the deploy order whenever stacks must be applied in sequence, and name what carries a value from one to the next — a cross-account or cross-region value is configuration, never a resolved reference
+- compose with `readme` for the rest of the document; when `sbce` also applies, omit its generated BC map and Components diagram (insert no markers) rather than carrying two maps of one system
+
 ## Reference files
 
 - `references/naming-conventions.md` — full CloudFormation, CDK, and Java naming tables (casing for logical IDs, stack names, construct IDs, tags, physical names). Read when unsure how to name any element.
