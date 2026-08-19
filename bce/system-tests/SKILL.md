@@ -28,5 +28,5 @@ Same test level, different oracle:
 ## Composition
 
 - This skill owns the contract above.
-- The composed stack skill owns launch mechanics, module layout, and test syntax — microprofile-server: `-st` Maven module, JUnit 5, rest client; java-cli-app: zunit; web-components: browser-driven checks.
+- The composed stack skill owns launch mechanics, module layout, and test syntax — microprofile-server: `-st` Maven module, JUnit 5, rest client; java-cli-app: zunit; web frontends: web-system-tests (Playwright against the running site).
 - ears-tests and characterization-tests own their expectation origins and compose with both this skill and the stack skill.

@@ -8,7 +8,8 @@ Shared baseline for the stack-specific web skills — all three compose this ski
 
 - [web-static](../web-static) — no-JavaScript static sites; adds hard constraints, CSS-only interactivity, and the Chrome DevTools verification loop
 - [web-sprinkles](../web-sprinkles) — static sites with bounded JavaScript enhancements; adds the enhancement contract, the CSS-versus-script cut line, and a no-JavaScript verification pass
-- [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, standards-based routing (Navigation API + URLPattern), and Playwright testing
+- [web-components](../web-components) — web component SPAs; adds BCE architecture, lit-html, Redux Toolkit, and standards-based routing (Navigation API + URLPattern)
+- [web-system-tests](../web-system-tests) — browser-driven system tests with Playwright against any of the above, once it runs
 
 The JavaScript half of the baseline is the sibling skill [javascript-conventions](../javascript-conventions) — language-level rules plus the Baseline lookup for JavaScript features. This skill owns HTML and CSS only.
 

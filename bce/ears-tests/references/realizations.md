@@ -139,7 +139,8 @@ void main() {
 
 No symbols in plain JS — the literal `Rn.m` string stays the trace token, leading the test title
 (visible in reports, grep-visible against the spec). One `test.describe` per group; iterate a cases
-array to emit one `test(...)` per statement.
+array to emit one `test(...)` per statement. The suite around these tests — layout, configuration,
+locators, and the green oracle — is `web-system-tests`.
 
 ```js
 const placeOrderCases = [

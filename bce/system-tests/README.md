@@ -12,7 +12,8 @@ An [AIrails.dev](https://airails.dev) skill with the **stack-neutral contract fo
 
 - a **stack skill** — launch mechanics, module layout, and test syntax:
   [`microprofile-server`](../microprofile-server) (`-st` Maven module, JUnit 5, rest client),
-  [`java-cli-app`](../java-cli-app) (zunit), or [`web-components`](../../web/web-components) (browser-driven checks).
+  [`java-cli-app`](../java-cli-app) (zunit), or [`web-system-tests`](../../web/web-system-tests)
+  (Playwright against the running frontend).
 - [`ears-tests`](../ears-tests) — system tests with spec-derived expectations.
 - [`characterization-tests`](../../migrations/characterization-tests) — system tests with recorded expectations, for legacy migrations.
 

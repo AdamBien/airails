@@ -378,12 +378,11 @@ follow `/web-conventions`. This stack adds:
 
 ## Testing
 
-- E2E tests with Playwright in a separate `tests/` directory
-- test across Chromium, Firefox, and WebKit
-- use role selectors (`getByRole`), label selectors (`getByLabel`), and visibility assertions
-- use `pressSequentially` with delay for simulating realistic text input
-- code coverage in a dedicated `codecoverage/` directory using Monocart Coverage Reports
-- tests verify user-visible behavior, not implementation details
+Browser-driven system tests come from `/web-system-tests` — a Playwright suite in a separate
+`tests/` directory, run against Chromium, Firefox, and WebKit, locating through the accessibility
+tree (`getByRole`, `getByLabel`) because that is this stack's public surface. It owns the layout,
+the configuration (`baseURL` plus `webServer` against the dev server on port 3000), coverage, and
+the green oracle; the black-box contract above it belongs to `/system-tests`.
 
 ## Event Handling in Templates
 

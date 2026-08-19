@@ -19,7 +19,7 @@ Architecture and coding rules for building single-page applications with web com
 
 ## Composition
 
-Composes with [web-conventions](../web-conventions) — the shared baseline for semantic HTML, accessibility, design tokens, and the Baseline browser-support policy — and with [javascript-conventions](../javascript-conventions) — the language baseline for ES modules, syntax, collections, asynchrony, errors, and JSDoc types. Rules in this skill override both. For static content sites without client-side state, use [web-static](../web-static).
+Composes with [web-conventions](../web-conventions) — the shared baseline for semantic HTML, accessibility, design tokens, and the Baseline browser-support policy — and with [javascript-conventions](../javascript-conventions) — the language baseline for ES modules, syntax, collections, asynchrony, errors, and JSDoc types. Rules in this skill override both. For static content sites without client-side state, use [web-static](../web-static). Browser-driven system tests come from [web-system-tests](../web-system-tests).
 
 ## Project Structure
 
