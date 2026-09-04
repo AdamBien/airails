@@ -10,7 +10,7 @@ Starter kinds:
 - `OBSERVABILITY` — exists to record what the process did
 - `EXTERNAL_SYSTEM` — exists to communicate with a system that has its own lifecycle and failure modes
 
-Project-specific kinds pass the admission discipline in [SKILL.md](SKILL.md); the annotation
+Project-specific kinds pass the admission rules in [SKILL.md](SKILL.md); the annotation
 template lives in [references/concern-template.md](references/concern-template.md).
 
 Composes with [java-conventions](../java-conventions) for style and

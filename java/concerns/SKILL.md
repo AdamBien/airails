@@ -1,6 +1,6 @@
 ---
 name: concerns
-description: Introduce and maintain a @Concern marker annotation vocabulary in Java projects — a SOURCE-retained annotation recording why a type or package exists when the reason is a technical concern (observability, external-system communication) rather than the business component's responsibility. Ships starter kinds with settled definitions plus the admission discipline for project-specific kinds. Composes with `/java-conventions` for style and `/bce` for placement; applies in any Java context (`java-cli-app`, `microprofile-server`). Use when introducing concern markers, adding a kind, or deciding what to mark. Triggers on "concern annotation", "@Concern", "mark concerns", "technical concern marker", "concern vocabulary", "concern kinds". Not for migration notes on legacy packages — use `concept-annotator`.
+description: Introduce and maintain a @Concern marker annotation vocabulary in Java projects — a SOURCE-retained annotation recording why a type or package exists when the reason is a technical concern (observability, external-system communication) rather than the business component's responsibility. Ships starter kinds with settled definitions plus admission rules for when a project-specific kind is worth adding. Composes with `/java-conventions` for style and `/bce` for placement; applies in any Java context (`java-cli-app`, `microprofile-server`). Use when introducing concern markers, adding a kind, or deciding what to mark. Triggers on "concern annotation", "@Concern", "mark concerns", "technical concern marker", "concern vocabulary", "concern kinds". Not for migration notes on legacy packages — use `concept-annotator`.
 ---
 
 One annotation, `@Concern(KIND)`, records why a class or package exists when that reason is a
@@ -60,4 +60,4 @@ is an external system without a single network import).
 ## Composition
 
 - `/java-conventions` owns language-level style; `/bce` owns where BCs, packages, and `package-info.java` live
-- this skill owns only the concern vocabulary and its discipline; the composed skill always specializes, never contradicts
+- this skill owns only the concern vocabulary and its rules; the composed skill always specializes, never contradicts

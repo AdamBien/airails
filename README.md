@@ -58,6 +58,7 @@ One capability spec equals one business component, and the spec is the boundary 
 ### Java
 
 - [**java-conventions**](java/java-conventions) — Composable Java 25 code conventions: modern syntax, naming, visibility, streams, and exceptions across all Java contexts
+- [**concerns**](java/concerns) — @Concern marker annotations recording why a class or package exists: starter kinds for observability and external systems, plus admission rules for when a project-specific kind is worth adding
 - [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH
 - [**java-distiller**](java/java-distiller) — Simplifies, modernizes, and refactors existing code into idiomatic Java 25
 - [**python-to-java**](java/python-to-java) — Converts Python scripts to zero-dependency Java 25 CLI programs
