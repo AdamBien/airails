@@ -35,7 +35,7 @@ is an external system without a single network import).
 - a kind that fits nearly every class carries no information — no `LOGGING`
 - do not duplicate a canonical stack marker — `@Transactional`, `@Liveness`, `@Retry` already say it; a second vocabulary for the same fact drifts
 - grep-findability does not disqualify a kind — naming the intent is worth it even when an import search finds the set
-- heuristic: a candidate kind is usually non-functional-ish and at least partially scattered across BCs; one that is neither is a business component or noise, not a kind
+- heuristic: a kind usually names the essential implementation of a non-functional requirement — caching for performance, observability for diagnosability — significant, but not domain-related, and at least partially scattered across BCs; trace it to the requirement it implements; a candidate that is neither is a business component or noise, not a kind
 - a kind whose membership must be argued case by case is a tagging system, not a classification — sharpen the definition or drop the kind
 
 ## Kind Naming
