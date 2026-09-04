@@ -31,8 +31,9 @@ public @interface Concern {
 
     Kind value();
 
-    /// A kind is admitted only when its members are few and would not exist without the
-    /// concern. Each kind states what does not qualify — the exclusions carry the information.
+    /// A kind is admitted only when its members are few, would not exist without the concern,
+    /// and the application — not the platform — implements it. Each kind states what does not
+    /// qualify — the exclusions carry the information.
     enum Kind {
 
         /// Exists to record what the process did — whatever the transport: JFR events, OTEL
