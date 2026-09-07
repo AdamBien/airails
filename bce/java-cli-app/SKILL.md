@@ -1,6 +1,7 @@
 ---
 name: java-cli-app
 description: Create and maintain multi-file Java 25 CLI applications packaged as executable JARs with zb (Zero Dependencies Builder). Use when asked to create a Java CLI application, a CLI project with multiple source files, or an executable JAR. Triggers on "Java CLI app", "CLI application", "multi-file Java", "executable JAR", "zb build", or requests for Java programs that need multiple source files or JAR packaging. Not for single-file scripts — use java-cli-script for those.
+argument-hint: "[description of the CLI application to build]"
 ---
 
 Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS. Apply all rules below strictly.

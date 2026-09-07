@@ -1,6 +1,7 @@
 ---
 name: continuous-testing
 description: Continuous test-driven development loop — after every code change, builds the project, starts the server, and runs Unit Tests, Integration Tests, and System Tests. Applies on top of microprofile-server skill. Use during development when you want full verification after each change. Triggers on "continuous testing", "continuous-testing", "test loop", "st-loop", or requests to run all tests after every change.
+argument-hint: "[project or business component to develop under the test loop]"
 ---
 
 Continuous test-driven development loop using $ARGUMENTS. Apply all rules from `/microprofile-server`, plus the verification loop below.

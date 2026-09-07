@@ -1,6 +1,7 @@
 ---
 name: zcfg
 description: Integrate zcfg (Zero Dependency Configuration Utility) into Java applications. Use when adding configuration loading, reading properties files, setting up application configuration, or integrating zcfg into a Java project. Triggers on "zcfg", "add configuration", "load properties", "application configuration with zcfg", or requests to use the zcfg library for configuration management.
+argument-hint: "[project and the configuration it should load]"
 ---
 
 Integrate zcfg into a Java application using $ARGUMENTS. Apply all rules below.

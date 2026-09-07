@@ -1,6 +1,7 @@
 ---
 name: zargs
 description: Add zero-dependency argument parsing to Java CLI applications using the zargs pattern — an enum-based argument parser. Use when adding CLI argument parsing, command-line option handling, or adding options to a Java project. Triggers on "zargs", "argument parsing", "CLI arguments", "command-line options", "parse arguments", "add options", or requests to add argument/option parsing to a Java CLI application without external dependencies.
+argument-hint: "[project and the options it should accept]"
 ---
 
 Add zero-dependency argument parsing to a Java CLI application using $ARGUMENTS. Apply all rules below.

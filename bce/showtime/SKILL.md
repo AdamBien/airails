@@ -1,6 +1,7 @@
 ---
 name: showtime
 description: Live coding mode — generates code without running tests, system tests, or builds. Applies on top of any project skill (microprofile-server, java-cli-app, java-cli-script, etc.). Use during live demos, workshops, or rapid prototyping sessions where speed matters over verification. Triggers on "showtime", "live coding", "demo mode", "skip tests", or requests to generate code quickly without test execution.
+argument-hint: "[what to build in live coding mode]"
 ---
 
 Live coding mode using $ARGUMENTS. Apply all rules from the active project skill, but skip all verification steps.

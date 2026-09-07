@@ -1,6 +1,7 @@
 ---
 name: zcl
 description: Add colored terminal output to Java applications using zcl (Zero-dependency Colour Logger). Use when adding colored console output, terminal logging with colors, ANSI color support, or integrating zcl into a Java project. Triggers on "zcl", "colored output", "colored logging", "terminal colors", "ANSI colors", "console colors", or requests to add color-coded log output to a Java application.
+argument-hint: "[project or class that needs colored output]"
 ---
 
 Add colored terminal output to a Java application using $ARGUMENTS. Apply all rules below.

@@ -1,6 +1,7 @@
 ---
 name: zunit
 description: Generate and run zunit tests for java-cli-app projects. Use when asked to create tests, write tests, add tests, or generate test files for a java-cli-app project. Triggers on "zunit", "write tests", "create tests", "add tests", "test this", "generate tests", or requests to test a java-cli-app application. Also trigger when the user asks to verify or validate behavior of a java-cli-app project. Not for JUnit tests or microprofile-server projects — use continuous-testing for those.
+argument-hint: "[project, class, or behavior to test]"
 ---
 
 Generate and run zunit tests for a java-cli-app project using $ARGUMENTS. Apply all rules below strictly.

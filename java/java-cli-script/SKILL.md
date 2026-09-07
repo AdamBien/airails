@@ -1,6 +1,7 @@
 ---
 name: java-cli-script
 description: Create zero-dependency, single-file executable Java scripts for system-wide use via PATH. Use when asked to create a single-file Java shell script, system utility, PATH-installed Java tool, or shebang-launched Java program without the .java extension. Triggers on "Java script", "Java utility", "PATH script", "system script", or requests for single-file Java programs installed in /usr/local/bin or similar PATH directories. Not for multi-file Java applications — use java-cli-app for those.
+argument-hint: "[description of the script or utility to create]"
 ---
 
 Create or maintain a zero-dependency, single-file executable Java script using $ARGUMENTS. Apply all rules below strictly.
