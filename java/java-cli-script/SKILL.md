@@ -1,7 +1,6 @@
 ---
 name: java-cli-script
 description: Create zero-dependency, single-file executable Java scripts for system-wide use via PATH. Use when asked to create a single-file Java shell script, system utility, PATH-installed Java tool, or shebang-launched Java program without the .java extension. Triggers on "Java script", "Java utility", "PATH script", "system script", or requests for single-file Java programs installed in /usr/local/bin or similar PATH directories. Not for multi-file Java applications — use java-cli-app for those.
-argument-hint: "[description of the script or utility to create]"
 ---
 
 Create or maintain a zero-dependency, single-file executable Java script using $ARGUMENTS. Apply all rules below strictly.
@@ -18,7 +17,8 @@ These are self-contained, single-file Java scripts installed in a PATH directory
 ## Single-File Constraint
 
 - Everything lives in one file — all logic, records, enums, sealed types, and helper methods
-- If the script grows beyond what fits comfortably in a single file, suggest switching to the `java-cli-app` skill instead
+- When a script grows longer or more complex, apply [BCE Layer Grouping](#bce-layer-grouping-for-longer-or-more-complex-scripts) before considering a switch — grouping extends single-file viability considerably
+- Past roughly 1000 lines even a grouped single file fights the medium — suggest switching to the `java-cli-app` skill, unless single-file deployment (copy one file to PATH, edit in place, no build) is the binding constraint
 - No multi-file source-code programs — this skill is strictly for single-file scripts
 
 ## Build
@@ -48,6 +48,32 @@ void main(String... args) throws Exception {
     // ...
 }
 ```
+
+## BCE Layer Grouping (for Longer or More Complex Scripts)
+
+Composes with `/bce`. Short scripts stay flat: top-level methods, records, and enums ordered Boundary → Control → Entity, `main` last. When a script grows beyond roughly two screens (~150–250 lines) or accumulates several records and many methods, group its members into three interfaces named after the BCE layers:
+
+- `interface Boundary` — the coarse-grained facade named after the script's responsibility (e.g. `listBusinessComponents`), output adapters (e.g. a `Log` enum), and the `NAME`/`VERSION` constants as bare interface fields (`String NAME = ...` — `public static final` is implicit, never write it)
+- `interface Control` — stateless static functions owning all I/O and traversal, coarsest function first
+- `interface Entity` — records and enums maintaining state and behavior on that state, no I/O; records keep their own explicit `static final` fields (records are classes, not interfaces)
+
+Rules:
+
+- The interfaces are namespaces for developer experience (IDE outline, per-layer folding, layer-labeled call sites) — never add enforcement ceremony: no constructors, no `final`, no explicit visibility modifiers
+- Interfaces beat grouping classes (a class generates a default constructor that pollutes completion) and grouping enums (`values()`/`valueOf()` pollute completion; the zero-constant `;` is cryptic)
+- Interface methods with bodies require the explicit `static` modifier
+- Inside a nested type, derive the script name with `MethodHandles.lookup().lookupClass().getEnclosingClass().getName()` — plain `lookupClass()` reports the nested type, not the script
+- Cross-layer references are qualified (`Entity.Layer` in `Control` signatures) — accepted cost: the qualifier labels the layer at every call site
+- `main` cannot move into an interface — it stays top-level at the very bottom and contains exactly one statement, the invocation of the boundary facade:
+
+```
+void main(String... args) throws Exception {
+    Boundary.listBusinessComponents(List.of(args));
+}
+```
+
+- The layer names `Boundary`, `Control`, `Entity` are the sanctioned exception to the `/bce` rule that no type name may end with `Control` — they are layer namespaces, not domain types
+- Reference implementation: `zlsbc` in the zeeds repository
 
 ## Naming Convention
 
@@ -123,7 +149,7 @@ When asked for an executable convenience script for a `/java-cli-app` project or
 
 Generic Java style comes from `/java-conventions`. The rules below are script-specific specializations.
 
-- Do not create classes or interfaces — use unnamed classes with top-level methods, records, enums, and sealed types only
+- Do not create classes — use unnamed classes with top-level methods, records, enums, and sealed types; the only sanctioned named interfaces are the `Boundary`/`Control`/`Entity` layer namespaces from [BCE Layer Grouping](#bce-layer-grouping-for-longer-or-more-complex-scripts) in longer or more complex scripts
 - No package declaration
 - Use `IO.println()` for printing (or `IO::println` as method reference) — never `System.out.println()` and never `System.Logger` (scripts use stdout directly)
 - For multi-line output, use a single `IO.println` with a text block — never multiple `IO.println` calls for consecutive lines
