@@ -59,7 +59,7 @@ One capability spec equals one business component, and the spec is the boundary 
 
 - [**java-conventions**](java/java-conventions) — Composable Java 25 code conventions: modern syntax, naming, visibility, streams, and exceptions across all Java contexts
 - [**concerns**](java/concerns) — @Concern marker annotations recording why a class or package exists: starter kinds for observability and external systems, plus admission rules for when a project-specific kind is worth adding
-- [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH
+- [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH; longer scripts group members into Boundary/Control/Entity interface namespaces (composes bce)
 - [**java-distiller**](java/java-distiller) — Simplifies, modernizes, and refactors existing code into idiomatic Java 25
 - [**python-to-java**](java/python-to-java) — Converts Python scripts to zero-dependency Java 25 CLI programs
 - [**enterprisifier**](java/enterprisifier) — Deliberately overengineers code with maximum patterns, indirections, and abstractions, for comedic or educational purposes
@@ -85,6 +85,7 @@ One capability spec equals one business component, and the spec is the boundary 
 ### BCE
 
 - [**bce**](bce/bce) — Composable, technology-neutral architecture rules for the Boundary-Control-Entity pattern: business components, layer responsibilities, and package structure
+- [**system-tests**](bce/system-tests) — Composable, technology-neutral conventions for black-box system tests exercising the running system through its public surface; stack skills own launch mechanics and test syntax
 - [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
 - [**aws-cdk**](bce/aws-cdk) — Create and review Java AWS CDK v2 infrastructure with BCE layering: thin stacks over reusable constructs, business components named after AWS services, region pinning, `grant*` permissions, and synthesis-based tests
