@@ -81,6 +81,7 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**web-system-tests**](web/web-system-tests) — Browser-driven system tests with Playwright against a running frontend: `tests/` layout, `baseURL` plus `webServer`, accessibility-tree locators, cross-engine runs, opt-in coverage; the web realization of system-tests
 - [**web-latest**](web/web-latest) — Modifier for experiments and PoCs that lifts the Baseline browser-support policy: newest web platform features without fallbacks, with a declared support floor; composes on top of web-static, web-sprinkles, or web-components
 - [**web-performance-reviewer**](web/web-performance-reviewer) — Opt-in performance review of the rendered site through Chrome DevTools MCP: throttled traces, Core Web Vitals thresholds, network waterfall, heap-snapshot leak checks for SPAs; never part of the verification loop; composes on top of web-static, web-sprinkles, or web-components
+- [**web-pwa**](web/web-pwa) — Modifier adding offline support via a hand-written service worker with a versioned Cache API precache, and installability via a web app manifest; no build step, no generated code; composes on top of web-static, web-sprinkles, or web-components
 
 ### BCE
 
