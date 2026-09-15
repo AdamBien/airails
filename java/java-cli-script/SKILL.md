@@ -53,7 +53,7 @@ void main(String... args) throws Exception {
 
 Composes with `/bce`. Short scripts stay flat: top-level methods, records, and enums ordered Boundary → Control → Entity, `main` last. When a script grows beyond roughly two screens (~150–250 lines) or accumulates several records and many methods, group its members into three interfaces named after the BCE layers:
 
-- `interface Boundary` — the coarse-grained facade named after the script's responsibility (e.g. `listBusinessComponents`), output adapters (e.g. a `Log` enum), and the `NAME`/`VERSION` constants as bare interface fields (`String NAME = ...` — `public static final` is implicit, never write it)
+- `interface Boundary` — the coarse-grained facade: for a single-purpose script, named after its responsibility (e.g. `listBusinessComponents`); for a script dispatching subcommands, named `run` — no single responsibility verb covers all commands, and an invented one (`manageDatabase`) is a filler verb restating context. Plus output adapters (e.g. a `Log` enum) and the `NAME`/`VERSION` constants as bare interface fields (`String NAME = ...` — `public static final` is implicit, never write it)
 - `interface Control` — stateless static functions owning all I/O and traversal, coarsest function first
 - `interface Entity` — records and enums maintaining state and behavior on that state, no I/O; records keep their own explicit `static final` fields (records are classes, not interfaces)
 
@@ -64,6 +64,7 @@ Rules:
 - Interface methods with bodies require the explicit `static` modifier
 - Inside a nested type, derive the script name with `MethodHandles.lookup().lookupClass().getEnclosingClass().getName()` — plain `lookupClass()` reports the nested type, not the script
 - Cross-layer references are qualified (`Entity.Layer` in `Control` signatures) — accepted cost: the qualifier labels the layer at every call site
+- A subcommand-dispatching Boundary receives raw argv and parses it once into a record (e.g. `record Invocation(String command, List<String> parameters)`), so command methods index their parameters from zero instead of re-skipping the leading words; the record is born in the Boundary — where the grammar, validation, and failure policy live — never in `main`
 - `main` cannot move into an interface — it stays top-level at the very bottom and contains exactly one statement, the invocation of the boundary facade:
 
 ```
