@@ -46,6 +46,23 @@ Manage installed skills:
 ./installSkills -h           # show help
 ```
 
+## Skill Layers
+
+The skills compose in layers. Each layer fixes one set of decisions; the layers above it ask for that decision instead of making it. A lower layer applies wherever the composed skill is silent, and the composed skill specializes it, never contradicts it. A fixed decision is one the agent does not rediscover per task.
+
+1. **Linguistic** — wording and test shape. [ears-tests](bce/ears-tests): six EARS patterns, each mapping to a fixed precondition/trigger/response tuple; one statement id yields one test row; the subject is always the BC.
+2. **Semantic** — scope and naming. [sbce](bce/sbce): one capability spec equals one BC equals one package; boundary operations are verb-noun and transport-neutral; requirement ids are stable and never renumbered.
+3. **Architectural** — structure and vocabulary. [bce](bce/bce) and [concerns](java/concerns): layer responsibilities, package structure, naming bans.
+4. **Technological** — runtime, layout, build, verification loop. Stack skills: [java-cli-script](java/java-cli-script), [java-cli-app](bce/java-cli-app), [microprofile-server](bce/microprofile-server), [aws-cdk](bce/aws-cdk), [web-static](web/web-static), [web-sprinkles](web/web-sprinkles), [web-components](web/web-components). Building blocks: [zb](java/zb), [zargs](java/zargs), [zcfg](java/zcfg), [zcl](java/zcl), [zjson](java/zjson). Layers 1–3 ask the stack skill where code lands and whether it is green.
+5. **Idiomatic** — syntax and style. [java-conventions](java/java-conventions), [javascript-conventions](web/javascript-conventions), [web-conventions](web/web-conventions): defaults wherever the stack skill is silent.
+6. **Judgment** — the definition of done. [system-tests](bce/system-tests) is the neutral rule, realized by [web-system-tests](web/web-system-tests), [zunit](java/zunit), [continuous-testing](bce/continuous-testing), and [characterization-tests](migrations/characterization-tests). The stack's own test loop is the oracle; the agent never self-certifies convergence.
+
+Outside the sequence:
+
+- **Exclusive grounding** — the selection rule for layers 4 and 5: standards first, zero dependencies, no build step. The model's prior on public standards, gated by the Baseline snapshot in [web-conventions](web/web-conventions).
+- **Controlled decompression** — modifiers reopen one decision each: [showtime](bce/showtime) skips verification, [web-latest](web/web-latest) lifts the Baseline policy, [web-pwa](web/web-pwa) adds offline support, [web-performance-reviewer](web/web-performance-reviewer) adds an opt-in review. Transformers apply layers 3–5 to existing code: [java-distiller](java/java-distiller), [python-to-java](java/python-to-java), [simplifier](migrations/simplifier); [enterprisifier](java/enterprisifier) inverts them.
+- **Recovery and projection** — the migration skills recover domain vocabulary from legacy code and feed layer 2: [concept-extractor](migrations/concept-extractor), [concept-clarifier](migrations/concept-clarifier), [bc-carver](migrations/bc-carver), [concept-annotator](migrations/concept-annotator), routed by [migration-advisor](migrations/migration-advisor). [readme](documentation/readme), [bce-diagrams](documentation/bce-diagrams), [mermaid](documentation/mermaid), and [drawio](documentation/drawio) render layers 2 and 3 for humans.
+
 ## What's Inside
 
 ### Spec-Driven BCE (SBCE)
