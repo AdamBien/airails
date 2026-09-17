@@ -39,6 +39,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 - implement procedural business logic in the control layer
 - prefer stateless, function-like units for procedural logic
 - control may be called by the boundary of the same BC or directly by other BCs; the boundary is not a gate for cross-BC calls
+- control methods have two visibility levels: public for operations consumed by other BCs, package-private (or the language equivalent) for operations used only inside the BC; the public surface of a control is its cross-BC contract
 
 ## Entity Layer
 
