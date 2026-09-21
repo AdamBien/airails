@@ -85,6 +85,7 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**zargs**](java/zargs) — Zero-dependency, enum-based argument parsing for Java CLI applications
 - [**zcfg**](java/zcfg) — Zero Dependency Configuration Utility for loading properties and application configuration
 - [**zcl**](java/zcl) — Zero-dependency Colour Logger for colored terminal output in Java applications
+- [**zhtmldb**](java/zhtmldb) — Agent datastore: key-value records stored as browsable, git-diffable XHTML pages, driven through the zhtmldb CLI
 - [**zjson**](java/zjson) — JSON parsing and generation by copying the org.json source into the project, no Maven/Gradle dependency
 - [**zunit**](java/zunit) — Generates and runs zunit tests for java-cli-app projects
 
