@@ -26,8 +26,10 @@ install these alongside it (all ship via airails `installSkills`):
   spec and BC is held against.
 - [`ears-tests`](../ears-tests) — the EARS→table-driven test transform; turns each `Rn.m` into one labeled row, preserving the spec↔test trace.
 - a **stack skill** — a technology-specific *implementation* of the `bce` principles, adding
-  code idioms *and* verification: [`java-cli-app`](../java-cli-app)
+  code idioms *and* verification: [`java-cli-script`](../../java/java-cli-script)
+  (single-file Boundary/Control/Entity layer grouping), [`java-cli-app`](../java-cli-app)
   (`zunit`/`zb`), [`microprofile-server`](../microprofile-server) (integration + system tests),
+  [`aws-cdk`](../aws-cdk) (synthesis tests + parameterized JUnit 5 rows),
   [`web-components`](../../web/web-components) (system tests + Playwright), or
   [`web-static`](../../web/web-static) / [`web-sprinkles`](../../web/web-sprinkles)
   (`checks.md` manifest + Chrome DevTools / Lighthouse).
@@ -42,8 +44,10 @@ graph TD
     EARS([ears-tests<br>EARS→table-driven tests])
 
     subgraph StackSkills[stack skills]
+        JavaScript([java-cli-script])
         JavaCli([java-cli-app])
         MicroProfile([microprofile-server])
+        AwsCdk([aws-cdk])
         WebComponents([web-components])
         WebStatic([web-static])
         WebSprinkles([web-sprinkles])
@@ -52,8 +56,10 @@ graph TD
     SBCE -->|relies on| BCE
     SBCE -->|delegates spec→test| EARS
     SBCE -->|"are you green?"| StackSkills
+    JavaScript -->|implements| BCE
     JavaCli -->|implements| BCE
     MicroProfile -->|implements| BCE
+    AwsCdk -->|implements| BCE
     WebComponents -->|implements| BCE
     WebStatic -->|implements| BCE
     WebSprinkles -->|implements| BCE
@@ -65,7 +71,7 @@ graph TD
     class SBCE workflow
     class BCE contract
     class EARS transform
-    class JavaCli,MicroProfile,WebComponents,WebStatic,WebSprinkles stack
+    class JavaScript,JavaCli,MicroProfile,AwsCdk,WebComponents,WebStatic,WebSprinkles stack
 ```
 
 ## Usage
