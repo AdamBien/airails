@@ -19,6 +19,7 @@ Rules for filling it in:
 - **System invariants** are EARS `shall` statements (the system is the assembly, not one BC). Same six patterns as a BC spec, and the same traceability: each carries a stable id `Sn` that ≥1 test embeds, so the spec↔test binding stays bijective at system altitude too.
 - **Ubiquitous language** defines shared nouns once, so each BC's `## Entities` stays terse — names plus a one-line meaning, no fields, no types.
 - **Decisions are append-only rationale.** Optional. Each confirmed choice carries a stable id `Dn`, states the decision, and names the rejected alternatives in a trailing `_(why: …; rejected: …)_`. Like Vision: no test, not a trace target. Immutable — a reversed decision gets a new entry and the old one is marked `superseded by Dm`, never edited or deleted. Testable behaviour belongs in an EARS statement instead; a standing project rule in the README's `## Conventions`.
+- **References are cross-BC rationale.** Optional. External specifications several BCs conform to — a standard, a regulation, a platform spec — one link per bullet with what it governs. Same rules as a BC's `## References`: no id, no test, not a trace target. A reference used by one BC belongs in that BC's spec.
 - It is not a tasks file and not a gap registry.
 
 The Markdown body (this is the whole system doc — every section optional except the charter):
@@ -49,6 +50,10 @@ The Markdown body (this is the whole system doc — every section optional excep
 <!-- optional; append-only confirmed choices with rejected alternatives; rationale, not contract — no test; supersede, never edit -->
 - D1 — Routing uses the Navigation API. _(why: web-platform first; rejected: router libraries)_
 - D2 — `payment` is its own BC, not a `checkout` control. _(why: independent provider swap; rejected: folding into `checkout`)_
+
+## References
+<!-- optional; external specs several BCs conform to; one link per bullet with what it governs; rationale, not contract — no id, no test -->
+- [PCI DSS v4.0](https://www.pcisecuritystandards.org/) — cardholder data handling across `checkout` and `payment`
 
 ## Stack
 <!-- the composed stack skill + package base, so `apply` reads it instead of re-inferring -->

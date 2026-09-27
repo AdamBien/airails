@@ -153,7 +153,7 @@ Green build + no structural gap or drift is the only definition of done.
 
 ## Spec format rules
 
-- Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, optional `## Decisions` (BC-local confirmed choices — same rules as the system doc's section), `## Out of scope`.
+- Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, optional `## Decisions` (BC-local confirmed choices — same rules as the system doc's section), optional `## References` (external specs the BC implements), `## Out of scope`.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
 - Requirements are [EARS](https://alistairmavin.com/ears/) statements — one of six patterns, the system always **the BC** — grouped under a titled `### Rn`, each statement carrying a stable id `Rn.m` (group `n`, statement `m`). Reach for `If…then` and `While…` to capture error and edge cases.
 
@@ -170,6 +170,7 @@ Green build + no structural gap or drift is the only definition of done.
 - Ids are **stable**: never renumber on reorder; a removed id is retired, not reused.
 - Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id** — per-statement and **bijective both ways**: a new `Rn.m` with no test is a gap, and a method, trace id, or `entity` type with no spec counterpart is inverse drift (surfaced, never absorbed into the spec). The trace form is the stack skill's call (an `r1_2…` method, a `@requirement R1.2` JavaDoc tag on the test, a system-test or Playwright name); SBCE only requires the id be grep-visible.
 - **Optional `why`.** Any `Rn.m` statement (or boundary op) may carry a trailing `_(why: …)_` — terse *origin/intent* for the rule. **Rationale, not contract**: non-verified (the oracle ignores it), **not a trace target** (the statement still needs its test; a `why` is never drift), and **bound to its id** (retires with the statement, never orphans; the `Rn.m` prefix stays first so id-grep is unaffected). Capture *why the rule exists*, never *how it currently works* — immutable origin, not a description to re-sync.
+- **Optional `## References`.** Links to **external** specifications the BC implements or must conform to — an RFC, a Jakarta/MicroProfile spec chapter, a standard, a regulation, a product document. One bullet per link: `- [<title>](<url>) — <what it governs here>`, optionally scoped to ids (`governs R2`). Rationale, not contract: no id, no test, not a trace target, ignored by the oracle. The link **informs** requirements, it never replaces them — behaviour the BC must exhibit is still an EARS `Rn.m` (a reference is never an excuse for an untested "shall conform to X"). The stack skill may read the linked document while closing the gap (`microprofile-server` follows JavaDoc links to external specs for code generation). Prefer stable, versioned URLs; a reference nobody cites from a `why`, a `Dn`, or a requirement group is noise — drop it.
 - The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
