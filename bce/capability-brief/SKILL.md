@@ -1,5 +1,6 @@
 ---
 name: capability-brief
+argument-hint: uc|story|review <description-or-brief-file>
 description: Capture one capability, or one addition to an existing capability, as a use case or a user story complete enough that `/sbce new` authors the spec in one shot without asking a question. Runs the clarifying interview upstream, at authoring time with the person who knows the domain, checks the result against a completeness checklist, and emits the filled template. Invoked as `/capability-brief uc|story|review <description-or-file>`, or with the mode omitted so the skill picks the format. Stack-neutral — what the system promises, never how it is built. Use whenever someone wants to write, refine, review, or complete a use case, user story, acceptance criteria, Given/When/Then scenarios, or a feature brief for a capability; wants to prepare input for `/sbce new`; or asks "what is missing from this story", "is this use case complete", "turn these notes into a use case". Triggers on "use case", "user story", "story", "acceptance criteria", "Given/When/Then", "main scenario", "extensions", "happy path", "capability brief", "prepare for sbce", "before sbce new". Not for authoring the spec or package doc itself (`/sbce`), and not for tests (`/ears-tests`).
 ---
 
