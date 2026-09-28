@@ -132,8 +132,10 @@ spec as source of truth, the stack's test loop as oracle).
 - `/sbce new shop-brief.md`
 
   One-shot declaration from a brief (intent-level — PM/BA): the use case or user story was
-  completed with [capability-brief](../capability-brief), so the clarify loop is skipped and only
-  the brief's `## Open issues` are asked.
+  completed with [capability-brief](../capability-brief) — `/capability-brief uc "…"` or
+  `/capability-brief story "…"` — and read by its author, so the clarify loop is skipped and only
+  the brief's `## Open issues` are asked. Two commands on purpose: the pause between them is the
+  domain owner's sign-off.
 
 - `/sbce new`
 
