@@ -102,6 +102,19 @@ a guessed spec makes the oracle verify assumptions, not intent.
 - **Interrogate per boundary op** — its trigger/response (event-driven), invalid/edge triggers (`If…then`), state constraints (`While…`) — and across the BC: scope (create-only vs full lifecycle, in/out), entities and fields (required/optional, identity, validation), and what "done" means.
 - **Stop only when** every boundary op and EARS statement, happy *and* unhappy, is answerable from the user's words such that another engineer would author the same spec. If in doubt, ask one more.
 
+**Brief input — the loop already ran.** A filled use case or user story authored with
+`/capability-brief` (recognisable by its `## Capability` … `## Open issues` sections, each with a
+stated section→spec mapping in its template) is the clarify loop run upstream with the domain
+owner, so the answers are the user's confirmed word: `## Capability` is the confirmed carving (name,
+`new`/`extends`, responsibility) — it replaces the carving confirmation below; each `record:` line
+under `## Decisions` is a confirmed `Dn` to log without offering it again; a supporting actor
+tagged `capability` is declared cross-BC wiring for the system doc; `## Out of scope` closes the
+scope questions. Ask exactly what `## Open issues` lists plus any section left blank — nothing
+else — then author from the brief's mapping: named operations → `## Boundary`, `Inputs` and
+`Extensions` → `If…then`, optional paths → `Where…`, `Lifecycle` → `While…`, `Entities` →
+`## Entities`. The brief is inception input, not a source of truth: once the spec exists, the
+spec is authoritative.
+
 **BC name** (`/sbce new checkout`):
 
 1. Validate the name — a single lowercase token, no dots/spaces/uppercase. Reject otherwise.
@@ -114,10 +127,10 @@ a guessed spec makes the oracle verify assumptions, not intent.
 
 1. Scan existing BCs — read their package docs for responsibilities, and the system doc's `## Decisions` if present: never propose an alternative a `Dn` records as rejected.
 2. **Propose** a BC set — each tagged **new** (coin a verb-noun name) or **extend-existing**, each with the one-line responsibility it owns.
-3. **Confirm the carving before any write** — decomposition has no test oracle, so the human approves the BC set.
+3. **Confirm the carving before any write** — decomposition has no test oracle, so the human approves the BC set (a brief's `## Capability` is that approval).
 4. Realise each entry via the BC-name steps: **new** → fresh doc + dirs; **extend-existing** → add ops / requirements to its **single** existing doc, never a second spec.
 5. If the carving introduces cross-BC wiring (a call, a shared noun, a system invariant), record it in the system doc — user-confirmed.
-6. A carving or stack choice the user confirmed **against** a proposed alternative is a decision — offer to record it as a `Dn` in the system doc's `## Decisions`; never record one silently.
+6. A carving or stack choice the user confirmed **against** a proposed alternative is a decision — offer to record it as a `Dn` in the system doc's `## Decisions`; never record one silently (a brief's `record:` lines are already confirmed).
 
 **README seed** (`/sbce new`, no argument):
 
