@@ -8,7 +8,11 @@ answers are recorded once.
 
 ## Scope
 
-- Two formats, one skill: a **use case** for a new capability with several steps, actors or kept state; a **user story** for one behaviour added to an existing capability. The skill routes by the input's shape and switches when it changes
+- Three modes, one skill — invoke as `/capability-brief uc|story|review <description-or-file>` (or by intent, mode omitted):
+  - **uc** — a **use case** for a new capability with several steps, actors or kept state
+  - **story** — a **user story** for one behaviour added to an existing capability, or a new capability with a single operation
+  - **review** — run the checklist over an existing brief and complete only its gaps
+- Mode omitted: the skill routes by the input's shape (kept state or several calls → use case, an addition to an existing capability → story) and switches when the shape changes. Mode given: the author's choice stands; when the input outgrows it, the skill warns and asks instead of switching
 - An **interview** that fills the template from the author's words, scans the repository read-only (existing package docs, the system doc's decisions and language, whether a stack is declared), then asks one gap per question — only what a human can answer: result shape, input parts and validation, repeated requests, external failures, lifecycle end, rejected alternatives
 - A **completeness checklist** every brief passes before it is emitted: every actor step named as an operation, every input with its parts, every operation with its failure cases, every supporting actor tagged as a capability or external, lifecycle and entities stated or `none`, decisions with rejected alternatives, open issues holding only unanswered questions
 - Stack-neutral — what the system promises, never how it is built; a type, transport or framework offered by the author is kept out
@@ -40,34 +44,44 @@ graph LR
 
 ## Usage
 
-Describe the capability in domain language; the skill picks the format, interviews until the
-checklist passes, and prints the filled brief. Save it where you like (`<capability>-brief.md`
-beside the repository `README.md` is the default) and hand it to `/sbce new`.
+Invoke `/capability-brief <mode> <description>` or describe the capability in domain language and
+let the skill pick the format. It interviews until the checklist passes and prints the filled
+brief. Save it where you like (`<capability>-brief.md` beside the repository `README.md` is the
+default), read it, then hand it to `/sbce new <file>`. Two commands on purpose: the pause between
+them is where the domain owner signs off before the brief becomes a spec.
 
 ## Example Prompts
 
-- `write a use case for "a shopper browses the store and buys products"`
+- `/capability-brief uc "a shopper browses the store and buys products"`
 
   New capability with several steps and a kept selection: use case; the interview asks for the result shape, the parts of payment and delivery details, what a second confirmation does, and when the selection expires.
 
-- `user story: as a shopper I want to search products by keyword`
+- `/capability-brief story "as a shopper I want to search products by keyword"`
 
   Addition to the existing `shop` capability: user story; the interview asks for the match rule, ordering, limit, minimum keyword length and the response when stock control is unavailable.
 
-- `is this use case complete enough for sbce? <pasted use case>`
+- `/capability-brief story "as a shopper I want to keep products in a wishlist across visits"`
 
-  Review: runs the checklist against the pasted text, asks only for the gaps, and returns the completed brief.
+  Explicit mode outgrown: the wishlist is kept state, so the skill warns that the story hides a lifecycle and asks whether to continue as story or switch to a use case — it never switches on its own once a mode was given.
+
+- `/capability-brief review shop-brief.md`
+
+  Review: runs the checklist over the file, asks only for the rows that fail, and returns the completed brief.
+
+- `write a use case for the returns process`
+
+  Mode omitted, triggered by intent: the skill routes by shape (several steps, a returned item tracked across them → use case) and says so.
 
 ## Test
 
 ```
-write a user story: as a librarian I want to register a returned book
+/capability-brief story "as a librarian I want to register a returned book"
 ```
 
 Then, on the emitted brief:
 
 ```
-/sbce new
+/sbce new library-brief.md
 ```
 
 `new` should author the spec without a question beyond the brief's `## Open issues`.

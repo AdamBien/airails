@@ -1,6 +1,6 @@
 ---
 name: capability-brief
-description: Capture one capability, or one addition to an existing capability, as a use case or a user story complete enough that `/sbce new` authors the spec in one shot without asking a question. Runs the clarifying interview upstream, at authoring time with the person who knows the domain, checks the result against a completeness checklist, and emits the filled template. Stack-neutral — what the system promises, never how it is built. Use whenever someone wants to write, refine, review, or complete a use case, user story, acceptance criteria, Given/When/Then scenarios, or a feature brief for a capability; wants to prepare input for `/sbce new`; or asks "what is missing from this story", "is this use case complete", "turn these notes into a use case". Triggers on "use case", "user story", "story", "acceptance criteria", "Given/When/Then", "main scenario", "extensions", "happy path", "capability brief", "prepare for sbce", "before sbce new". Not for authoring the spec or package doc itself (`/sbce`), and not for tests (`/ears-tests`).
+description: Capture one capability, or one addition to an existing capability, as a use case or a user story complete enough that `/sbce new` authors the spec in one shot without asking a question. Runs the clarifying interview upstream, at authoring time with the person who knows the domain, checks the result against a completeness checklist, and emits the filled template. Invoked as `/capability-brief uc|story|review <description-or-file>`, or with the mode omitted so the skill picks the format. Stack-neutral — what the system promises, never how it is built. Use whenever someone wants to write, refine, review, or complete a use case, user story, acceptance criteria, Given/When/Then scenarios, or a feature brief for a capability; wants to prepare input for `/sbce new`; or asks "what is missing from this story", "is this use case complete", "turn these notes into a use case". Triggers on "use case", "user story", "story", "acceptance criteria", "Given/When/Then", "main scenario", "extensions", "happy path", "capability brief", "prepare for sbce", "before sbce new". Not for authoring the spec or package doc itself (`/sbce`), and not for tests (`/ears-tests`).
 ---
 
 Produce a **brief**: one filled template that answers every question `/sbce new` would otherwise
@@ -17,16 +17,32 @@ would bind the spec to an implementation before the spec exists.
 - **Structural completeness is yours to enforce.** Every section filled, every actor step named as an operation, every input with its parts, every operation with its failure cases. The checklist below makes this mechanical; do not emit a brief that fails it.
 - **Semantic completeness is the human's.** The result shape, which parts of an input are required, what a second identical request does, which alternative was rejected — these are domain facts. You cannot invent them; you can only ask until they are answered or honestly parked under `## Open issues`. A silently guessed answer becomes a spec statement, then a test, then code that verifies your guess instead of their intent.
 
-## Pick the format
+## Invocation modes: uc · story · review
 
-| Brief | When | Template |
-|---|---|---|
-| Use case | a new capability; several steps or actors; state kept across calls | [references/use-case-template.md](references/use-case-template.md) |
-| User story | one behaviour added to an existing capability; a new capability with a single operation | [references/user-story-template.md](references/user-story-template.md) |
+Read the mode and the input from the invocation: `/capability-brief uc "<description>"`,
+`/capability-brief story "<description>"`, `/capability-brief review <file-or-pasted-brief>`.
+With the mode omitted, pick the format by the routing rule below and say which one you chose.
 
-Route by the shape the input has *now*, and switch when it changes: a story that grows a kept
-selection or a second actor mid-interview has become a use case — say so and carry the answers
-over. Both formats end in the same checklist and the same hand-off, so the switch costs nothing.
+| Mode | Brief | When | Template |
+|---|---|---|---|
+| `uc` | Use case | a new capability; several steps or actors; state kept across calls | [references/use-case-template.md](references/use-case-template.md) |
+| `story` | User story | one behaviour added to an existing capability; a new capability with a single operation | [references/user-story-template.md](references/user-story-template.md) |
+| `review` | either | an existing brief to check; the format is the one the brief already has | — |
+
+Routing rule when no mode is given, in order: kept state between the actor's requests → use case;
+the actor calls the system more than once to reach the goal → use case; an addition to a capability
+whose package doc exists → story. Route by the shape the input has *now*, and switch when it
+changes: a story that grows a kept selection or a second actor mid-interview has become a use case
+— say so and carry the answers over. Both formats end in the same checklist and the same hand-off,
+so the switch costs nothing.
+
+An explicit mode is the author's decision, so respect it: when the input outgrows the chosen
+format, warn instead of switching — "this keeps a selection across calls; the story hides that
+lifecycle, the use case captures it: continue as story or switch?" — and do what the author
+answers. `story` means story until they say otherwise.
+
+`review` runs the checklist over the given brief, asks only for the rows that fail, and returns the
+completed brief in the same format. It never reopens answered sections.
 
 ## Interview
 
@@ -64,7 +80,7 @@ Run this before emitting; every row maps to a part of the spec that would otherw
 
 ## Output
 
-- Emit the filled body exactly in the template's section order, header comment removed, ending with the hand-off line: `Run: /sbce new on this brief`.
+- Emit the filled body exactly in the template's section order, header comment removed, ending with the exact hand-off to run next: `/sbce new <file>` when the brief was written to a file, else `/sbce new` on the pasted body. Two commands, not one: the pause between them is where the domain owner reads the brief before it becomes a spec.
 - Print it in the reply. Write it to a file only when asked, where the author says; a sensible default is `<capability>-brief.md` beside the repository `README.md`.
 - The brief is **inception input, not a source of truth** — the same status as the README seed `/sbce new` reads. Once the spec exists in the package doc, the spec is authoritative and the brief is not kept in sync.
 
