@@ -131,10 +131,12 @@ description: Generic, composable Java 25 code conventions — modern syntax, cod
 
 - use AssertJ assertions instead of JUnit assertions
 - unit test methods must not start with `test` or `should`
-- create minimalistic tests first; avoid repetitive or trivial unit tests and keep only essential tests verifying core functionality
-- do not write tests for implementations that cannot fail (enums, records, getters/setters)
-- generate at most three tests per class under test (applies separately to unit, integration, and system tests)
-- the presence of an `isEqualTo` assertion makes less specific checks (`startsWith`, `isNotNull`) obsolete
+- every test must be able to fail for a plausible bug no other test would catch — delete tests that only re-verify what another test already covers
+- do not write tests for implementations that cannot fail (enums, records, getters/setters, pure delegation)
+- express variations of the same behavior (inputs, boundaries, edge cases) as one parameterized test, not as separate methods
+- assert the exact expected value or state (`isEqualTo`, `containsExactly`); `isNotNull`, `isNotEmpty`, `startsWith`, or "no exception thrown" alone do not verify behavior
+- the presence of an `isEqualTo` assertion makes less specific checks on the same value obsolete
+- prefer one behavior per test with as many assertions as that behavior needs, over many tests each asserting one field
 
 ## Comments & JavaDoc
 
