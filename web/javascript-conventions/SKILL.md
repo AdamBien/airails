@@ -210,8 +210,11 @@ Statuses from the 2026-07-08 snapshot, with the date each became Widely Availabl
 ## Testing
 
 - test user-visible behavior through the public surface, never internals
-- create minimal tests first; no tests for code that cannot fail
-- at most three tests per unit under test
+- every test must be able to fail for a plausible bug no other test would catch — delete tests that only re-verify what another test already covers
+- no tests for code that cannot fail (constants, plain data objects, pure delegation)
+- express variations of the same behavior (inputs, boundaries, edge cases) as one table-driven test, not as separate tests
+- assert the exact expected value or state; "is defined", "is truthy", "has length", or "does not throw" alone do not verify behavior
+- prefer one behavior per test with as many assertions as that behavior needs, over many tests each asserting one property
 - the framework, layout, and run command come from the composed stack skill
 
 ## What NOT to Do
