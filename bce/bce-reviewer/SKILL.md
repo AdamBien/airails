@@ -22,7 +22,7 @@ Verify the BCE structure of $ARGUMENTS and report as briefly as possible. Review
 | `diff <ref>` | `git diff <ref>...` plus the working tree — a branch or PR range |
 | mode omitted | `diff` when the working tree is dirty, otherwise `full` |
 
-Both modes build the same BC map first: direct children of the top-level package are BCs; record each BC's layers and the cross-BC dependency edges.
+Both modes build the same BC map first: direct children of the top-level package are BCs; record each BC's layers, the cross-BC dependency edges, and per BC two counts — internal references (file pairs inside the BC that reference each other) and outgoing cross-BC references (file pairs reaching another BC). A reference is one `import` or fully qualified use per referencing file, counted once per target file; a reference to another BC's entity counts twice, because it bypasses the control contract.
 
 - `full` reports every finding in the map
 - `diff` reports only findings the change creates or worsens: new, moved, or renamed packages and files, added imports, added public control methods, added classes. Carving checks (cycles, fan-in/fan-out) use the full map as context but are reported only when the diff introduced the edge. Pre-existing findings in touched files collapse to one trailing line.
@@ -36,6 +36,8 @@ Carving:
 - BC with a single small class consumed by exactly one other BC → merge candidate
 - dependency cycle between BCs
 - excessive cross-BC references or shared configuration → split, merge, or rebalance
+- cohesion ratio below 1 — more outgoing cross-BC references than internal ones → merge into the referenced BC, or move the reaching code there
+- BC with no internal references and more than one class → a folder, not a component; split or merge
 - non-trivial code in the root package → dedicated BC
 
 Layering:
@@ -62,9 +64,10 @@ pre-existing: 3 (run full)
 
 - header: mode, baseline or path, file count (diff) or BC count (full), finding count
 - one line per finding: severity, category (`carving|layer|naming`), location, defect → fix; ~100 characters max
-- severity: `✗` rule violation, `?` judgment call (split/merge candidates, anemic entities, excessive coupling)
+- severity: `✗` rule violation, `?` judgment call (split/merge candidates, anemic entities, excessive coupling, cohesion ratio)
 - order: carving, layer, naming — carving errors make layer findings moot
-- `full` adds one BC map line: `BCs: orders→customers, billing→orders, customers`
+- `full` adds one BC map line, `+` joining several targets: `BCs: billing→orders+customers, orders→customers, customers`
+- `full` adds one cohesion line, per BC `internal/cross-BC` references (cross-BC weighted as counted above), `?` marking a ratio below 1: `cohesion: orders 14/3 · customers 9/1 · billing 2/7 ?`
 - clean is one line: `bce-reviewer full: clean (5 BCs)`
 
 ## Rules

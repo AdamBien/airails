@@ -4,7 +4,7 @@ An [AIrails.dev](https://airails.dev) skill reviewing business component carving
 
 ## Scope
 
-- BC carving: layer-first layouts, technical BC names, split and merge candidates, cycles, coupling
+- BC carving: layer-first layouts, technical BC names, split and merge candidates, cycles, coupling, and the per-BC cohesion ratio (internal vs. cross-BC references)
 - Layering: entry points outside boundary, upward dependencies, misplaced cross-cutting concerns, anemic entities, control visibility
 - Naming: suffix bans from `bce`
 - Full review of a codebase, or incremental review of uncommitted changes or a git range
