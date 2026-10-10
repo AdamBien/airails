@@ -64,3 +64,9 @@ After installation, confirm the skill directories exist and each contains a `SKI
 ```
 ls ~/.claude/skills/*/SKILL.md
 ```
+
+Skills that bundle executables in `scripts/` (e.g. `web-conventions/scripts/zws`) must keep the exec bit; `installSkills`, the zips, and `cp -R` all preserve it:
+
+```
+ls -l ~/.claude/skills/*/scripts/
+```
