@@ -13,7 +13,11 @@ Review only — no code changes, no report file, not part of any verification lo
 
 ## Composition
 
-Detects the stack from the project and takes the dependency allowlist from its skill: [web-static](../web-static) and [web-sprinkles](../web-sprinkles) allow nothing at runtime, [web-components](../web-components) allows lit-html. BCE layering belongs to [bce-reviewer](../../bce/bce-reviewer), performance to [web-performance-reviewer](../web-performance-reviewer), rendered-page verification to web-static.
+Detects the stack from the project and takes the dependency allowlist from its skill: [web-static](../web-static) and [web-sprinkles](../web-sprinkles) allow nothing at runtime, [web-components](../web-components) allows lit-html. BCE layering belongs to [bce-reviewer](../../bce/bce-reviewer), performance to [web-performance-reviewer](../web-performance-reviewer), rendered-page verification to web-static. Listing, searching, and reading files follows the [zllm-scripts](../../java/zllm-scripts) skill.
+
+## Scripts
+
+Evidence is collected with `files`, `search`, `show`, and `imports` — read-only, root-confined scripts from [AdamBien/zllm-scripts](https://github.com/AdamBien/zllm-scripts), bundled in [scripts](scripts) and called by path as the [zllm-scripts](../../java/zllm-scripts) skill prescribes. Nothing is installed into the OS. Requires Java 25+.
 
 ## Usage
 

@@ -1,7 +1,7 @@
 ---
 name: web-standards-reviewer
 argument-hint: full|diff [path-or-git-ref]
-description: Review an existing web project for web-standards use and essential dependencies only, against the rules of `/web-conventions`, `/javascript-conventions`, and the stack skill the project composes (`web-static`, `web-sprinkles`, `web-components`), and answer with the shortest possible feedback — one line per finding, one line when clean. Three categories — build step, dependencies beyond the stack allowlist, hand-rolled code the platform covers — and two modes, `full` for the whole project and `diff` for uncommitted changes or a git range. Use whenever the frontend stack must be checked — triggers on "web standards review", "review dependencies", "dependency review", "is this standards-based", "what can the platform replace", "do we need this library", "review the frontend stack", "too many dependencies", "/web-standards-reviewer". Not for BCE layering (`bce-reviewer`), performance (`web-performance-reviewer`), rendered-page verification (`web-static`), and never for fixing or migrating.
+description: Review an existing web project for web-standards use and essential dependencies only, against the rules of `/web-conventions`, `/javascript-conventions`, and the stack skill the project composes (`web-static`, `web-sprinkles`, `web-components`), and answer with the shortest possible feedback — one line per finding, one line when clean. Evidence is collected with the bundled read-only zllm-scripts (`scripts/files`, `search`, `show`, `imports`) per `/zllm-scripts`, requiring Java 25+. Three categories — build step, dependencies beyond the stack allowlist, hand-rolled code the platform covers — and two modes, `full` for the whole project and `diff` for uncommitted changes or a git range. Use whenever the frontend stack must be checked — triggers on "web standards review", "review dependencies", "dependency review", "is this standards-based", "what can the platform replace", "do we need this library", "review the frontend stack", "too many dependencies", "/web-standards-reviewer". Not for BCE layering (`bce-reviewer`), performance (`web-performance-reviewer`), rendered-page verification (`web-static`), and never for fixing or migrating.
 ---
 
 Review the build, dependency, and web-standards posture of $ARGUMENTS and report as briefly as possible. Review only; never modify code.
@@ -10,6 +10,7 @@ Review the build, dependency, and web-standards posture of $ARGUMENTS and report
 
 - rules come from `/javascript-conventions` (platform-first list, ES module rules), `/web-conventions` (Baseline policy, snapshot lookup), and the detected stack skill (dependency allowlist, build rules, layout); this skill owns only the procedure and the output format
 - what the stack skill explicitly allows is not a finding: `/web-components` allows lit-html, vendored Redux Toolkit as an import-map switch, zws plus Playwright as development tooling, and the Navigation API plus URLPattern without existence check in `router.js`; `reduction.js` is application code, not a dependency; `/web-static` and `/web-sprinkles` allow nothing at runtime
+- files are listed, searched, and read per `/zllm-scripts` with the scripts bundled in `scripts/`; that skill owns the output format, exit codes, denials, and fallbacks
 - `/web-latest` in effect (a declared support floor in the project) suppresses Newly Available findings
 - BCE layering belongs to `/bce-reviewer`, performance to `/web-performance-reviewer`, rendered-page verification to `/web-static`, fixing to the stack skill
 
@@ -39,6 +40,26 @@ The application root is the directory holding `index.html` (and the import map, 
 Granularity: one finding per runtime dependency (location: the manifest or import map entry, else the first import), dependencies with the same replacement share a line; one finding per build concern (bundler, transpiler, CSS pipeline, manifest, CDN script), not per config file; development-only dependencies (bundler, transpiler, PostCSS, test runner) surface as build findings and stay out of the `deps:` line; a CSS framework is a `deps` finding, its PostCSS pipeline a `build` finding.
 
 Evidence: `package.json`, lockfiles, and `node_modules` from the application root up to the repository root; `vite.config.*`, `webpack.*`, `rollup.*`, `esbuild.*`, `tsconfig.json`, `babel.config.*`, `.babelrc`, `postcss.config.*`, `tailwind.config.*`; `<script>` and `<link>` tags and the import map in `index.html`; `import … from` and `require(` across `*.js`, `*.mjs`, `*.ts`, `*.jsx`, `*.tsx`; file extensions `*.ts`, `*.tsx`, `*.jsx`, `*.scss`, `*.less`. Baseline status is looked up in the `/web-conventions` snapshot, never recalled from memory; only features the snapshot or `/javascript-conventions` list as Newly Available or Limited are checked, Widely Available features are not inventoried.
+
+## Scripts
+
+`scripts/` holds unmodified copies of `files`, `search`, `show`, and `imports` from https://github.com/AdamBien/zllm-scripts. Call them by absolute path, `<this skill's directory>/scripts/<name>`, from the application root; a script of the same name on the PATH is not used. Requires Java 25+.
+
+| Evidence | Command |
+|---|---|
+| build and config files, manifests, lockfiles | `files package.json 'vite.config.*' 'webpack.*' 'rollup.*' 'esbuild.*' tsconfig.json 'babel.config.*' .babelrc 'postcss.config.*' 'tailwind.config.*'` |
+| `node_modules` | `files -type d -all -max 1 node_modules` — ignored directories are skipped without `-all` |
+| transpiled and preprocessed sources | `files -count '*.{ts,tsx,jsx,scss,less}'` |
+| file count for the header | `files -count '*.{html,css,js,mjs}'` |
+| runtime dependencies for the `deps:` line | `imports -external -count -package` |
+| import locations, imported names, import-map targets, CDN URLs, `<script src>`, stylesheet links | `imports -names` |
+| hand-rolled code | `search '<regex>' -glob '*.{js,mjs,html}'` |
+| reading a finding's location | `show <file> -lines <from>-<to>` |
+
+- `diff` mode: `git diff` and `git ls-files` determine the changed files — no script covers git; the changed files are then passed as paths to `imports`, `search`, and `show`
+- vendored files in `libs/` are part of the dependency map and stay in scope; `imports libs` shows bare specifiers and sibling imports inside them
+- a truncated result (`output stopped at -max N` on stderr) is narrowed or repeated with a higher `-max` before a finding count is reported
+- a denied path (exit 3) is not reviewed and not retried with another tool
 
 ## Checks
 

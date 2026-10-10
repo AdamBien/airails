@@ -1,0 +1,765 @@
+#!/usr/bin/env -S java --source 25
+
+interface Boundary {
+
+    String NAME = MethodHandles.lookup().lookupClass().getEnclosingClass().getName();
+    String VERSION = "2026-10-09.2";
+
+    static void imports(List<String> args) {
+        Trace.invocation(NAME, VERSION, args);
+        Log.USER.out("%s %s root=%s".formatted(NAME, VERSION, Control.root()));
+        try {
+            var query = parse(args);
+            var scope = new Entity.Scope(Control.root(), query.all());
+            var starts = Control.starts(scope, query.paths());
+            var walk = Control.walk(scope, starts, query.selection());
+            var result = Control.imports(scope, walk, query, Log.USER::out);
+            Log.NOTE.out(result.summary(query));
+            if (!walk.skipped().isEmpty())
+                Log.NOTE.out("skipped: " + walk.report());
+            Log.exit(result.found() > 0 ? Exit.MATCH : Exit.NO_MATCH);
+        } catch (SecurityException e) {
+            Log.stop(e.getMessage(), Exit.DENIED);
+        } catch (IllegalArgumentException | IOException e) {
+            Log.stop(e.getMessage(), Exit.USAGE);
+        }
+    }
+
+    static Entity.Query parse(List<String> args) {
+        var positional = new ArrayList<String>();
+        var globs = new ArrayList<String>();
+        var excludes = new ArrayList<String>();
+        var mode = Entity.Mode.LINES;
+        var external = false;
+        var names = false;
+        var packages = false;
+        var max = 200;
+        var all = false;
+        var tokens = Arg.expand(args);
+        for (int i = 0; i < tokens.size(); i++) {
+            var token = tokens.get(i);
+            if (token.equals("--")) {
+                positional.addAll(tokens.subList(i + 1, tokens.size()));
+                break;
+            }
+            switch (Arg.from(token)) {
+                case HELP -> usage();
+                case SHOW_VERSION -> Log.exit(Exit.MATCH);
+                case GLOB -> globs.add(Arg.value(tokens, ++i, token));
+                case EXCLUDE -> excludes.add(Arg.value(tokens, ++i, token));
+                case EXTERNAL -> external = true;
+                case NAMES -> names = true;
+                case PACKAGE -> packages = true;
+                case COUNT -> mode = Entity.Mode.COUNT;
+                case FILES -> mode = Entity.Mode.FILES;
+                case MAX -> max = Arg.number(tokens, ++i, token);
+                case ALL -> all = true;
+                case null -> {
+                    if (token.startsWith("-") && token.length() > 1)
+                        throw new IllegalArgumentException("unknown option: " + token + " (put -- before a path starting with -)");
+                    positional.add(token);
+                }
+            }
+        }
+        if (globs.isEmpty())
+            globs.add(Entity.Query.DEFAULT_GLOB);
+        return new Entity.Query(List.copyOf(positional), Entity.Selection.of(globs, excludes), mode, external, names, packages, max, all);
+    }
+
+    static void usage() {
+        Log.USER.out("""
+                Usage: %s [path...] [options]
+                Read-only inventory of module specifiers in JavaScript, TypeScript and HTML files of the current
+                directory or the given paths, confined to the root (nearest directory containing .git, at or above
+                the current directory, otherwise the current directory).
+                Found: import … from, export … from, import(), require(), importScripts(), <script src>,
+                <link rel=stylesheet|modulepreload>, and import-map entries. Comments starting a line are ignored.
+                Output: path:line:specifier<TAB>form<TAB>kind, with -names a fourth column holding the imported
+                names or the import-map target. Kinds: bare, builtin, url, relative, absolute, alias, data.
+                Summary and skips go to stderr.
+
+                Options:
+                %s
+                  --                 end of options, use before a path starting with -
+
+                Default files: %s
+                Never read: .git, secrets (.env, *.pem, *.key, .npmrc, id_rsa, ...), paths outside the root.
+                Skipped unless -all: node_modules, dist, target, coverage, .next, .cache, ...,
+                build and out at the root, files over 1 MiB.
+                Exit: 0 imports found, 1 none found, 2 usage error, 3 denied path.
+                """.formatted(NAME, Arg.usage(), Entity.Query.DEFAULT_GLOB));
+        Log.exit(Exit.MATCH);
+    }
+
+    enum Arg {
+        HELP("-help", "", "show this help"),
+        SHOW_VERSION("-version", "", "show version"),
+        GLOB("-glob", "<glob>", "only files matching, repeatable; replaces the default file set"),
+        EXCLUDE("-exclude", "<glob>", "skip files matching, repeatable (libs/**, '*.d.ts')"),
+        EXTERNAL("-external", "", "only bare and url specifiers — the external libraries"),
+        NAMES("-names", "", "add the imported names or the import-map target as a fourth column"),
+        PACKAGE("-package", "", "reduce specifiers to the package name (lodash/debounce -> lodash, CDN urls -> package)"),
+        COUNT("-count", "", "print specifier<TAB>imports<TAB>files per distinct specifier, most imported first"),
+        FILES("-files", "", "print the paths of files with imports only"),
+        MAX("-max", "<n>", "stop after n output entries (default 200)"),
+        ALL("-all", "", "include ignored directories and files up to 32 MiB");
+
+        final String option;
+        final String parameter;
+        final String description;
+
+        Arg(String option, String parameter, String description) {
+            this.option = option;
+            this.parameter = parameter;
+            this.description = description;
+        }
+
+        boolean matches(String value) {
+            return option.equals(value) || value.startsWith(option + ":");
+        }
+
+        static Arg from(String value) {
+            return Stream.of(values())
+                    .filter(arg -> arg.matches(value))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        static List<String> expand(List<String> args) {
+            var tokens = new ArrayList<String>();
+            for (int i = 0; i < args.size(); i++) {
+                var arg = args.get(i);
+                if (arg.equals("--")) {
+                    tokens.addAll(args.subList(i, args.size()));
+                    break;
+                }
+                var known = from(arg);
+                if (known != null && arg.length() > known.option.length()) {
+                    tokens.add(known.option);
+                    tokens.add(arg.substring(known.option.length() + 1));
+                } else {
+                    tokens.add(arg);
+                }
+            }
+            return tokens;
+        }
+
+        static String value(List<String> tokens, int index, String option) {
+            if (index >= tokens.size())
+                throw new IllegalArgumentException("missing value for " + option);
+            return tokens.get(index);
+        }
+
+        static int number(List<String> tokens, int index, String option) {
+            var value = value(tokens, index, option);
+            if (!value.matches("\\d+"))
+                throw new IllegalArgumentException(option + " expects a non-negative number, got: " + value);
+            return Integer.parseInt(value);
+        }
+
+        static String usage() {
+            return Stream.of(values())
+                    .map(arg -> "  %-18s %s".formatted(arg.option + " " + arg.parameter, arg.description))
+                    .collect(Collectors.joining("\n"));
+        }
+    }
+
+    enum Exit {
+        MATCH(0), NO_MATCH(1), USAGE(2), DENIED(3);
+
+        final int code;
+
+        Exit(int code) {
+            this.code = code;
+        }
+    }
+
+    enum Log {
+        USER, NOTE, ERROR;
+
+        void out(String message) {
+            switch (this) {
+                case USER -> IO.println(message);
+                case NOTE -> System.err.println(message);
+                case ERROR -> System.err.println(NAME + ": " + message);
+            }
+        }
+
+        static void stop(String message, Exit exit) {
+            ERROR.out(message);
+            exit(exit);
+        }
+
+        static void exit(Exit exit) {
+            Trace.exit(exit.code);
+        }
+    }
+}
+
+interface Control {
+
+    Pattern STATIC_IMPORT = Pattern.compile("(?<![\\w$.])import(?![\\w$])\\s*(?:([^'\"`;()]+?)\\s*\\bfrom\\s*)?['\"]([^'\"\\n]+)['\"]");
+    Pattern EXPORT_FROM = Pattern.compile("(?<![\\w$.])export(?![\\w$])\\s+([^'\"`;()]+?)\\s*\\bfrom\\s*['\"]([^'\"\\n]+)['\"]");
+    Pattern DYNAMIC_IMPORT = Pattern.compile("(?<![\\w$.])import\\s*\\(\\s*['\"]([^'\"\\n]+)['\"]");
+    Pattern REQUIRE = Pattern.compile("(?<![\\w$.])require\\s*\\(\\s*['\"]([^'\"\\n]+)['\"]\\s*\\)");
+    Pattern IMPORT_SCRIPTS = Pattern.compile("(?<![\\w$.])importScripts\\s*\\(\\s*['\"]([^'\"\\n]+)['\"]");
+    Pattern SCRIPT_SRC = Pattern.compile("(?is)<script\\b[^>]*?\\ssrc\\s*=\\s*[\"']([^\"']+)[\"']");
+    Pattern LINK = Pattern.compile("(?is)<link\\b[^>]*>");
+    Pattern LINK_REL = Pattern.compile("(?is)\\brel\\s*=\\s*[\"']([^\"']*)[\"']");
+    Pattern LINK_HREF = Pattern.compile("(?is)\\bhref\\s*=\\s*[\"']([^\"']+)[\"']");
+    Pattern IMPORT_MAP = Pattern.compile("(?is)<script\\b[^>]*\\btype\\s*=\\s*[\"']importmap[\"'][^>]*>(.*?)</script>");
+    Pattern IMPORT_MAP_IMPORTS = Pattern.compile("\"imports\"\\s*:\\s*\\{");
+    Pattern IMPORT_MAP_ENTRY = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]*)\"");
+    Pattern BLOCK_COMMENT = Pattern.compile("(?m)^[ \\t]*/\\*.*?\\*/", Pattern.DOTALL);
+    Pattern LINE_COMMENT = Pattern.compile("(?m)^[ \\t]*//.*$");
+
+    static Entity.Result imports(Entity.Scope scope, Entity.Walk walk, Entity.Query query, Consumer<String> out) {
+        var found = new ArrayList<Entity.Import>();
+        var files = 0;
+        for (var file : walk.files()) {
+            var content = content(scope, file, walk);
+            if (content.isEmpty())
+                continue;
+            var path = scope.relative(file);
+            var extracted = extract(path, content.get()).stream()
+                    .filter(query::accepts)
+                    .toList();
+            if (extracted.isEmpty())
+                continue;
+            files++;
+            found.addAll(extracted);
+        }
+        var entries = switch (query.mode()) {
+            case LINES -> found.stream().map(each -> each.line(query)).toList();
+            case FILES -> found.stream().map(Entity.Import::path).distinct().toList();
+            case COUNT -> counts(found, query);
+        };
+        var shown = entries.subList(0, Math.min(entries.size(), query.max()));
+        shown.forEach(out);
+        return new Entity.Result(found.size(), files, shown.size() < entries.size());
+    }
+
+    static List<String> counts(List<Entity.Import> found, Entity.Query query) {
+        record Tally(int imports, Set<String> files) {}
+        var tallies = new TreeMap<String, Tally>();
+        for (var each : found) {
+            var key = each.key(query);
+            var tally = tallies.computeIfAbsent(key, k -> new Tally(0, new TreeSet<>()));
+            tally.files().add(each.path());
+            tallies.put(key, new Tally(tally.imports() + 1, tally.files()));
+        }
+        return tallies.entrySet().stream()
+                .sorted(Comparator.comparingInt((Map.Entry<String, Tally> entry) -> entry.getValue().imports()).reversed()
+                        .thenComparing(Map.Entry::getKey))
+                .map(entry -> entry.getKey() + "\t" + entry.getValue().imports() + "\t" + entry.getValue().files().size())
+                .toList();
+    }
+
+    static List<Entity.Import> extract(String path, String content) {
+        var text = uncommented(content);
+        var imports = new ArrayList<Entity.Import>();
+        var html = path.endsWith(".html") || path.endsWith(".htm");
+        if (html) {
+            scan(imports, text, SCRIPT_SRC, Entity.Form.SCRIPT, 1, 0);
+            scan(imports, text, IMPORT_SCRIPTS, Entity.Form.IMPORT_SCRIPTS, 1, 0);
+            links(imports, text);
+            importMaps(imports, text);
+        }
+        scan(imports, text, STATIC_IMPORT, Entity.Form.IMPORT, 2, 1);
+        scan(imports, text, EXPORT_FROM, Entity.Form.EXPORT, 2, 1);
+        scan(imports, text, DYNAMIC_IMPORT, Entity.Form.DYNAMIC, 1, 0);
+        scan(imports, text, REQUIRE, Entity.Form.REQUIRE, 1, 0);
+        if (!html)
+            scan(imports, text, IMPORT_SCRIPTS, Entity.Form.IMPORT_SCRIPTS, 1, 0);
+        imports.sort(Comparator.comparingInt(Entity.Import::offset));
+        return numbered(path, text, imports);
+    }
+
+    static void scan(List<Entity.Import> imports, String text, Pattern pattern, Entity.Form form, int specifier, int detail) {
+        var matcher = pattern.matcher(text);
+        while (matcher.find()) {
+            var names = detail > 0 && matcher.group(detail) != null ? clause(matcher.group(detail)) : "";
+            imports.add(Entity.Import.of(matcher.start(), form, matcher.group(specifier).strip(), names));
+        }
+    }
+
+    static void links(List<Entity.Import> imports, String text) {
+        var matcher = LINK.matcher(text);
+        while (matcher.find()) {
+            var tag = matcher.group();
+            var rel = LINK_REL.matcher(tag);
+            var href = LINK_HREF.matcher(tag);
+            if (!rel.find() || !href.find())
+                continue;
+            var kinds = Set.of(rel.group(1).toLowerCase().strip().split("\\s+"));
+            if (kinds.contains("stylesheet") || kinds.contains("modulepreload"))
+                imports.add(Entity.Import.of(matcher.start(), Entity.Form.LINK, href.group(1).strip(), ""));
+        }
+    }
+
+    static void importMaps(List<Entity.Import> imports, String text) {
+        var map = IMPORT_MAP.matcher(text);
+        while (map.find()) {
+            var json = map.group(1);
+            var base = map.start(1);
+            var block = IMPORT_MAP_IMPORTS.matcher(json);
+            if (!block.find())
+                continue;
+            var end = closing(json, block.end() - 1);
+            var entry = IMPORT_MAP_ENTRY.matcher(json.substring(0, end));
+            entry.region(block.end(), end);
+            while (entry.find())
+                imports.add(Entity.Import.of(base + entry.start(), Entity.Form.IMPORT_MAP, entry.group(1), "-> " + entry.group(2)));
+        }
+    }
+
+    static int closing(String json, int open) {
+        var depth = 0;
+        for (int i = open; i < json.length(); i++) {
+            switch (json.charAt(i)) {
+                case '{' -> depth++;
+                case '}' -> {
+                    if (--depth == 0)
+                        return i;
+                }
+                default -> { }
+            }
+        }
+        return json.length();
+    }
+
+    static String clause(String clause) {
+        return clause.strip()
+                .replaceFirst("^type\\s+", "")
+                .replaceAll("\\s+", " ")
+                .replace("{ ", "{")
+                .replace(" }", "}");
+    }
+
+    static List<Entity.Import> numbered(String path, String text, List<Entity.Import> imports) {
+        var numbered = new ArrayList<Entity.Import>(imports.size());
+        var line = 1;
+        var cursor = 0;
+        for (var each : imports) {
+            for (int i = cursor; i < each.offset(); i++)
+                if (text.charAt(i) == '\n')
+                    line++;
+            cursor = each.offset();
+            numbered.add(each.at(path, line));
+        }
+        return numbered;
+    }
+
+    static String uncommented(String text) {
+        var chars = text.toCharArray();
+        blank(chars, BLOCK_COMMENT.matcher(text));
+        blank(chars, LINE_COMMENT.matcher(new String(chars)));
+        return new String(chars);
+    }
+
+    static void blank(char[] chars, Matcher comments) {
+        while (comments.find())
+            for (int i = comments.start(); i < comments.end(); i++)
+                if (chars[i] != '\n')
+                    chars[i] = ' ';
+    }
+
+    static Optional<String> content(Entity.Scope scope, Path file, Entity.Walk walk) {
+        try {
+            if (Files.size(file) > scope.sizeLimit()) {
+                walk.skip(Entity.Skip.LARGE);
+                return Optional.empty();
+            }
+            var bytes = Files.readAllBytes(file);
+            if (Entity.Scope.binary(bytes)) {
+                walk.skip(Entity.Skip.BINARY);
+                return Optional.empty();
+            }
+            return Optional.of(new String(bytes, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            walk.skip(Entity.Skip.UNREADABLE);
+            return Optional.empty();
+        }
+    }
+
+    // root, starts, walk and visit are shared verbatim by files, search and imports, root and starts also by show — change them together
+
+    static Path root() {
+        try {
+            var cwd = Path.of("").toRealPath();
+            for (var dir = cwd; dir != null; dir = dir.getParent())
+                if (Files.exists(dir.resolve(".git")))
+                    return dir;
+            return cwd;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    static List<Path> starts(Entity.Scope scope, List<String> paths) throws IOException {
+        if (paths.isEmpty())
+            return List.of(Path.of("").toRealPath());
+        var starts = new ArrayList<Path>();
+        for (var path : paths) {
+            var candidate = Path.of(path).toAbsolutePath().normalize();
+            if (!Files.exists(candidate))
+                throw new IllegalArgumentException("not found: " + path);
+            var real = candidate.toRealPath();
+            if (!real.startsWith(scope.root()))
+                throw new SecurityException("outside the root " + scope.root() + ": " + path);
+            if (Files.isRegularFile(real) && scope.denied(real))
+                throw new SecurityException("denied (may contain secrets): " + path);
+            starts.add(real);
+        }
+        return starts;
+    }
+
+    static Entity.Walk walk(Entity.Scope scope, List<Path> starts, Entity.Selection selection) {
+        var walk = new Entity.Walk(new ArrayList<>(), new ArrayList<>(), new EnumMap<>(Entity.Skip.class));
+        for (var start : starts) {
+            if (Files.isDirectory(start))
+                visit(scope, start, selection, walk);
+            else
+                walk.files().add(start);
+        }
+        walk.files().sort(Comparator.comparing(scope::relative));
+        walk.directories().sort(Comparator.comparing(scope::relative));
+        return walk;
+    }
+
+    static void visit(Entity.Scope scope, Path directory, Entity.Selection selection, Entity.Walk walk) {
+        if (selection.test(scope.relative(directory)))
+            walk.directories().add(directory);
+        try (var entries = Files.newDirectoryStream(directory)) {
+            for (var entry : entries) {
+                if (Files.isSymbolicLink(entry) && !scope.contains(entry)) {
+                    walk.skip(Entity.Skip.OUTSIDE);
+                } else if (Files.isDirectory(entry, LinkOption.NOFOLLOW_LINKS)) {
+                    if (scope.ignored(entry))
+                        walk.skip(Entity.Skip.IGNORED);
+                    else
+                        visit(scope, entry, selection, walk);
+                } else if (Files.isRegularFile(entry) && selection.test(scope.relative(entry))) {
+                    if (scope.denied(entry))
+                        walk.skip(Entity.Skip.DENIED);
+                    else
+                        walk.files().add(entry);
+                }
+            }
+        } catch (IOException e) {
+            walk.skip(Entity.Skip.UNREADABLE);
+        }
+    }
+}
+
+interface Entity {
+
+    enum Mode { LINES, COUNT, FILES }
+
+    enum Form {
+        IMPORT("import", false), EXPORT("export", false), DYNAMIC("dynamic", false), REQUIRE("require", false),
+        IMPORT_SCRIPTS("importScripts", false), SCRIPT("script", true), LINK("link", true), IMPORT_MAP("importmap", false);
+
+        final String label;
+        final boolean document;
+
+        Form(String label, boolean document) {
+            this.label = label;
+            this.document = document;
+        }
+    }
+
+    enum Kind {
+        BARE, BUILTIN, URL, RELATIVE, ABSOLUTE, ALIAS, DATA;
+
+        static final Set<String> NODE_BUILTINS = Set.of("assert", "async_hooks", "buffer", "child_process", "cluster",
+                "console", "constants", "crypto", "dgram", "diagnostics_channel", "dns", "domain", "events", "fs", "http",
+                "http2", "https", "inspector", "module", "net", "os", "path", "perf_hooks", "process", "punycode",
+                "querystring", "readline", "repl", "sea", "sqlite", "stream", "string_decoder", "sys", "test", "timers",
+                "tls", "trace_events", "tty", "url", "util", "v8", "vm", "wasi", "worker_threads", "zlib");
+
+        static Kind of(String specifier) {
+            if (specifier.startsWith("http://") || specifier.startsWith("https://") || specifier.startsWith("//"))
+                return URL;
+            if (specifier.startsWith("data:") || specifier.startsWith("blob:"))
+                return DATA;
+            if (specifier.startsWith("./") || specifier.startsWith("../") || specifier.equals(".") || specifier.equals(".."))
+                return RELATIVE;
+            if (specifier.startsWith("/"))
+                return ABSOLUTE;
+            if (specifier.startsWith("#") || specifier.startsWith("@/") || specifier.startsWith("~/"))
+                return ALIAS;
+            if (specifier.startsWith("node:") || specifier.startsWith("bun:") || specifier.startsWith("deno:")
+                    || NODE_BUILTINS.contains(head(specifier)))
+                return BUILTIN;
+            return BARE;
+        }
+
+        static String head(String specifier) {
+            var slash = specifier.indexOf('/');
+            return slash < 0 ? specifier : specifier.substring(0, slash);
+        }
+
+        String label() {
+            return name().toLowerCase();
+        }
+    }
+
+    record Import(String path, int line, int offset, Form form, Kind kind, String specifier, String detail) {
+
+        static final Set<String> CDN_PACKAGE_HOSTS = Set.of("esm.sh", "unpkg.com", "cdn.skypack.dev", "esm.run", "cdn.esm.sh");
+
+        static Import of(int offset, Form form, String specifier, String detail) {
+            var kind = Kind.of(specifier);
+            if (form.document && (kind == Kind.BARE || kind == Kind.BUILTIN || kind == Kind.ALIAS))
+                kind = Kind.RELATIVE;
+            return new Import("", 0, offset, form, kind, specifier, detail);
+        }
+
+        Import at(String path, int line) {
+            return new Import(path, line, offset, form, kind, specifier, detail);
+        }
+
+        boolean external() {
+            return kind == Kind.BARE || kind == Kind.URL;
+        }
+
+        String key(Query query) {
+            return query.packages() ? packageName() : specifier;
+        }
+
+        String line(Query query) {
+            var line = path + ":" + this.line + ":" + key(query) + "\t" + form.label + "\t" + kind.label();
+            return query.names() && !detail.isEmpty() ? line + "\t" + detail : line;
+        }
+
+        String packageName() {
+            return switch (kind) {
+                case BARE -> packageOf(specifier);
+                case BUILTIN -> Kind.head(specifier.replaceFirst("^\\w+:", ""));
+                case URL -> cdnPackage(specifier);
+                default -> specifier;
+            };
+        }
+
+        static String packageOf(String path) {
+            var segments = path.split("/");
+            var name = path.startsWith("@") && segments.length > 1 ? segments[0] + "/" + segments[1] : segments[0];
+            var at = name.lastIndexOf('@');
+            return at > 0 ? name.substring(0, at) : name;
+        }
+
+        static String cdnPackage(String url) {
+            try {
+                var uri = URI.create(url.startsWith("//") ? "https:" + url : url);
+                var host = uri.getHost() == null ? "" : uri.getHost();
+                var path = uri.getPath() == null ? "" : uri.getPath();
+                var rest = cdnPath(host, path);
+                if (rest == null)
+                    return host.isEmpty() ? url : host;
+                rest = rest.replaceFirst("^/+", "").replaceFirst("^(v\\d+|stable|gh)/", "");
+                var name = packageOf(rest);
+                return name.isEmpty() ? host : name;
+            } catch (IllegalArgumentException e) {
+                return url;
+            }
+        }
+
+        static String cdnPath(String host, String path) {
+            if (CDN_PACKAGE_HOSTS.contains(host))
+                return path;
+            if (host.equals("cdn.jsdelivr.net") && path.startsWith("/npm/"))
+                return path.substring(5);
+            if (host.equals("cdnjs.cloudflare.com") && path.startsWith("/ajax/libs/"))
+                return path.substring(11);
+            if (host.equals("ga.jspm.io") && path.startsWith("/npm:"))
+                return path.substring(5);
+            return null;
+        }
+    }
+
+    record Query(List<String> paths, Selection selection, Mode mode, boolean external, boolean names, boolean packages,
+                 int max, boolean all) {
+
+        static final String DEFAULT_GLOB = "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,html,htm}";
+
+        boolean accepts(Import each) {
+            return !external || each.external();
+        }
+    }
+
+    record Result(int found, int files, boolean truncated) {
+
+        String summary(Query query) {
+            var summary = "%d imports in %d files".formatted(found, files);
+            return truncated ? summary + " (output stopped at -max " + query.max() + ")" : summary;
+        }
+    }
+
+    // Scope, Skip, Walk, Glob and Selection are shared verbatim by files, search and imports, Scope also by show — change them together
+
+    record Scope(Path root, boolean all) {
+
+        static final Set<String> IGNORED_ANYWHERE = Set.of("node_modules", "bower_components", "target", "dist",
+                "coverage", ".next", ".nuxt", ".svelte-kit", ".cache", ".parcel-cache", ".turbo", ".gradle",
+                "__pycache__", ".venv", "venv", ".idea");
+        static final Set<String> IGNORED_AT_ROOT = Set.of("build", "out");
+        static final List<PathMatcher> DENIED = Stream.of(".env", ".env.*", "*.pem", "*.key", "*.p12", "*.pfx",
+                        "*.jks", "*.keystore", "*.kdbx", "id_rsa*", "id_dsa*", "id_ecdsa*", "id_ed25519*", ".npmrc",
+                        ".yarnrc.yml", ".netrc", ".pgpass", ".git-credentials", "credentials", "credentials.json",
+                        "secrets.{yml,yaml,json,properties}")
+                .map(glob -> FileSystems.getDefault().getPathMatcher("glob:" + glob))
+                .toList();
+        static final List<String> HARMLESS_SUFFIXES = List.of(".example", ".sample", ".template");
+        static final long SIZE_LIMIT = 1L << 20;
+        static final long SIZE_LIMIT_ALL = 32L << 20;
+
+        boolean ignored(Path directory) {
+            var name = directory.getFileName().toString();
+            if (name.equals(".git"))
+                return true;
+            if (all)
+                return false;
+            return IGNORED_ANYWHERE.contains(name) || (IGNORED_AT_ROOT.contains(name) && root.equals(directory.getParent()));
+        }
+
+        boolean denied(Path file) {
+            if (relative(file).startsWith(".git/") || relative(file).contains("/.git/"))
+                return true;
+            var name = file.getFileName();
+            if (HARMLESS_SUFFIXES.stream().anyMatch(name.toString()::endsWith))
+                return false;
+            return DENIED.stream().anyMatch(matcher -> matcher.matches(name));
+        }
+
+        boolean contains(Path path) {
+            try {
+                return path.toRealPath().startsWith(root);
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        long sizeLimit() {
+            return all ? SIZE_LIMIT_ALL : SIZE_LIMIT;
+        }
+
+        String relative(Path path) {
+            var relative = root.relativize(path).toString().replace(File.separatorChar, '/');
+            return relative.isEmpty() ? "." : relative;
+        }
+
+        static boolean binary(byte[] head) {
+            for (int i = 0; i < Math.min(head.length, 8192); i++)
+                if (head[i] == 0)
+                    return true;
+            return false;
+        }
+    }
+
+    enum Skip {
+        IGNORED("ignored directories (-all includes them, except .git)"),
+        DENIED("denied files (may contain secrets)"),
+        OUTSIDE("symlinks leaving the root"),
+        UNREADABLE("unreadable paths"),
+        BINARY("binary files"),
+        LARGE("files over the size limit (1 MiB, -all: 32 MiB)"),
+        LONG_LINE("lines over 20000 characters");
+
+        final String label;
+
+        Skip(String label) {
+            this.label = label;
+        }
+    }
+
+    record Walk(List<Path> files, List<Path> directories, EnumMap<Skip, Integer> skipped) {
+
+        void skip(Skip reason) {
+            skipped.merge(reason, 1, Integer::sum);
+        }
+
+        String report() {
+            return skipped.entrySet().stream()
+                    .map(entry -> entry.getValue() + " " + entry.getKey().label)
+                    .collect(Collectors.joining(", "));
+        }
+    }
+
+    record Glob(String pattern, PathMatcher matcher, PathMatcher tail) {
+
+        static Glob of(String pattern) {
+            var tail = pattern.startsWith("**/") ? pattern.substring(3) : pattern;
+            return new Glob(pattern, matcher(pattern), matcher(tail));
+        }
+
+        static PathMatcher matcher(String pattern) {
+            return FileSystems.getDefault().getPathMatcher("glob:" + pattern);
+        }
+
+        boolean matches(String relative) {
+            var path = Path.of(relative);
+            if (!pattern.contains("/"))
+                return path.getFileName() != null && matcher.matches(path.getFileName());
+            return matcher.matches(path) || tail.matches(path);
+        }
+    }
+
+    record Selection(List<Glob> includes, List<Glob> excludes) {
+
+        static Selection of(List<String> includes, List<String> excludes) {
+            return new Selection(includes.stream().map(Glob::of).toList(), excludes.stream().map(Glob::of).toList());
+        }
+
+        boolean test(String relative) {
+            if (excludes.stream().anyMatch(glob -> glob.matches(relative)))
+                return false;
+            return includes.isEmpty() || includes.stream().anyMatch(glob -> glob.matches(relative));
+        }
+    }
+}
+
+// Trace is shared verbatim by every script in this repository — change all copies together
+
+interface Trace {
+
+    Path FILE = Path.of(System.getProperty("user.home"), "zllm-scripts", "zllm-scripts-invocations.log");
+    long STARTED = System.currentTimeMillis();
+    AtomicInteger EXIT = new AtomicInteger();
+    int ARG_LIMIT = 120;
+    int LINE_LIMIT = 600;
+
+    static void invocation(String name, String version, List<String> args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> append(name, version, args)));
+    }
+
+    static void exit(int code) {
+        EXIT.set(code);
+        System.exit(code);
+    }
+
+    static void append(String name, String version, List<String> args) {
+        var line = "%s pid=%d %s %s exit=%d ms=%d cwd=%s args=%s%n".formatted(
+                Instant.now(), ProcessHandle.current().pid(), name, version, EXIT.get(),
+                System.currentTimeMillis() - STARTED, Path.of("").toAbsolutePath(), quote(args));
+        try {
+            Files.createDirectories(FILE.getParent());
+            Files.writeString(FILE, line, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException | RuntimeException e) {
+            System.err.println(name + ": invocation not logged to " + FILE + ": " + e.getMessage());
+        }
+    }
+
+    static String quote(List<String> args) {
+        var quoted = args.stream()
+                .map(arg -> arg.length() > ARG_LIMIT ? arg.substring(0, ARG_LIMIT) + "..." : arg)
+                .map(arg -> arg.replace("\\", "\\\\").replace("\"", "\\\"").replaceAll("\\s", " "))
+                .map(arg -> '"' + arg + '"')
+                .collect(Collectors.joining(" "));
+        return quoted.length() > LINE_LIMIT ? quoted.substring(0, LINE_LIMIT) + "..." : quoted;
+    }
+}
+
+void main(String... args) {
+    Boundary.imports(List.of(args));
+}
