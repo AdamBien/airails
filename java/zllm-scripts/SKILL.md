@@ -13,7 +13,7 @@ Perform the file and clipboard steps of $ARGUMENTS with the zllm-scripts command
 
 OS commands have no limits: `cat ~/.ssh/id_rsa`, `grep -r token /`, or `find /` with megabytes of output. The zllm-scripts can't do any of that:
 
-- **read-only:** no writes, no network, no spawned processes
+- **read-only:** no writes beyond one log line per run in `~/zllm-scripts/zllm-scripts-invocations.log`, no network, no spawned processes
 - **confined to a root:** the nearest directory containing `.git`, otherwise the current directory; paths and symlinks leaving it are refused
 - **secrets refused:** `.env`, `*.pem`, `*.key`, `.npmrc`, `id_rsa*` and `.git/` are never read
 - **bounded output:** results are capped, long lines are cut, and stderr reports what was left out and how to continue
@@ -21,17 +21,21 @@ OS commands have no limits: `cat ~/.ssh/id_rsa`, `grep -r token /`, or `find /` 
 
 ## Setup
 
-Check once per session; install when missing:
+This skill ships no scripts. A composing skill that needs them carries copies in its own `scripts/` directory, taken from https://github.com/AdamBien/zllm-scripts and never edited in place; when upstream changes, the composing skill re-copies. This skill only installs them.
+
+Check once per session; prefer scripts already on the PATH (the maintained install):
 
 ```bash
-command -v files search show imports clip paste || {
-  git clone https://github.com/AdamBien/zllm-scripts && cd zllm-scripts
-  chmod +x filesystem/* javascript/* clipboard/* skills/*
-  sudo cp filesystem/* javascript/* clipboard/* skills/* /usr/local/bin/
-}
+command -v files search show imports clip paste parseFrontmatter quickValidate >/dev/null
 ```
 
-When installation is not possible, use the OS command and state that the scripts are missing.
+When some are missing, install the composing skill's copies:
+
+```bash
+sudo cp "<composing skill's directory>/scripts/"* /usr/local/bin/
+```
+
+When installing is not possible, call them by path — `<composing skill's directory>/scripts/search <regex>` — and note that the per-script permission rules (`Bash(search:*)`) match the installed names only. When no composing skill carries them, clone https://github.com/AdamBien/zllm-scripts and copy `filesystem/*`, `javascript/*`, `clipboard/*`, `skills/*` to `/usr/local/bin/`. Without a JDK, use the OS command and state that the scripts are unavailable.
 
 ## Command Mapping
 
@@ -71,3 +75,4 @@ Globs without `/` match the file name (`'*.{ts,tsx}'`, `package.json`). Globs wi
 
 - **java-cli-script:** every zllm-script is a java-cli-script; use it to write a missing one.
 - **Composing skills** reference this skill instead of repeating the rules, e.g. `Search and read files per /zllm-scripts.` The composing skill keeps its workflow; this skill only decides which command performs each file or clipboard step.
+- **Composing skills carry the scripts they use** in their `scripts/` directory, with the exec bit set, so the scripts travel with the skill through every install path (`installSkills`, the release zips, `cp -R`).
