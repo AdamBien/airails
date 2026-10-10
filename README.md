@@ -60,7 +60,7 @@ The skills compose in layers. Each layer fixes one set of decisions; the layers 
 Outside the sequence:
 
 - **Exclusive grounding** — the selection rule for layers 4 and 5: standards first, zero dependencies, no build step. The model's prior on public standards, gated by the Baseline snapshot in [web-conventions](web/web-conventions).
-- **Controlled decompression** — modifiers reopen one decision each: [showtime](bce/showtime) skips verification, [web-latest](web/web-latest) lifts the Baseline policy, [web-pwa](web/web-pwa) adds offline support, [web-performance-reviewer](web/web-performance-reviewer) adds an opt-in review. Transformers apply layers 3–5 to existing code: [java-distiller](java/java-distiller), [python-to-java](java/python-to-java), [simplifier](migrations/simplifier); [enterprisifier](java/enterprisifier) inverts them.
+- **Controlled decompression** — modifiers reopen one decision each: [showtime](bce/showtime) skips verification, [web-latest](web/web-latest) lifts the Baseline policy, [web-pwa](web/web-pwa) adds offline support, [web-performance-reviewer](web/web-performance-reviewer), [web-standards-reviewer](web/web-standards-reviewer), and [bce-reviewer](bce/bce-reviewer) add opt-in reviews. Transformers apply layers 3–5 to existing code: [java-distiller](java/java-distiller), [python-to-java](java/python-to-java), [simplifier](migrations/simplifier); [enterprisifier](java/enterprisifier) inverts them.
 - **Recovery and projection** — [capability-brief](bce/capability-brief) captures greenfield intent as a use case or user story and feeds layer 2; the migration skills recover domain vocabulary from legacy code and feed it likewise: [concept-extractor](migrations/concept-extractor), [concept-clarifier](migrations/concept-clarifier), [bc-carver](migrations/bc-carver), [concept-annotator](migrations/concept-annotator), routed by [migration-advisor](migrations/migration-advisor). [readme](documentation/readme), [bce-diagrams](documentation/bce-diagrams), [mermaid](documentation/mermaid), and [drawio](documentation/drawio) render layers 2 and 3 for humans.
 
 ## What's Inside
@@ -89,6 +89,7 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**zhtmldb**](java/zhtmldb) — Agent datastore: key-value records stored as browsable, git-diffable XHTML pages, driven through the zhtmldb CLI
 - [**zjson**](java/zjson) — JSON parsing and generation by copying the org.json source into the project, no Maven/Gradle dependency
 - [**zunit**](java/zunit) — Generates and runs zunit tests for java-cli-app projects
+- [**zllm-scripts**](java/zllm-scripts) — Read-only, root-confined replacements for find, grep, cat, and clipboard commands, plus a JavaScript import inventory, that agents and composing skills run instead of OS shell commands
 
 ### Web
 
@@ -100,11 +101,13 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**web-system-tests**](web/web-system-tests) — Browser-driven system tests with Playwright against a running frontend: `tests/` layout, `baseURL` plus `webServer`, accessibility-tree locators, cross-engine runs, opt-in coverage; the web realization of system-tests
 - [**web-latest**](web/web-latest) — Modifier for experiments and PoCs that lifts the Baseline browser-support policy: newest web platform features without fallbacks, with a declared support floor; composes on top of web-static, web-sprinkles, or web-components
 - [**web-performance-reviewer**](web/web-performance-reviewer) — Opt-in performance review of the rendered site through Chrome DevTools MCP: throttled traces, Core Web Vitals thresholds, network waterfall, heap-snapshot leak checks for SPAs; never part of the verification loop; composes on top of web-static, web-sprinkles, or web-components
+- [**web-standards-reviewer**](web/web-standards-reviewer) — Terse review of an existing web project against the web-standards and essential-dependencies rules of the detected stack skill: build step, non-essential dependencies, platform APIs replacing hand-rolled code; one line per finding; review only
 - [**web-pwa**](web/web-pwa) — Modifier adding offline support via a hand-written service worker with a versioned Cache API precache, and installability via a web app manifest; no build step, no generated code; composes on top of web-static, web-sprinkles, or web-components
 
 ### BCE
 
 - [**bce**](bce/bce) — Composable, technology-neutral architecture rules for the Boundary-Control-Entity pattern: business components, layer responsibilities, and package structure
+- [**bce-reviewer**](bce/bce-reviewer) — Terse review of BC carving, the per-BC cohesion/coupling ratio, and BCE layering against bce, one line per finding; full codebase or incremental (uncommitted changes, git range); review only
 - [**system-tests**](bce/system-tests) — Composable, technology-neutral conventions for black-box system tests exercising the running system through its public surface; stack skills own launch mechanics and test syntax
 - [**java-cli-app**](bce/java-cli-app) — Multi-file Java 25 CLI applications packaged as executable JARs with zb
 - [**microprofile-server**](bce/microprofile-server) — Architecture and coding conventions for long-running MicroProfile/Jakarta EE server applications using BCE pattern
