@@ -1,6 +1,7 @@
 ---
 name: simplifier
-description: Replatform mode ("lift, tinker, and shift") — simplify a 1:1-lifted legacy system in place: modernize code and remove external dependencies, one pass at a time, each bracketed by characterization-tests replays, structure preserved. Owns the stack-neutral pass discipline; the transformation catalog and dependency ladder come from the composed stack ecosystem (Java: java-distiller, Java SE → MicroProfile/Jakarta EE → copied source; web: web-conventions/web-components, web platform first → vendored source). A legitimate terminal state, or preparation for concept-extractor. Invoke explicitly as /simplifier. Not a rearchitecture — structural moves belong to bc-carver and sbce.
+description: >-
+  Replatform mode ("lift, tinker, and shift") — simplify a 1:1-lifted legacy system in place: modernize code and remove external dependencies, one pass at a time, each bracketed by characterization-tests replays, structure preserved. Owns the stack-neutral pass discipline; the transformation catalog and dependency ladder come from the composed stack ecosystem (Java: java-distiller, Java SE → MicroProfile/Jakarta EE → copied source; web: web-conventions/web-components, web platform first → vendored source). A legitimate terminal state, or preparation for concept-extractor. Invoke explicitly as /simplifier. Not a rearchitecture — structural moves belong to bc-carver and sbce.
 disable-model-invocation: true
 ---
 
