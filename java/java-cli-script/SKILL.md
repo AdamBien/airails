@@ -144,6 +144,7 @@ When asked for an executable convenience script for a `/java-cli-app` project or
 - Only use the `java.base` module and standard JDK modules
 - Never add external JARs or classpath entries to the shebang
 - Use `java.net.http.HttpClient` for HTTP, `javax.crypto` for crypto, `java.nio.file` for file I/O
+- Use Java's clipboard (`Toolkit.getDefaultToolkit().getSystemClipboard()` with `StringSelection` / `DataFlavor.stringFlavor`) instead of OS clipboard commands (`pbcopy`, `pbpaste`, `xclip`, `clip.exe`) — portable across operating systems, no process spawning
 - If a task genuinely requires external libraries or multiple files, suggest using the `java-cli-app` skill with zb instead
 
 ## Code Style
