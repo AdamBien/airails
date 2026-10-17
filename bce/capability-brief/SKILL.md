@@ -52,12 +52,18 @@ completed brief in the same format. It never reopens answered sections.
    - existing package docs (`package-info.java` / `package-info.md`) → the capabilities that exist, their operations and entities; decides `kind: extends` versus `new`, and stops you from coining an operation that exists;
    - the system doc's `## Decisions` → never propose an alternative a `Dn` records as rejected; the `## Ubiquitous language` → reuse its nouns;
    - whether a stack is declared (system doc `Stack` line, `AGENTS.md`, `README.md`) → if not, `/sbce new` will have to ask for it; put "stack not declared" under `## Open issues` so the author knows it is not theirs to answer.
-3. **Ask one gap per question**, specific over generic, with enumerable options and an "other" escape. When you propose a default, name it — "I'd assume at most 50 results, most relevant first; confirm or correct". Skip what context already answers. No meta-questions about the process.
-4. **Ask what only the human knows**: the result's shape, order, limit and empty answer; each input's parts and which are required; what makes an input invalid; the response when an external system is unavailable; what a repeated request does; who ends kept state and when; the alternatives a decision rejected.
-5. **Answer yourself what is derivable**: operation names (verb-noun from the actor's step), the format, the `capability`/`external` tag of a supporting actor when a package doc names it, the section a fact belongs to.
-6. **Loop.** Each answer can expose the next gap; re-run the checklist after every round. Stop when it passes.
-7. **Park, never guess.** A question the author cannot or will not answer goes under `## Open issues` in their words. That section is the only thing `/sbce new` will ask, so it must hold every unanswered question and no answered one.
-8. **Refuse the how.** If the author offers a type, transport, framework, or file name, keep it out of the brief. If it is really a choice made against alternatives, record the choice in domain terms under `## Decisions`; otherwise drop it and say so.
+3. **Report what the scan found** before the first question, in a short list the author can correct — the author may not know what the system already does:
+   - **existing functionality** — a capability or operation whose responsibility overlaps the request, named with its package: "`shop` already offers `findProducts`; this reads as an extension of `shop`, not a new capability";
+   - **reuse candidates** — an existing operation or entity the new capability could rely on instead of re-declaring, offered as a supporting actor tagged `capability`;
+   - **overloaded terms** — a word of the author's that already means something else in a package doc or the ubiquitous language ("order" as a purchase versus a sort order), two words for one thing (the author's "basket", the system's "cart"), or a proposed capability, operation or entity name already taken.
+
+   Each finding becomes a question with options — reuse or extend the existing capability / keep it separate; adopt the existing term / rename / keep both meanings. A rejected reuse or a deliberately kept second meaning is a choice against an alternative: record it under `## Decisions`. With no package doc and no ubiquitous language, say "greenfield, nothing to reuse" and continue.
+4. **Ask one gap per question**, specific over generic, with enumerable options and an "other" escape. When you propose a default, name it — "I'd assume at most 50 results, most relevant first; confirm or correct". Skip what context already answers. No meta-questions about the process.
+5. **Ask what only the human knows**: the result's shape, order, limit and empty answer; each input's parts and which are required; what makes an input invalid; the response when an external system is unavailable; what a repeated request does; who ends kept state and when; the alternatives a decision rejected.
+6. **Answer yourself what is derivable**: operation names (verb-noun from the actor's step), the format, the `capability`/`external` tag of a supporting actor when a package doc names it, the section a fact belongs to.
+7. **Loop.** Each answer can expose the next gap; re-run the checklist after every round. Stop when it passes.
+8. **Park, never guess.** A question the author cannot or will not answer goes under `## Open issues` in their words. That section is the only thing `/sbce new` will ask, so it must hold every unanswered question and no answered one.
+9. **Refuse the how.** If the author offers a type, transport, framework, or file name, keep it out of the brief. If it is really a choice made against alternatives, record the choice in domain terms under `## Decisions`; otherwise drop it and say so.
 
 ## Completeness checklist
 
@@ -67,6 +73,7 @@ Run this before emitting; every row maps to a part of the spec that would otherw
 |---|---|
 | Capability name is one lowercase word; `kind` is `new` or `extends` a capability whose package doc exists | the spec's identity |
 | `responsibility` is one sentence from the system's side | the spec's `>` line |
+| No responsibility overlaps an existing capability unless `kind: extends` it, it is a supporting actor, or the overlap is rejected under Decisions; no name clashes with an existing capability, operation or entity; every noun matches the ubiquitous language or is new, and a second meaning is recorded under Decisions | no duplicate BC, no overloaded term in the spec |
 | Every step where the primary actor addresses the system names a verb-noun operation; system-only steps name none | `## Boundary`, one op each |
 | Every input an operation carries lists its parts, the required ones, and what makes it invalid | the `If…then` rows per operation |
 | The last step, or the happy `Then`, states the result's shape, order, limit with truncation wording, and the empty answer | the assert of the happy `When` |
