@@ -50,6 +50,64 @@ brief. Save it where you like (`<capability>-brief.md` beside the repository `RE
 default), read it, then hand it to `/sbce new <file>`. Two commands on purpose: the pause between
 them is where the domain owner signs off before the brief becomes a spec.
 
+## Templates
+
+Written for the domain expert or business analyst who fills in the brief. You need no technical
+knowledge. A template asks what the system promises: who uses it, what they ask for, what they get
+back, and what happens when something goes wrong. The skill fills in what it can from your
+description and asks you only about the gaps. A blank section turns into a question later; a
+guessed answer turns into behaviour nobody asked for.
+
+### Which template
+
+| You describe… | Template | Example |
+|---|---|---|
+| a new process with several steps or participants, or something the system must remember between steps | [Use case](references/use-case-template.md) | a shopper browses, selects products, pays and confirms |
+| one new behaviour of an existing process, or a process that is a single request and answer | [User story](references/user-story-template.md) | a shopper searches products by keyword |
+
+The skill picks the template for you. If a story turns out to hide several steps or something the
+system must remember, the skill suggests switching to a use case.
+
+### Use case
+
+| Section | What you answer |
+|---|---|
+| Use case | the name of the process and the goal the person reaches |
+| Capability | the business area responsible, in one word; whether it is new or extends an existing one; one sentence on what it promises |
+| Actors | who starts the process, and who or what it relies on: another part of the system, or an outside party such as a payment provider or a sales advisor |
+| Trigger | the event that starts the process and the information it carries |
+| Main scenario | the steps when everything goes well. The last step says exactly what comes back: which details, in which order, how many at most, and what is said when nothing is found |
+| Inputs | each piece of information the person provides: its parts, which parts are mandatory, and when it counts as invalid |
+| Extensions | everything that can go wrong or go differently, tied to its step: invalid information, nothing to act on, something missing, an outside party unavailable, the same request sent twice, the person walking away. Optional paths are marked |
+| Lifecycle | what the system remembers between steps, and when that starts and ends — e.g. a selection kept until purchase or expiry; otherwise `none` |
+| Entities | the things the system keeps track of, names only — e.g. Selection, Order |
+| Out of scope | what was considered and deliberately left out |
+| Decisions | each choice with the alternatives rejected — e.g. payment is taken only at confirmation, not when the card details are entered |
+| Open issues | questions nobody could answer yet; these are the only questions asked later |
+
+### User story
+
+| Section | What you answer |
+|---|---|
+| Story | "As a *role*, I want *action* so that *outcome*." |
+| Capability | the business area; whether it is new or extended; the requests the story adds; what it relies on; the things it keeps track of |
+| Inputs | as in the use case |
+| Acceptance criteria | one short scenario per behaviour: *Given* the situation, *When* the person does something, *Then* the system answers. Cover the failures too: invalid input, nothing found, an outside party unavailable, a repeated request. The *Then* of the success scenario states the exact result |
+| Lifecycle, Out of scope, Decisions, Open issues | as in the use case |
+
+### What stays out
+
+No technical terms: no screens, data types, protocols, products or file names. If a technical
+preference is really a business choice, it is written down under Decisions in business terms.
+
+### After sign-off
+
+You read and approve the brief; the developers then turn it into the specification. From that
+point the specification is authoritative and the brief is not updated.
+
+Each template ends with a filled example from an online music store — a use case for "browse and
+shop" and a user story for keyword search. Read one before your first interview.
+
 ## Example Prompts
 
 - `/capability-brief uc "a shopper browses the store and buys products"`
