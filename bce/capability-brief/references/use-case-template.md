@@ -6,11 +6,12 @@ here; sbce reads it from the system doc, AGENTS.md or README — if none declare
 Open issues.
 
 How the sections become the spec:
-Capability     -> the spec's identity and its one-line responsibility
+Capability     -> the spec's identity and its one-line responsibility; the goal is context only
 Actors         -> who calls the system; a supporting capability is cross-capability wiring
 Main scenario  -> the named operations become `## Boundary`; each step a `When…shall` statement;
-                  the last step the result shape
-Inputs         -> the `If…then` statements for invalid input
+                  step 1 is the trigger; the last step the result shape
+Inputs         -> the `If…then` statements for invalid input: reject and name every invalid part,
+                  unless an extension states another response
 Extensions     -> `If…then` statements, one per extension; optional paths -> `Where…`
 Lifecycle      -> `While…` statements
 Entities       -> `## Entities`
@@ -19,13 +20,10 @@ Decisions      -> the recorded `Dn` log with rejected alternatives
 Use: run `/sbce new` on the file, or paste the body as the argument of `/sbce new "…"`.
 -->
 
-## Use case
-- name: <verb-noun, e.g. "browse and shop">
-- goal: <one sentence: what the primary actor achieves>
-
 ## Capability
 - name: `<one lowercase word>`
 - kind: new | extends `<existing-capability>`
+- goal: <one sentence: what the primary actor achieves>
 - responsibility: <one sentence: what the capability promises, from the system's side>
 
 ## Actors
@@ -34,25 +32,25 @@ capability or as external to the system -->
 - primary: <e.g. "a shopper">
 - supporting: <name> — capability `<name>` | external; <what this use case relies on it for>
 
-## Trigger
-<the event that starts the use case, with the input it carries>
-
 ## Main scenario
-<!-- numbered happy path; a step where the primary actor addresses the system names its operation
-in backticks, verb-noun; system-only steps name none; do not repeat the Extensions; the last step
-states the result: shape, order, limit and truncation wording, empty answer -->
+<!-- numbered happy path; step 1 is the trigger, the event that starts the use case with the input
+it carries; a step where the primary actor addresses the system names its operation in backticks,
+verb-noun; system-only steps name none; do not repeat the Extensions; the last step states the
+result: shape, order, limit and truncation wording, empty answer -->
 1. `<operation>` — <actor> <does what, with which input>
 2. The system <does what>
 n. The system returns <shape>; <order>; <limit and truncation>; when nothing matches, <empty answer>.
 
 ## Inputs
-<!-- every input an operation carries: its parts, which are required, what makes it invalid -->
+<!-- every input an operation carries: its parts, which are required, what makes it invalid;
+an invalid input is rejected naming every invalid part — no extension needed for that -->
 - <input>: <parts>; required: <parts>; invalid when: <rule>
 
 ## Extensions
-<!-- one per thing that can go wrong or differ, keyed to its step; cover per operation: invalid
-input, nothing to act on, absent target, external system unavailable, repeated request where it
-changes state, actor stops responding; mark an optional path "(optional)"; "*" = any step -->
+<!-- one per thing that can go wrong or differ, keyed to its step; cover per operation: nothing to
+act on, absent target, external system unavailable, repeated request where it changes state, actor
+stops responding; invalid input only when the response differs from the default rejection; mark an
+optional path "(optional)"; "*" = any step -->
 - 1a. <condition> -> <system response>
 - *a. <condition> -> <system response>
 
@@ -83,13 +81,10 @@ it ends; else "none" -->
 <summary>Filled example: <code>shop</code>, use case "browse and shop" — adapted from Jacobson & Cockburn, <a href="https://alistaircockburn.com/Use%20Case%20Foundation.pdf">Use-Case Foundation</a> v1.1</summary>
 
 ```markdown
-## Use case
-- name: browse and shop
-- goal: a shopper finds the most suitable product for their needs and purchases it
-
 ## Capability
 - name: `shop`
 - kind: new
+- goal: a shopper finds the most suitable product for their needs and purchases it
 - responsibility: list the products of the online music store and turn a shopper's selection into a paid, confirmed order
 
 ## Actors
@@ -97,9 +92,6 @@ it ends; else "none" -->
 - supporting: the stock control system — external; availability of a product
 - supporting: the payment system — external; validating payment details and taking the payment
 - supporting: a sales advisor — external; specialist or high-value products; the system hands the shopper over, the advisor never places a purchase
-
-## Trigger
-the shopper asks for products, optionally narrowed by a keyword
 
 ## Main scenario
 1. `list-products` — the shopper asks for products, optionally with a keyword.
@@ -117,16 +109,12 @@ the shopper asks for products, optionally narrowed by a keyword
 - delivery details: recipient, street, postal code, city, country; required: all; invalid when a part is missing
 
 ## Extensions
-- 1a. the keyword is invalid -> reject the request and name the minimum length
-- 1b. the shopper asks for expert advice (optional) -> hand the shopper over to a sales advisor; the selection is kept
+- 1a. the shopper asks for expert advice (optional) -> hand the shopper over to a sales advisor; the selection is kept
 - 2a. the stock control system is unavailable -> list the products without availability and mark it as unknown
-- 3a. the selection is invalid -> reject it and name the invalid part
-- 3b. the selected product is out of stock -> reject the selection and report the product as unavailable
-- 3c. the same product is selected again -> add the quantity to the existing line, never a second line
-- 4a. payment details invalid -> reject them and name the invalid part
-- 4b. the shopper has stored payment details (optional) -> offer them for reuse before asking for new ones
-- 5a. delivery details invalid -> reject them and name every missing part
-- 5b. the shopper has stored delivery details (optional) -> offer them for reuse before asking for new ones
+- 3a. the selected product is out of stock -> reject the selection and report the product as unavailable
+- 3b. the same product is selected again -> add the quantity to the existing line, never a second line
+- 4a. the shopper has stored payment details (optional) -> offer them for reuse before asking for new ones
+- 5a. the shopper has stored delivery details (optional) -> offer them for reuse before asking for new ones
 - 6a. nothing selected at confirmation -> reject the confirmation and ask for a selection
 - 6b. payment or delivery details not yet provided -> reject the confirmation and name what is missing
 - 6c. the purchase is confirmed a second time -> take no second payment; return the same confirmation

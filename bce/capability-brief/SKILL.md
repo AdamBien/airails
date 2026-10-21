@@ -75,9 +75,9 @@ Run this before emitting; every row maps to a part of the spec that would otherw
 | `responsibility` is one sentence from the system's side | the spec's `>` line |
 | No responsibility overlaps an existing capability unless `kind: extends` it, it is a supporting actor, or the overlap is rejected under Decisions; no name clashes with an existing capability, operation or entity; every noun matches the ubiquitous language or is new, and a second meaning is recorded under Decisions | no duplicate BC, no overloaded term in the spec |
 | Every step where the primary actor addresses the system names a verb-noun operation; system-only steps name none | `## Boundary`, one op each |
-| Every input an operation carries lists its parts, the required ones, and what makes it invalid | the `If…then` rows per operation |
+| Every input an operation carries lists its parts, the required ones, and what makes it invalid; its rejection names every invalid part unless an extension or scenario states another response | the `If…then` rows per operation |
 | The last step, or the happy `Then`, states the result's shape, order, limit with truncation wording, and the empty answer | the assert of the happy `When` |
-| Per operation the extensions cover: invalid input, nothing to act on, absent target, external system unavailable, repeated request where it changes state, actor stops responding; optional paths are marked | `If…then`, `Where…` |
+| Per operation the extensions cover: nothing to act on, absent target, external system unavailable, repeated request where it changes state, actor stops responding; optional paths are marked | `If…then`, `Where…` |
 | Every supporting actor is tagged `capability` (naming it) or `external` | the system doc's `## Components` wiring |
 | Lifecycle is `none` or states what starts kept state, what is reused, and when and how it ends | `While…` |
 | Entities is `none` or lists the stateful nouns this capability owns, names only | `## Entities` |

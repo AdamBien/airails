@@ -9,15 +9,17 @@ How the sections become the spec:
 Story                -> the capability's one-line responsibility (for a new capability)
 Capability           -> the spec's identity, its `## Boundary` operations, its `## Entities`, and the
                         cross-capability wiring
-Inputs               -> the `If…then` statements for invalid input
+Inputs               -> the `If…then` statements for invalid input: reject and name every invalid
+                        part, unless a scenario states another response
 Acceptance criteria  -> one EARS statement each: Given = `While…`, When = `When…`, a failing
                         scenario = `If…then`, Then = the `shall` response and its result shape
 Lifecycle            -> `While…` statements
 Decisions            -> the recorded `Dn` log with rejected alternatives
 
-Cover every scenario, not only the happy path: invalid input, nothing to act on, an absent target,
-an external system unavailable, a repeated request where it changes state. A scenario you do not
-write is a question you will be asked.
+Cover every scenario, not only the happy path: nothing to act on, an absent target, an external
+system unavailable, a repeated request where it changes state. Invalid input needs no scenario
+unless its response differs from the default rejection. A scenario you do not write is a question
+you will be asked.
 
 Use: run `/sbce new` on the file, or paste the body as the argument of `/sbce new "…"`.
 -->
@@ -29,12 +31,13 @@ As a <role>, I want <action with its input> so that <outcome>.
 - name: `<one lowercase word>`
 - kind: new | extends `<existing-capability>`
 - responsibility: <one sentence from the system's side; for kind new, else omit>
-- operations: `<verb-noun>` <one per operation this story adds or changes>
+- operations: `<verb-noun>` <one per operation this story adds or changes; derived from the story by the skill>
 - relies on: none | capability `<name>` — <for what> | external <name> — <for what>
 - entities: none | <stateful nouns this capability owns, names only>
 
 ## Inputs
-<!-- every input an operation carries: its parts, which are required, what makes it invalid -->
+<!-- every input an operation carries: its parts, which are required, what makes it invalid;
+an invalid input is rejected naming every invalid part — no scenario needed for that -->
 - <input>: <parts>; required: <parts>; invalid when: <rule>
 
 ## Acceptance criteria
@@ -94,10 +97,6 @@ As a shopper, I want to search the products by a keyword so that I find a suitab
 ### Nothing matches
 - When the shopper searches with a keyword no product contains
 - Then the system reports that no product was found
-
-### Keyword missing or too short
-- When the shopper searches with an empty keyword or fewer than two characters
-- Then the system rejects the search and names the minimum length
 
 ### Stock control unavailable
 - Given the stock control system is unavailable

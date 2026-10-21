@@ -112,7 +112,8 @@ under `## Decisions` is a confirmed `Dn` to log without offering it again; a sup
 tagged `capability` is declared cross-BC wiring for the system doc; `## Out of scope` closes the
 scope questions. Ask exactly what `## Open issues` lists plus any section left blank — nothing
 else — then author from the brief's mapping: named operations → `## Boundary`, `Inputs` and
-`Extensions` → `If…then`, optional paths → `Where…`, `Lifecycle` → `While…`, `Entities` →
+`Extensions` → `If…then` (an invalid input is rejected naming every invalid part unless an
+extension states another response), optional paths → `Where…`, `Lifecycle` → `While…`, `Entities` →
 `## Entities`. The brief is inception input, not a source of truth: once the spec exists, the
 spec is authoritative.
 

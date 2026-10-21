@@ -72,13 +72,11 @@ system must remember, the skill suggests switching to a use case.
 
 | Section | What you answer |
 |---|---|
-| Use case | the name of the process and the goal the person reaches |
-| Capability | the business area responsible, in one word; whether it is new or extends an existing one; one sentence on what it promises |
+| Capability | the business area responsible, in one word; whether it is new or extends an existing one; the goal the person reaches; one sentence on what the system promises |
 | Actors | who starts the process, and who or what it relies on: another part of the system, or an outside party such as a payment provider or a sales advisor |
-| Trigger | the event that starts the process and the information it carries |
-| Main scenario | the steps when everything goes well. The last step says exactly what comes back: which details, in which order, how many at most, and what is said when nothing is found |
-| Inputs | each piece of information the person provides: its parts, which parts are mandatory, and when it counts as invalid |
-| Extensions | everything that can go wrong or go differently, tied to its step: invalid information, nothing to act on, something missing, an outside party unavailable, the same request sent twice, the person walking away. Optional paths are marked |
+| Main scenario | the steps when everything goes well, starting with the event that starts the process. The last step says exactly what comes back: which details, in which order, how many at most, and what is said when nothing is found |
+| Inputs | each piece of information the person provides: its parts, which parts are mandatory, and when it counts as invalid. Invalid information is always rejected, naming what is wrong |
+| Extensions | everything else that can go wrong or go differently, tied to its step: nothing to act on, something missing, an outside party unavailable, the same request sent twice, the person walking away. Optional paths are marked |
 | Lifecycle | what the system remembers between steps, and when that starts and ends — e.g. a selection kept until purchase or expiry; otherwise `none` |
 | Entities | the things the system keeps track of, names only — e.g. Selection, Order |
 | Out of scope | what was considered and deliberately left out |
@@ -89,13 +87,10 @@ system must remember, the skill suggests switching to a use case.
 <summary>Filled example: <code>leave</code>, use case "request leave"</summary>
 
 ```markdown
-## Use case
-- name: request leave
-- goal: an employee gets a decided leave request for a period of time off
-
 ## Capability
 - name: `leave`
 - kind: new
+- goal: an employee gets a decided leave request for a period of time off
 - responsibility: take an employee's leave request, have it decided by their manager and keep the leave balance and the team calendar in line with the decision
 
 ## Actors
@@ -103,9 +98,6 @@ system must remember, the skill suggests switching to a use case.
 - supporting: the employee's manager — external; approves or rejects the request
 - supporting: the HR system — external; the leave balance of each employee and the assignment of employees to managers
 - supporting: the team calendar — external; shows approved leave to the team
-
-## Trigger
-the employee asks for time off for a period, with the type of leave
 
 ## Main scenario
 1. `request-leave` — the employee submits the leave type, the first and the last day, and an optional note.
@@ -118,17 +110,15 @@ the employee asks for time off for a period, with the type of leave
 - decision: approve or reject, reason; required: the decision, and a reason when rejecting; invalid when a rejection has no reason
 
 ## Extensions
-- 1a. the leave request is invalid -> reject it and name the invalid part
-- 1b. the period contains no working day -> reject it; there is nothing to request
-- 1c. the period overlaps a pending or approved request of the same employee -> reject it and name the overlapping request
-- 1d. annual leave exceeds the remaining balance -> reject it and state the remaining balance
-- 1e. the same request is submitted a second time -> create no second request; return the existing one
+- 1a. the period contains no working day -> reject it; there is nothing to request
+- 1b. the period overlaps a pending or approved request of the same employee -> reject it and name the overlapping request
+- 1c. annual leave exceeds the remaining balance -> reject it and state the remaining balance
+- 1d. the same request is submitted a second time -> create no second request; return the existing one
 - 2a. the HR system is unavailable -> record the request as pending with the balance unchecked, and check the balance again before the manager decides
 - 2b. no manager is assigned to the employee -> record the request as pending and inform HR to assign one
 - 3a. the manager rejects the request -> close it as rejected, keep the balance unchanged and inform the employee with the reason
-- 3b. the decision is invalid -> reject it and name the invalid part
-- 3c. the request is no longer pending -> reject the decision and report the request's current state
-- 3d. the manager does not decide within 10 working days -> pass the request to the next-level manager and inform the employee
+- 3b. the request is no longer pending -> reject the decision and report the request's current state
+- 3c. the manager does not decide within 10 working days -> pass the request to the next-level manager and inform the employee
 - 4a. the HR system is unavailable -> the approval stands; deduct the days as soon as the HR system is available
 - 4b. the team calendar is unavailable -> the approval stands; enter the absence as soon as the calendar is available
 - *a. the employee withdraws a pending request (`withdraw-leave`) -> close it as withdrawn and inform the manager
@@ -162,9 +152,9 @@ the employee asks for time off for a period, with the type of leave
 | Section | What you answer |
 |---|---|
 | Story | "As a *role*, I want *action* so that *outcome*." |
-| Capability | the business area; whether it is new or extended; the requests the story adds; what it relies on; the things it keeps track of |
+| Capability | the business area; whether it is new or extended; what it relies on; the things it keeps track of. The skill names the requests the story adds |
 | Inputs | as in the use case |
-| Acceptance criteria | one short scenario per behaviour: *Given* the situation, *When* the person does something, *Then* the system answers. Cover the failures too: invalid input, nothing found, an outside party unavailable, a repeated request. The *Then* of the success scenario states the exact result |
+| Acceptance criteria | one short scenario per behaviour: *Given* the situation, *When* the person does something, *Then* the system answers. Cover the failures too: nothing found, an outside party unavailable, a repeated request. The *Then* of the success scenario states the exact result |
 | Lifecycle, Out of scope, Decisions, Open issues | as in the use case |
 
 ### What stays out
