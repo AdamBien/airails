@@ -85,6 +85,78 @@ system must remember, the skill suggests switching to a use case.
 | Decisions | each choice with the alternatives rejected — e.g. payment is taken only at confirmation, not when the card details are entered |
 | Open issues | questions nobody could answer yet; these are the only questions asked later |
 
+<details>
+<summary>Filled example: <code>leave</code>, use case "request leave"</summary>
+
+```markdown
+## Use case
+- name: request leave
+- goal: an employee gets a decided leave request for a period of time off
+
+## Capability
+- name: `leave`
+- kind: new
+- responsibility: take an employee's leave request, have it decided by their manager and keep the leave balance and the team calendar in line with the decision
+
+## Actors
+- primary: an employee
+- supporting: the employee's manager — external; approves or rejects the request
+- supporting: the HR system — external; the leave balance of each employee and the assignment of employees to managers
+- supporting: the team calendar — external; shows approved leave to the team
+
+## Trigger
+the employee asks for time off for a period, with the type of leave
+
+## Main scenario
+1. `request-leave` — the employee submits the leave type, the first and the last day, and an optional note.
+2. The system counts the working days in the period, checks them against the employee's balance in the HR system, records the request as pending and informs the employee's manager.
+3. `decide-leave` — the manager approves the request.
+4. The system deducts the days from the balance in the HR system, enters the absence in the team calendar and informs the employee with the decided request: request number, leave type, first and last day, working days taken, decision, and remaining balance.
+
+## Inputs
+- leave request: leave type (annual, unpaid, special), first day, last day, note; required: type, first day, last day; invalid when the type is unknown, the first day is in the past, or the last day is before the first day
+- decision: approve or reject, reason; required: the decision, and a reason when rejecting; invalid when a rejection has no reason
+
+## Extensions
+- 1a. the leave request is invalid -> reject it and name the invalid part
+- 1b. the period contains no working day -> reject it; there is nothing to request
+- 1c. the period overlaps a pending or approved request of the same employee -> reject it and name the overlapping request
+- 1d. annual leave exceeds the remaining balance -> reject it and state the remaining balance
+- 1e. the same request is submitted a second time -> create no second request; return the existing one
+- 2a. the HR system is unavailable -> record the request as pending with the balance unchecked, and check the balance again before the manager decides
+- 2b. no manager is assigned to the employee -> record the request as pending and inform HR to assign one
+- 3a. the manager rejects the request -> close it as rejected, keep the balance unchanged and inform the employee with the reason
+- 3b. the decision is invalid -> reject it and name the invalid part
+- 3c. the request is no longer pending -> reject the decision and report the request's current state
+- 3d. the manager does not decide within 10 working days -> pass the request to the next-level manager and inform the employee
+- 4a. the HR system is unavailable -> the approval stands; deduct the days as soon as the HR system is available
+- 4b. the team calendar is unavailable -> the approval stands; enter the absence as soon as the calendar is available
+- *a. the employee withdraws a pending request (`withdraw-leave`) -> close it as withdrawn and inform the manager
+- *b. the employee withdraws an approved request before its first day -> return the days to the balance, remove the calendar entry and inform the manager
+
+## Lifecycle
+- one request per submission, pending from submission until approved, rejected or withdrawn; an approved request ends after its last day or when withdrawn before its first day
+
+## Entities
+- LeaveRequest
+
+## Out of scope
+- reporting sick leave — a separate capability with no approval
+- calculating the yearly entitlement — owned by the HR system
+- payroll effects of unpaid leave — owned by payroll
+
+## Decisions
+- record: one capability `leave` from request to decision _(rejected: separate `request` and `approval` capabilities)_
+- record: the balance stays in the HR system and is checked at request and before the decision _(rejected: keeping a copy of the balance)_
+- record: an undecided request goes to the next-level manager after 10 working days _(rejected: automatic approval; waiting without limit)_
+
+## Open issues
+- may an approved request be withdrawn after its first day, and are the remaining days returned?
+- must the manager see who else in the team is absent in the requested period before deciding?
+```
+
+</details>
+
 ### User story
 
 | Section | What you answer |
@@ -106,7 +178,8 @@ You read and approve the brief; the developers then turn it into the specificati
 point the specification is authoritative and the brief is not updated.
 
 Each template ends with a filled example from an online music store — a use case for "browse and
-shop" and a user story for keyword search. Read one before your first interview.
+shop" and a user story for keyword search; the use case above adds "request leave" from everyday
+office work. Read one before your first interview.
 
 ## Example Prompts
 
