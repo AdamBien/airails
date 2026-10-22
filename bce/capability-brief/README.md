@@ -8,13 +8,14 @@ answers are recorded once.
 
 ## Scope
 
-- Three modes, one skill — invoke as `/capability-brief uc|story|review <description-or-file>` (or by intent, mode omitted):
+- Three modes, one skill — invoke as `/capability-brief uc|story|review <description, notes, or file>` (or by intent, mode omitted):
   - **uc** — a **use case** for a new capability with several steps, actors or kept state
   - **story** — a **user story** for one behaviour added to an existing capability, or a new capability with a single operation
-  - **review** — run the checklist over an existing brief and complete only its gaps
+  - **review** — run the checklist over an existing brief, or over notes, an email or a requirements document, and complete only the gaps
+- **Any text as input** — a sentence, notes, an email, a requirements document. The minimum is one outcome the system should deliver; everything else is asked. Text naming only a solution is answered with one question for the outcome; text spanning several capabilities with a choice of which to brief. The input's form never lowers the checklist and never changes the output: always a use case or a user story
 - Mode omitted: the skill routes by the input's shape (kept state or several calls → use case, an addition to an existing capability → story) and switches when the shape changes. Mode given: the author's choice stands; when the input outgrows it, the skill warns and asks instead of switching
-- An **interview** that fills the template from the author's words, scans the repository read-only (existing package docs, the system doc's decisions and language, whether a stack is declared), reports what it found — existing capabilities and operations that overlap the request, reuse candidates, overloaded terms and name clashes — then asks one gap per question — only what a human can answer: result shape, input parts and validation, repeated requests, external failures, lifecycle end, rejected alternatives
-- A **completeness checklist** every brief passes before it is emitted: no unacknowledged overlap with an existing capability and no overloaded term, every actor step named as an operation, every input with its parts, every operation with its failure cases, every supporting actor tagged as a capability or external, lifecycle and entities stated or `none`, decisions with rejected alternatives, open issues holding only unanswered questions
+- An **interview** that fills the template from the author's words — only what they state; a value they did not state is asked as a proposed default, vague wording ("a few", "fast") is a gap, and contradicting passages become one question — reads back what it took from the input so a misreading is corrected before it counts, scans the repository read-only (existing package docs, the system doc's decisions and language, whether a stack is declared), reports what it found — existing capabilities and operations that overlap the request, reuse candidates, overloaded terms and name clashes — then asks one gap per question — only what a human can answer: result shape, input parts and validation, repeated requests, external failures, lifecycle end, rejected alternatives
+- A **completeness checklist** every brief passes before it is emitted: every entry stated in the input or confirmed in the interview, none inferred; no unacknowledged overlap with an existing capability and no overloaded term, every actor step named as an operation, every input with its parts, every operation with its failure cases, every supporting actor tagged as a capability or external, lifecycle and entities stated or `none`, decisions with rejected alternatives, open issues holding only unanswered questions
 - Stack-neutral — what the system promises, never how it is built; a type, transport or framework offered by the author is kept out
 - The brief is **inception input, not a source of truth** — the same status as the README seed `/sbce new` reads. Once the spec exists in the package doc, the spec is authoritative
 - Templates: [references/use-case-template.md](references/use-case-template.md), [references/user-story-template.md](references/user-story-template.md); each carries a filled example and states how its sections become the spec
@@ -53,7 +54,10 @@ them is where the domain owner signs off before the brief becomes a spec.
 ## Templates
 
 Written for the domain expert or business analyst who fills in the brief. You need no technical
-knowledge. A template asks what the system promises: who uses it, what they ask for, what they get
+knowledge, and you need not know use cases or user stories: describe the process in your own
+words — a sentence, notes, or an existing document — and the skill structures it. It reads back
+what it understood from your text before asking anything, so correct it there; it never fills in
+a value you did not state. A template asks what the system promises: who uses it, what they ask for, what they get
 back, and what happens when something goes wrong. The skill fills in what it can from your
 description and asks you only about the gaps. A blank section turns into a question later; a
 guessed answer turns into behaviour nobody asked for.
@@ -184,6 +188,10 @@ office work. Read one before your first interview.
 - `/capability-brief story "as a shopper I want to keep products in a wishlist across visits"`
 
   Explicit mode outgrown: the wishlist is kept state, so the skill warns that the story hides a lifecycle and asks whether to continue as story or switch to a use case — it never switches on its own once a mode was given.
+
+- `/capability-brief review leave-notes.md`
+
+  Review of plain text: the notes are routed (a request and a decision by another person → use case), the template is filled only from what the notes state, the skill reads back what it took, then asks for the gaps — "the manager decides soon" is vague, so it asks for the time limit and what happens when it passes.
 
 - `/capability-brief review shop-brief.md`
 
