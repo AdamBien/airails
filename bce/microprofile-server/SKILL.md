@@ -46,6 +46,9 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - direct references between entities from independent BCs are allowed, but always aim for Maximal Cohesion and Minimal Coupling between BCs
 - if a relation exists in the database (e.g. JPA foreign key), the entities must carry a corresponding reference (id field or association); the DB schema is the source of truth
 - excessive cross-BC references or shared configuration is a refactoring signal — split, merge, or rebalance the BCs to restore cohesion
+- do not copy entities into structurally identical objects (DTOs, VOs, mirror records) across layers or BCs; pass the entity itself
+- introduce a separate type only when its shape or semantics differ (e.g. projection, aggregation, versioned external contract)
+- no mapper classes or mapping frameworks (e.g. MapStruct, ModelMapper) for 1:1 field copies
 
 ## Components
 - create new components with minimal business logic and essential fields only
