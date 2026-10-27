@@ -36,6 +36,17 @@ install these alongside it (all ship via airails `installSkills`):
   [`web-static`](../../web/web-static) / [`web-sprinkles`](../../web/web-sprinkles)
   (`checks.md` manifest + Chrome DevTools / Lighthouse).
 
+Read as a whole, the composition is a stepwise refinement of one capability: each skill adds one
+kind of decision and specializes, never contradicts, the ones above it. The first three are
+stack-neutral, so the stack skill is interchangeable.
+
+| Skill | Term | Question | Commits to | Neutral to |
+|---|---|---|---|---|
+| [`capability-brief`](../capability-brief) | Intent | Why, for whom | actors, outcome, failures | structure and stack |
+| `sbce` | Contract | What is promised | EARS statements, operations, entities; one capability is one BC | structure rules and stack |
+| [`bce`](../bce) | Structure | Where it lives, and what makes the cut good | BC per responsibility, layer semantics, cohesion and coupling rules, entity requirements, naming | stack |
+| stack skill, e.g. [`microprofile-server`](../microprofile-server), [`web-components`](../../web/web-components), [`java-cli-app`](../java-cli-app), [`aws-cdk`](../aws-cdk) | Realization | How it is built | runtime, layout, build, test loop | nothing |
+
 `sbce` never names a runner or a test kind; it asks the stack skill "are you green?". The spec
 format and rules live in [SKILL.md](SKILL.md).
 
