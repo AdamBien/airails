@@ -59,7 +59,7 @@ case or a user story, whatever the input's form — `/sbce new` reads only those
 | Input | Response |
 |---|---|
 | names only a solution — "add a message queue for orders", "we need an endpoint for X" | ask what someone should be able to do once it exists; continue from the answer |
-| spans several capabilities — "the whole HR portal" | list the capabilities found and ask which one to brief; the others go under `## Out of scope` or into later briefs |
+| spans several capabilities — "the whole HR portal" | list the capabilities found and ask which one to brief; the others go under `## Out of scope` or into later briefs — or hand the whole to `/system-brief`, which carves it once with the stakeholders and returns one line per capability |
 | describes no system behaviour, or is a bug report, a refactoring, or a technical task | say it is not a capability, and stop |
 
 Long text is the risk, not short text. A one-liner is visibly incomplete and gets asked; a document
@@ -119,6 +119,7 @@ Run this before emitting; every row maps to a part of the spec that would otherw
 
 ## Composition
 
+- `/system-brief` is upstream when it exists: its capability line gives `name`, `kind` and the primary actor, its external systems the `external` supporting actors, its carried notes the start of the interview; its `## Language` nouns are reused and its `## Out of scope` is not re-asked. Never re-carve what it confirmed.
 - `/sbce` owns the spec format and the `new` step; its SKILL.md states that a filled brief counts as the completed clarify loop and that only `## Open issues` is asked. Never author the spec here.
 - `/ears-tests` owns tests; a brief never contains test wording.
 - The stack skill is not consulted — the brief is upstream of any stack; the only stack-related act is the declaration check in the interview.

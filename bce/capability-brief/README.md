@@ -22,6 +22,7 @@ answers are recorded once.
 
 ## Composition
 
+- [`system-brief`](../system-brief) is upstream when the system was carved first: one of its capability lines is this brief's input, with the system's actors, external systems and carried notes already answered
 - [`sbce`](../sbce) consumes the brief: its `new` mode treats a filled brief as the completed clarify loop, its `## Capability` as the confirmed carving, each `record:` as a confirmed decision, and asks only what `## Open issues` lists
 - [`ears-tests`](../ears-tests) is downstream of the spec; a brief never contains test wording
 - No stack skill is involved; the brief is upstream of any stack
