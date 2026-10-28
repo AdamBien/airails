@@ -61,7 +61,7 @@ Outside the sequence:
 
 - **Exclusive grounding** — the selection rule for layers 4 and 5: standards first, zero dependencies, no build step. The model's prior on public standards, gated by the Baseline snapshot in [web-conventions](web/web-conventions).
 - **Controlled decompression** — modifiers reopen one decision each: [showtime](bce/showtime) skips verification, [web-latest](web/web-latest) lifts the Baseline policy, [web-pwa](web/web-pwa) adds offline support, [web-performance-reviewer](web/web-performance-reviewer), [web-standards-reviewer](web/web-standards-reviewer), and [bce-reviewer](bce/bce-reviewer) add opt-in reviews. Transformers apply layers 3–5 to existing code: [java-distiller](java/java-distiller), [python-to-java](java/python-to-java), [simplifier](migrations/simplifier); [enterprisifier](java/enterprisifier) inverts them.
-- **Recovery and projection** — [capability-brief](bce/capability-brief) captures greenfield intent as a use case or user story and feeds layer 2; the migration skills recover domain vocabulary from legacy code and feed it likewise: [concept-extractor](migrations/concept-extractor), [concept-clarifier](migrations/concept-clarifier), [bc-carver](migrations/bc-carver), [concept-annotator](migrations/concept-annotator), routed by [migration-advisor](migrations/migration-advisor). [readme](documentation/readme), [bce-diagrams](documentation/bce-diagrams), [mermaid](documentation/mermaid), and [drawio](documentation/drawio) render layers 2 and 3 for humans.
+- **Recovery and projection** — [system-brief](bce/system-brief) carves a greenfield system into capabilities with its stakeholders, [capability-brief](bce/capability-brief) captures each as a use case or user story and feeds layer 2; the migration skills recover domain vocabulary from legacy code and feed it likewise: [concept-extractor](migrations/concept-extractor), [concept-clarifier](migrations/concept-clarifier), [bc-carver](migrations/bc-carver), [concept-annotator](migrations/concept-annotator), routed by [migration-advisor](migrations/migration-advisor). [readme](documentation/readme), [bce-diagrams](documentation/bce-diagrams), [mermaid](documentation/mermaid), and [drawio](documentation/drawio) render layers 2 and 3 for humans.
 
 ## What's Inside
 
@@ -72,6 +72,7 @@ One capability spec equals one business component, and the spec is the boundary 
 - [**sbce**](bce/sbce) — The workflow: `new` decomposes a feature into capability specs, `apply` converges code to spec; composes with bce and a stack skill (java-cli-app, microprofile-server, web-components)
 - [**ears-tests**](bce/ears-tests) — Parameterized (table-driven) tests generated from the EARS requirement statements in a capability spec, one labeled row per requirement id
 - [**capability-brief**](bce/capability-brief) — A use case or user story completed with the domain owner against a completeness checklist, so `/sbce new` authors the spec in one shot without questions
+- [**system-brief**](bce/system-brief) — The mission, actors and the carving of a whole system into named capabilities, confirmed with the stakeholders once; each line is a one-shot input to `capability-brief`, the rest seeds the sbce system doc
 
 ### Java
 

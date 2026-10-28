@@ -42,7 +42,7 @@ An **optional** doc one altitude up — the base package's `package-info.java` /
 only when a real cross-BC concern appears; a one-BC system needs none. Author from
 `references/system-doc-template.md`.
 
-- **Charter** — one sentence for the whole assembly.
+- **Mission** — one sentence for the whole assembly.
 - **Vision** *(optional)* — one aspirational sentence: the outcome the assembly chases. Rationale, not contract — no `Sn`, no test; the single non-verifiable line in the doc, and the deliberate exception to the traceability invariant. May be proposed by `/sbce new` distilling a README seed (human accepts/edits).
 - **Components** — this system's concrete wiring: which BC may call which, which integration events cross boundaries (`/bce` owns the generic layering; this owns the concrete dependencies).
 - **System invariants** — cross-cutting EARS `shall` statements (id `Sn`) no single BC owns.
@@ -58,7 +58,7 @@ a BC map, mark it **generated** and regenerate it from the per-BC docs.
 An **optional** repo-root `README.md` — a human on-ramp that is a **projection of the specs, not a
 source of truth**. Author from `references/readme-template.md`. Two slices, handled oppositely:
 
-- **Generated** (never hand-edited) — the system doc's Charter + Vision, a BC map (each BC name, its `>` one-liner, a link to its `package-info`), and a **Mermaid diagram of the declared `## Components` wiring**, fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`.
+- **Generated** (never hand-edited) — the system doc's Mission + Vision, a BC map (each BC name, its `>` one-liner, a link to its `package-info`), and a **Mermaid diagram of the declared `## Components` wiring**, fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`.
 - **Hand-maintained** (outside the markers, since no spec covers it — so it can't drift): `## Conventions`, build/run/test delegated to the stack skill, plus free-form meta (license, links, motivation).
 
 - **Doubles as the inception seed.** The hand-written prose outside the markers is what `/sbce new` (no argument) reads to bootstrap vision + specs (see `new`); SBCE reads it, never rewrites it.
@@ -77,7 +77,7 @@ source of truth**. Author from `references/readme-template.md`. Two slices, hand
 | Place the BC — package doc + layer dirs at the source location | the composed stack skill (owns the package base / source root) | yes — stack-defined |
 | Structural sync, **both directions** (spec→code: op→method, `Rn.m`→test · code→spec: method→op, test-id→statement, entity→`## Entities`) | this skill, made checkable by the stack's traceability convention | grep-level |
 | "Does this code satisfy the requirement" | this skill's judgment, **grounded by the requirement's passing test** | no — semantic |
-| Regenerate the README generated block (Charter/Vision/BC map/`## Components` diagram) from the package docs | this skill | yes — mechanical projection |
+| Regenerate the README generated block (Mission/Vision/BC map/`## Components` diagram) from the package docs | this skill | yes — mechanical projection |
 
 - Ask the stack skill "are you green?" — never name a runner or test kind, and never self-certify convergence.
 
@@ -116,6 +116,19 @@ else — then author from the brief's mapping: named operations → `## Boundary
 extension states another response), optional paths → `Where…`, `Lifecycle` → `While…`, `Entities` →
 `## Entities`. The brief is inception input, not a source of truth: once the spec exists, the
 spec is authoritative.
+
+**System brief input — the carving already ran.** A filled system brief authored with
+`/system-brief` (recognisable by its `## System` … `## Open issues` sections) is the stakeholder
+conversation about the whole assembly, run upstream and signed off: its `## Capabilities` is the
+confirmed carving — it replaces the carving confirmation below, each line tagged `new` or
+`existing`; `## System` is the proposed mission and vision for the system doc (the human accepts
+or edits the vision, as with a README seed); `## Interactions`, `## Language` and `## Invariants`
+seed `## Components`, `## Ubiquitous language` and `## System invariants` — invariants arrive in
+domain terms and are authored here as EARS `Sn` statements; each `record:` under `## Decisions` is a
+confirmed `Dn`. The system brief carries no capability's inside, so each `new` capability still
+needs its clarify loop: prefer the capability briefs the system brief hands off to, and run the
+feature-description interview only for a capability without one. Like every brief it is inception
+input, not a source of truth.
 
 **BC name** (`/sbce new checkout`):
 
