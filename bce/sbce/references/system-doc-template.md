@@ -15,14 +15,14 @@ Rules for filling it in:
 - **Cross-BC only.** Anything that belongs to a single boundary stays in that BC's spec.
 - **Never duplicate a BC's one-liner.** A hand-maintained BC index drifts and breaks the single-source-of-truth rule — *the gap is read, not stored*. If you want a BC map, mark it **generated** and regenerate it from the per-BC docs; never hand-type it.
 - **Composition is concrete wiring**, not generic rules — `/bce` owns BCE layering and naming bans; the system doc owns *this system's* allowed dependencies and integration events.
-- **Vision is the one exception.** Optional, one aspirational sentence — the outcome the assembly chases, distinct from the Charter's mandate ("what this assembly is"). Pure rationale: it carries **no `Sn`**, traces to **no test**, and is the single non-verifiable line in the doc. May be proposed by `/sbce new` distilling a README seed (the human accepts or edits). Omit it unless a real aspiration exists.
+- **Vision is the one exception.** Optional, one aspirational sentence — the outcome the assembly chases, distinct from the Mission's mandate ("what this assembly is"). Pure rationale: it carries **no `Sn`**, traces to **no test**, and is the single non-verifiable line in the doc. May be proposed by `/sbce new` distilling a README seed (the human accepts or edits). Omit it unless a real aspiration exists.
 - **System invariants** are EARS `shall` statements (the system is the assembly, not one BC). Same six patterns as a BC spec, and the same traceability: each carries a stable id `Sn` that ≥1 test embeds, so the spec↔test binding stays bijective at system altitude too.
 - **Ubiquitous language** defines shared nouns once, so each BC's `## Entities` stays terse — names plus a one-line meaning, no fields, no types.
 - **Decisions are append-only rationale.** Optional. Each confirmed choice carries a stable id `Dn`, states the decision, and names the rejected alternatives in a trailing `_(why: …; rejected: …)_`. Like Vision: no test, not a trace target. Immutable — a reversed decision gets a new entry and the old one is marked `superseded by Dm`, never edited or deleted. Testable behaviour belongs in an EARS statement instead; a standing project rule in the README's `## Conventions`.
 - **References are cross-BC rationale.** Optional. External specifications several BCs conform to — a standard, a regulation, a platform spec — one link per bullet with what it governs. Same rules as a BC's `## References`: no id, no test, not a trace target. A reference used by one BC belongs in that BC's spec.
 - It is not a tasks file and not a gap registry.
 
-The Markdown body (this is the whole system doc — every section optional except the charter):
+The Markdown body (this is the whole system doc — every section optional except the mission):
 
 ```markdown
 # <System Name>
