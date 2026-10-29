@@ -9,8 +9,9 @@ stack is not captured here — if none is declared in the repository, say so und
 How the sections become downstream artifacts:
 System           -> the system doc's title, `>` mission line and `## Vision`
 Actors           -> the `primary` and `external` actors of each capability brief
-Capabilities     -> one `/capability-brief` input per line; name and tag become its `name`
-                    and `kind`; the proposed BC set `/sbce new` confirms
+Capabilities     -> one `/capability-brief` input per `new` or `extends` line; name and tag
+                    become its `name` and `kind`; `existing` lines complete the assembly only;
+                    the proposed BC set `/sbce new` confirms
 Interactions     -> the system doc's `## Components` wiring, proposed
 Language         -> the system doc's `## Ubiquitous language`
 Invariants       -> candidates for the system doc's `## System invariants`, written as EARS by sbce
@@ -35,11 +36,13 @@ systems the assembly relies on but does not own, each with what for -->
 - external: <e.g. "the payroll system"> — <what the assembly relies on it for>
 
 ## Capabilities
-<!-- one line each, in build order; one lowercase word, tagged new or existing; one sentence naming
+<!-- one line each, in build order; one lowercase word, tagged new, extends or existing; one sentence naming
 the primary actor and the outcome the system promises; no operations, inputs, steps or screens —
-those belong to the capability's own brief. The first line states why it is first. -->
-1. `<name>` — new | existing — <primary actor> <achieves outcome>; the system <promises …>. _(first: <why>)_
-2. `<name>` — new | existing — …
+those belong to the capability's own brief. The first line states why it is first. `new`: a
+capability to build; `extends`: an existing capability that gains this outcome, the line
+describes the addition; `existing`: reused as it is, no brief needed. -->
+1. `<name>` — new | extends | existing — <primary actor> <achieves outcome>; the system <promises …>. _(first: <why>)_
+2. `<name>` — new | extends | existing — …
 
 ## Interactions
 <!-- only between listed capabilities and external systems; direction and what crosses; or
