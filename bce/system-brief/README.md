@@ -92,8 +92,7 @@ developers turn the briefs into specifications. From that point the specificatio
 doc are authoritative and this brief is not updated.
 
 The template ends with a filled example: an HR self-service portal carved into `leave`,
-`expenses`, `onboarding` and an existing `directory`. Its `leave` line is the input of the
-[`capability-brief`](../capability-brief) example. Read it before your first interview.
+`expenses`, `onboarding` and an existing `directory`. Read it before your first interview.
 
 ## Example Prompts
 
