@@ -78,7 +78,7 @@ One capability spec equals one business component, and the spec is the boundary 
 
 - [**java-conventions**](java/java-conventions) — Composable Java 25 code conventions: modern syntax, naming, visibility, streams, and exceptions across all Java contexts
 - [**concerns**](java/concerns) — @Concern marker annotations recording why a class or package exists: starter kinds for observability and external systems, plus admission rules for when a project-specific kind is worth adding
-- [**jdbc-persistence**](java/jdbc-persistence) — Plain JDBC persistence with Data-Oriented Programming: records as row shapes, sealed variants mapped through exhaustive switches, stateless control functions over a boundary-owned `Connection`; composes bce, java-conventions, and microprofile-server or java-cli-app
+- [**jdbc-persistence**](java/jdbc-persistence) — Plain JDBC persistence with Data-Oriented Programming: records as row shapes, sealed variants mapped through exhaustive switches, controls with an injected `DataSource` under a `@Transactional` boundary (CLI: static functions over a boundary-owned `Connection`); composes bce, java-conventions, and microprofile-server or java-cli-app
 - [**java-cli-script**](java/java-cli-script) — Zero-dependency, single-file executable Java scripts for system-wide use via PATH; longer scripts group members into Boundary/Control/Entity interface namespaces (composes bce)
 - [**java-distiller**](java/java-distiller) — Simplifies, modernizes, and refactors existing code into idiomatic Java 25
 - [**python-to-java**](java/python-to-java) — Converts Python scripts to zero-dependency Java 25 CLI programs
