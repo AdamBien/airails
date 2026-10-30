@@ -158,3 +158,4 @@ In a `/java-cli-app` the same class is an interface, the methods are `static`, a
 - `/java-conventions` owns syntax and style; the only deviation here is the single `while (rows.next())` loop inside the row collector
 - `/microprofile-server` and `/java-cli-app` own build, configuration, lifecycle, and the test loop; this skill specializes how they reach the database and never contradicts them
 - `/sbce`: a persisted record and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
+- `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class and adding `@Transactional` to the boundary

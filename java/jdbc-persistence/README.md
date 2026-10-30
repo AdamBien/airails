@@ -12,7 +12,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 - Hand-written DDL per BC; Flyway on the server, idempotent `CREATE TABLE IF NOT EXISTS` in a CLI
 - Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services, or `zunit` against a disposable database
 
-Not for JPA/Hibernate projects and not for NoSQL stores.
+Not for JPA/Hibernate projects and not for NoSQL stores. For a collection-backed store with the same control contract, see [`memory-persistence`](../memory-persistence).
 
 ## Composition
 
