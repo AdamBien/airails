@@ -20,6 +20,26 @@ recorded once.
 - Stack-neutral and inside-neutral — why the system exists and which capabilities it needs; a capability's operations and inputs are carried forward as notes for its own brief, never written into this one
 - The brief is **inception input, not a source of truth** — the same status as a capability brief and the README seed. Once the system doc and the specs exist they are authoritative; the capability list is not kept in sync, the README projection regenerates its BC map from the package docs instead
 - Template: [references/system-brief-template.md](references/system-brief-template.md); it carries a filled example and states how its sections become downstream artifacts
+- Standards: [references/standards.md](references/standards.md) — which established definition each section adopts, and what the skill adds on its own
+
+## Standards
+
+The brief keeps the product owner's words, but each section is defined by an established
+standard, so the skill reasons with definitions it already knows:
+
+| Section | Standard |
+|---|---|
+| System | OMG Business Motivation Model — Mission, Vision |
+| Actors | UML 2.5 Use Cases — primary and supporting Actor, Subject; Cockburn's actor roles |
+| Capabilities | ArchiMate 3.2 Strategy layer — Capability, the capability map; Cockburn's goal levels for altitude |
+| Interactions, Language | Domain-Driven Design — context map, ubiquitous language |
+| Invariants, Success measures | ArchiMate 3.2 Motivation layer — Principle, Outcome |
+| Out of scope | ISO/IEC/IEEE 29148 — system boundary, exclusions |
+| Decisions, Open issues | ISO/IEC/IEEE 42010 — decision with rationale, stakeholder concern |
+
+The whole document is a 29148 Stakeholder Requirements Specification compressed to inception
+size. The `new`/`extends`/`existing` tags, the one-word name, the build order and the interview
+protocol are the skill's own; [references/standards.md](references/standards.md) draws the line.
 
 ## Composition
 
