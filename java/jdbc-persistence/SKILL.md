@@ -51,6 +51,7 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 
 - the boundary owns the unit of work: one connection, one transaction, several control calls
 - `/microprofile-server`: `@Transactional` on the boundary method and `@Inject` of the control; the boundary never sees a `DataSource` or `Connection` — the container opens the transaction, the control's connections enlist in it, the container commits
+- when the project defines a `@Boundary` stereotype (a CDI `@Stereotype` carrying `@ApplicationScoped` and `@Transactional`), the boundary class is annotated with `@Boundary` and no explicit `@Transactional` appears; introduce the stereotype only when the project already has one or asks for it (`/microprofile-server`: without a stereotype, use `@ApplicationScoped`)
 - `/java-cli-app`: the boundary opens the connection (`DriverManager.getConnection(url, user, password)` or a driver `DataSource`), sets `setAutoCommit(false)`, calls the controls, commits; a thrown exception rolls back in a `catch` and rethrows
 - a read-only query may run with auto-commit; a boundary method that writes never does
 - connection coordinates come from configuration, never from literals: `quarkus.datasource.*` / MicroProfile Config on the server; `/zcfg` keys (`db.url`, `db.user`, `db.password`) in a CLI app; the password never lands in a source file
@@ -159,4 +160,4 @@ In a `/java-cli-app` the same class is an interface, the methods are `static`, a
 - `/java-conventions` owns syntax and style; the only deviation here is the single `while (rows.next())` loop inside the row collector
 - `/microprofile-server` and `/java-cli-app` own build, configuration, lifecycle, and the test loop; this skill specializes how they reach the database and never contradicts them
 - `/sbce`: a persisted record and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
-- `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class and adding `@Transactional` to the boundary
+- `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary

@@ -12,7 +12,7 @@ The store is a collection of immutable records. No entity lifecycle, no identity
 
 - records only — the stored value is the entity record itself, never a mutable copy or a wrapper
 - the control is the sole holder of state; no other class references the collection
-- the control's public contract is identical to the `/jdbc-persistence` control for the same BC: `save` returns the record with its id, `findById` returns `Optional`, `all` and queries return `List`; a BC migrates by swapping the control class and adding `@Transactional` to the boundary
+- the control's public contract is identical to the `/jdbc-persistence` control for the same BC: `save` returns the record with its id, `findById` returns `Optional`, `all` and queries return `List`; a BC migrates by swapping the control class and adding `@Transactional` (or the project's `@Boundary` stereotype) to the boundary
 - state lives for the process lifetime and is lost on restart; say so in the BC's `package-info.java`, not in the code
 
 ## Placement (BCE)
