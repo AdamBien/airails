@@ -5,7 +5,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 ## Scope
 
 - Records in `entity` as row shapes and projections, sealed interfaces for variants — free of `java.sql`
-- Controls as `@ApplicationScoped` CDI beans with an injected `DataSource` on the server, as interfaces with `static` functions over a `Connection` in a CLI; SQL in text blocks, `?` binding, explicit column lists
+- Controls named after responsibilities, spanning the tables of their BC: `@ApplicationScoped` CDI beans with an injected `DataSource` on the server, as interfaces with `static` functions over a `Connection` in a CLI; SQL in text blocks, `?` binding, explicit column lists
 - Exhaustive `switch` mapping in both directions between a sealed type and its discriminator column
 - Boundary-owned unit of work: `@Transactional` on the server, explicit commit in a CLI
 - `SQLException` translated at the control: integrity violations become `IllegalArgumentException`, the rest `IllegalStateException`

@@ -18,10 +18,10 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 ## Placement (BCE)
 
 - `entity` — the records and sealed interfaces; free of `java.sql`, annotations, and SQL strings
-- `control` — one class per aggregate root holding its SQL, binding, and row mapping; name it after the responsibility in plural (`Orders`, `Speakers`), never `*Repository`, `*Dao`, `*Mapper`, `*Store`
+- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Mapper`, `*Store`; a control holds the SQL, binding, and row mapping for the queries it answers and may read or write several tables of its BC in one method; a record built from a join or from two queries (`Customer` with `List<Address>`) is the normal result, not a special case; one table is written by exactly one control
 - `boundary` — owns the unit of work: on the server it carries `@Transactional` and injects the control; in a CLI it opens the connection, passes it to the control functions, and commits; never contains SQL
 - the schema belongs to the BC: each BC ships its own DDL; a table is owned by exactly one BC
-- a foreign key across BCs is an `id` component in the referencing record (`/bce`: the schema is the source of truth); never a nested record of the other BC's entity
+- a foreign key across BCs is an `id` component in the referencing record (`/bce`: the schema is the source of truth); never a nested record of the other BC's entity; a join across BC boundaries is confined to read-only projections and is a coupling signal
 
 ## Control Functions
 
@@ -44,6 +44,7 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - a sealed interface maps to a discriminator column plus the variant's detail columns (or one JSON column for wide variants); writing is an exhaustive `switch` over the sealed type with no `default`, so a new variant fails compilation until bound; reading is a `switch` over the discriminator whose only `default` throws — it guards against rows written by a newer deployment, not against a missing case
 - a nullable column is a modeling signal: prefer a variant (`Shipped(on)` vs `Open()`) or a separate table over a nullable component; when the column is genuinely optional, read it with `getObject(column, Type.class)`, document the invariant in the compact constructor, and never pass `null` on into a collection
 - projections (a report row, a count with a name, a dropdown entry) get their own small record in `entity`; never a half-filled aggregate record
+- a parent with children (`Customer` with `List<Address>`) is loaded by one join grouped in the row collector, or by two queries when the child list is large; never by one query per parent
 - no reflection, no annotation-driven mapping, no mapping library; a record with twenty columns has a twenty-line mapper and that is fine
 
 ## Transactions and Connections
