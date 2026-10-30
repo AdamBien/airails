@@ -20,6 +20,19 @@ Out of scope     -> closes scope questions in every capability brief
 Decisions        -> the system doc's `Dn` log with rejected alternatives
 Open issues      -> the only questions asked downstream about the system
 
+Standards each section adopts (definitions in standards.md; the terms stay out of the brief):
+System           -> BMM Mission and Vision
+Actors           -> UML Use Case primary and supporting Actors against the Subject, the system
+Capabilities     -> ArchiMate Capability, a capability map; Cockburn kite/cloud level
+Interactions     -> DDD context map: upstream/downstream and what crosses
+Language         -> DDD ubiquitous language
+Invariants       -> ArchiMate Principle
+Success measures -> ArchiMate Outcome
+Out of scope     -> ISO/IEC/IEEE 29148 system boundary and exclusions
+Decisions        -> ISO/IEC/IEEE 42010 decision with rationale and rejected alternatives
+Open issues      -> ISO/IEC/IEEE 42010 unresolved stakeholder concern
+The whole brief  -> a 29148 Stakeholder Requirements Specification at inception size
+
 Use: run `/capability-brief "<one-liner>"` per capability in build order, then `/sbce new`; or
 paste the body into the README outside the `sbce:generated` markers as the inception seed.
 -->
