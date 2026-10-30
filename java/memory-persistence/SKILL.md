@@ -18,7 +18,7 @@ The store is a collection of immutable records. No entity lifecycle, no identity
 ## Placement (BCE)
 
 - `entity` — the records and sealed interfaces, unchanged from `/jdbc-persistence`
-- `control` — one class per aggregate root named after the responsibility in plural (`Orders`), never `*Repository`, `*Store`, `*InMemory*`; the storage technology does not appear in the name because the boundary must not know it
+- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Store`, `*InMemory*`; the storage technology does not appear in the name because the boundary must not know it; a control may hold more than one map when it owns more than one record type
 - `boundary` — injects or receives the control; no collection, no stream over stored data
 
 ## Control
