@@ -92,7 +92,58 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - every `Connection`, `PreparedStatement`, `ResultSet` is in a try-with-resources
 - a round-trip test exists for every record that is persisted
 
-A complete worked example for both stacks: [references/worked-example.md](references/worked-example.md).
+## Shape
+
+```java
+public interface Orders {
+
+    String INSERT = """
+        INSERT INTO purchase_order (customer, total, status, status_detail)
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+        """;
+
+    static Order save(Connection connection, Order order) {
+        try (var statement = connection.prepareStatement(INSERT)) {
+            statement.setString(1, order.customer());
+            statement.setBigDecimal(2, order.total());
+            statement.setString(3, discriminator(order.status()));
+            statement.setString(4, detail(order.status()));
+            try (var keys = statement.executeQuery()) {
+                keys.next();
+                return order.withId(keys.getLong("id"));
+            }
+        } catch (SQLException e) {
+            throw translate(e, INSERT);
+        }
+    }
+
+    static Order toOrder(ResultSet rows) throws SQLException {
+        return new Order(
+            rows.getLong("id"),
+            rows.getString("customer"),
+            rows.getBigDecimal("total"),
+            toStatus(rows.getString("status"), rows.getString("status_detail")));
+    }
+
+    static String discriminator(Status status) {
+        return switch (status) {
+            case Open _ -> "OPEN";
+            case Shipped _ -> "SHIPPED";
+            case Cancelled _ -> "CANCELLED";
+        };
+    }
+
+    static Status toStatus(String discriminator, String detail) {
+        return switch (discriminator) {
+            case "OPEN" -> new Open();
+            case "SHIPPED" -> new Shipped(LocalDate.parse(detail));
+            case "CANCELLED" -> new Cancelled(detail);
+            default -> throw new IllegalStateException("unknown order status: " + discriminator);
+        };
+    }
+}
+```
 
 ## Composition
 

@@ -28,7 +28,7 @@ graph TD
 
 ## Usage
 
-Activated when adding persistence, tables, queries, or `ResultSet` mapping to a MicroProfile server or Java CLI project. The rules in [SKILL.md](SKILL.md) guide generation and review; [references/worked-example.md](references/worked-example.md) shows one BC on both stacks.
+Activated when adding persistence, tables, queries, or `ResultSet` mapping to a MicroProfile server or Java CLI project. The rules in [SKILL.md](SKILL.md) guide generation and review.
 
 ## Test
 
