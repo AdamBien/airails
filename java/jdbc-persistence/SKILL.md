@@ -1,6 +1,6 @@
 ---
 name: jdbc-persistence
-description: Persist and query data with plain JDBC and Data-Oriented Programming (DOP) — records as row shapes, sealed interfaces for variants, exhaustive pattern matching for the column mapping, SQL in text blocks, and controls that execute the statements — CDI beans with an injected `DataSource` under a `@Transactional` boundary on the server, stateless functions over a boundary-owned `Connection` in a CLI. No ORM, no JPA annotations, no reflection-based mapping. Composes with `/bce` for placement, `/java-conventions` for style, and the stack skill — `/microprofile-server` (CDI, `@Inject DataSource`, Dev Services) or `/java-cli-app` (driver JAR on the classpath, explicit commit). Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or when asked for "JDBC", "plain SQL", "data-oriented persistence", "persist records", "query records", "DataSource", "PreparedStatement", "ResultSet mapping", "schema", "DDL", "CREATE TABLE", "Flyway migration", "migration SQL", "no JPA", "no Hibernate". Not for JPA/Hibernate projects and not for NoSQL stores.
+description: Persist and query data with plain JDBC and Data-Oriented Programming — records as row shapes, sealed interfaces for variants, exhaustive pattern matching for the column mapping, hand-written SQL in controls, the unit of work owned by the boundary. No ORM, no JPA annotations, no reflection-based mapping. Composes with `/bce` for placement, `/java-conventions` for style, and the stack skill `/microprofile-server` or `/java-cli-app`. Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or when asked for "JDBC", "plain SQL", "data-oriented persistence", "persist records", "query records", "DataSource", "PreparedStatement", "ResultSet mapping", "schema", "DDL", "CREATE TABLE", "Flyway migration", "migration SQL", "no JPA", "no Hibernate". Not for JPA/Hibernate projects and not for NoSQL stores.
 argument-hint: "[BC, record, or query to persist]"
 ---
 
@@ -11,29 +11,32 @@ Add JDBC persistence using $ARGUMENTS. Apply all rules below strictly; `/bce`, `
 Data-Oriented Programming applied to the relational store: the record **is** the row shape, the sealed interface **is** the closed set of variants, and the control is a set of functions that move data between the two representations. Nothing is hidden — no proxies, no lazy loading, no dirty checking, no generated SQL. What the code reads is what the database executes.
 
 - model the data, the whole data, nothing but the data — one record per row shape, one record per projection; no record carries columns a query does not return
-- data is immutable and transparent — records only; a change is a new record (`with`-style copy through the canonical constructor), then an `UPDATE`
+- data is immutable and transparent — a change is a new record (`with`-style copy through the canonical constructor), then an `UPDATE`
 - make illegal states unrepresentable — closed sets as sealed interfaces or enums; the compiler, not a `default` branch, proves the column mapping complete
 - separate operations from data — SQL, binding, and row mapping live in the control; records carry components, invariants, and domain behavior, never `java.sql` imports
 
 ## Placement (BCE)
 
 - `entity` — the records and sealed interfaces; free of `java.sql`, annotations, and SQL strings
-- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Mapper`, `*Store`; a control holds the SQL, binding, and row mapping for the queries it answers and may read or write several tables of its BC in one method; a record built from a join or from two queries (`Customer` with `List<Address>`) is the normal result, not a special case; one table is written by exactly one control
-- `boundary` — owns the unit of work: on the server it carries `@Transactional` and injects the control; in a CLI it opens the connection, passes it to the control functions, and commits; never contains SQL
+- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Mapper`, `*Store`; a control holds the SQL, binding, and row mapping for the queries it answers and may read or write several tables of its BC in one method; one table is written by exactly one control
+- `boundary` — owns the unit of work: one connection, one transaction, several control calls; never contains SQL
+  - `/microprofile-server`: `@Transactional` on the boundary method and `@Inject` of the control; the boundary never sees a `DataSource` or `Connection` — the container opens the transaction, the control's connections enlist in it, the container commits. When the project defines a `@Boundary` stereotype (a CDI `@Stereotype` carrying `@ApplicationScoped` and `@Transactional`), use it instead of an explicit `@Transactional`; introduce the stereotype only when the project already has one or asks for it
+  - `/java-cli-app`: the boundary opens the connection (`DriverManager.getConnection(url, user, password)` or a driver `DataSource`), sets `setAutoCommit(false)`, passes the connection to the controls, commits; a thrown exception rolls back in a `catch` and rethrows. A read-only query may run with auto-commit; a boundary method that writes never does
+- connection coordinates come from configuration, never from literals: `quarkus.datasource.*` / MicroProfile Config on the server, `/zcfg` keys (`db.url`, `db.user`, `db.password`) in a CLI; the password never lands in a source file
 - the schema belongs to the BC: each BC ships its own DDL; a table is owned by exactly one BC
-- a foreign key across BCs is an `id` component in the referencing record (`/bce`: the schema is the source of truth); never a nested record of the other BC's entity; a join across BC boundaries is confined to read-only projections and is a coupling signal
+- a reference to another BC is an `id` component in the referencing record, backed by a real `FOREIGN KEY` (see Schema); never a nested record of the other BC's entity; a join across BC boundaries is confined to read-only projections and is a coupling signal
 
 ## Control Functions
 
-- `/microprofile-server`: the control is an `@ApplicationScoped` CDI bean with `@Inject DataSource dataSource;` (field injection, `/java-conventions`); each method opens its own connection in a try-with-resources — `try (var connection = this.dataSource.getConnection())` — and the pool hands back the connection enlisted in the boundary's JTA transaction, so several control calls in one boundary method share one transaction without passing anything around
-- `/java-cli-app`: the control is an interface with `static` methods and the `Connection` is the first parameter — `static Order save(Connection connection, Order order)`; there is no container to scope a transaction, so the boundary passes the connection it owns
+- `/microprofile-server`: the control is an `@ApplicationScoped` CDI bean with `@Inject DataSource dataSource;`; each method opens its own connection in a try-with-resources — `try (var connection = this.dataSource.getConnection())` — and the pool hands back the connection enlisted in the boundary's JTA transaction, so several control calls in one boundary method share one transaction without passing anything around
+- `/java-cli-app`: the control is an interface with `static` methods and the `Connection` is the first parameter — `static Order save(Connection connection, Order order)`
 - every method does one statement, or one logical unit of statements; it never commits or rolls back
 - SQL lives in `static final String` text blocks next to the function that executes it; explicit column lists, never `SELECT *`
 - parameters are bound with `?` only; a dynamic clause (sort column, filter name) comes from an enum constant or a `switch` over a sealed type, never from an interpolated argument
-- `PreparedStatement` and `ResultSet` are closed by try-with-resources inside the function
-- a `List<T>` result is collected in one `while (rows.next())` loop inside a single `rows(ResultSet)`-style method — the one place where a loop beats a stream; callers see a `List`, never a `ResultSet`
+- a `ResultSet` never leaves the function that opened it: a `List<T>` result is collected in one `while (rows.next())` loop inside a single row-collector method — the one place where a loop beats a stream
 - bulk writes use `addBatch`/`executeBatch`
 - generated keys: `RETURNING id` (PostgreSQL) or `getGeneratedKeys`; the function returns the record **with** the id — the caller never mutates anything
+- a lookup by id returns `Optional<T>`; `List` results are empty, never `null`
 
 ## Row Mapping
 
@@ -41,40 +44,30 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - one `static void bind(PreparedStatement statement, Order order)` per record for writes; `save` and `update` share it
 - columns map to the most specific Java SE type through `getObject(column, Type.class)`: `Instant`/`OffsetDateTime`/`LocalDate` for temporal columns, `BigDecimal` for money, `UUID` where the DBMS supports it; never `java.sql.Timestamp` or `Date` in a record
 - enums are stored by `name()` and read with `Enum.valueOf`; never by ordinal
-- a sealed interface maps to a discriminator column plus the variant's detail columns (or one JSON column for wide variants); writing is an exhaustive `switch` over the sealed type with no `default`, so a new variant fails compilation until bound; reading is a `switch` over the discriminator whose only `default` throws — it guards against rows written by a newer deployment, not against a missing case
-- a nullable column is a modeling signal: prefer a variant (`Shipped(on)` vs `Open()`) or a separate table over a nullable component; when the column is genuinely optional, read it with `getObject(column, Type.class)`, document the invariant in the compact constructor, and never pass `null` on into a collection
+- a sealed interface maps to a `NOT NULL` discriminator column plus one typed column per variant detail (or one `JSONB` column for wide variants); the DDL `CHECK` on the discriminator, the write `switch`, and the read `switch` enumerate the same set. Writing is an exhaustive `switch` over the sealed type with no `default`, so a new variant fails compilation until bound; reading is a `switch` over the discriminator whose only `default` throws — it guards against rows written by a newer deployment, not against a missing case
+- a nullable column is a modeling signal: prefer a variant (`Shipped(on)` vs `Open()`) or a separate table over a nullable component; a variant's detail column is nullable by nature, every other nullable column exists only where the record documents an optional component, read with `getObject(column, Type.class)`, and `null` never passes on into a collection
 - projections (a report row, a count with a name, a dropdown entry) get their own small record in `entity`; never a half-filled aggregate record
 - a parent with children (`Customer` with `List<Address>`) is loaded by one join grouped in the row collector, or by two queries when the child list is large; never by one query per parent
 - no reflection, no annotation-driven mapping, no mapping library; a record with twenty columns has a twenty-line mapper and that is fine
 
-## Transactions and Connections
-
-- the boundary owns the unit of work: one connection, one transaction, several control calls
-- `/microprofile-server`: `@Transactional` on the boundary method and `@Inject` of the control; the boundary never sees a `DataSource` or `Connection` — the container opens the transaction, the control's connections enlist in it, the container commits
-- when the project defines a `@Boundary` stereotype (a CDI `@Stereotype` carrying `@ApplicationScoped` and `@Transactional`), the boundary class is annotated with `@Boundary` and no explicit `@Transactional` appears; introduce the stereotype only when the project already has one or asks for it (`/microprofile-server`: without a stereotype, use `@ApplicationScoped`)
-- `/java-cli-app`: the boundary opens the connection (`DriverManager.getConnection(url, user, password)` or a driver `DataSource`), sets `setAutoCommit(false)`, calls the controls, commits; a thrown exception rolls back in a `catch` and rethrows
-- a read-only query may run with auto-commit; a boundary method that writes never does
-- connection coordinates come from configuration, never from literals: `quarkus.datasource.*` / MicroProfile Config on the server; `/zcfg` keys (`db.url`, `db.user`, `db.password`) in a CLI app; the password never lands in a source file
-
 ## Exceptions
 
-- control functions translate `SQLException` at the point of execution; checked exceptions never cross a layer
-- SQLState class `23` (integrity violation) becomes an `IllegalArgumentException` whose message names the constraint; everything else becomes an `IllegalStateException` carrying the SQL statement
+- control functions translate `SQLException` at the point of execution: SQLState class `23` (integrity violation) becomes an `IllegalArgumentException` whose message names the constraint; everything else becomes an `IllegalStateException` carrying the SQL statement
 - the boundary maps those to the protocol: `/microprofile-server` throws `ClientErrorException(Response.Status.CONFLICT)` for the integrity case and lets the rest surface as 500; `/java-cli-app` prints the message and exits non-zero
-- a lookup by id returns `Optional<T>`; `List` results are empty, never `null`
 
 ## Schema
 
 - the agent derives the **first** migration from the records with the mapping below; from then on the DDL is the source of truth — a schema change starts in SQL and the record follows, never the other way round (no `ddl-auto`, no schema derived at runtime)
-- DDL is hand-written SQL in text, one file per BC per change, named for the BC with a timestamp version so BCs never collide: `db/migration/V<yyyyMMddHHmm>__<bc>_<change>.sql`
+- DDL is hand-written SQL, one file per BC per change, named for the BC with a timestamp version so BCs never collide: `db/migration/V<yyyyMMddHHmm>__<bc>_<change>.sql`
 - table and column names are `snake_case`, singular table per record (`order_line`), primary key `id`
 - every constraint and index is named — `pk_<table>`, `uq_<table>_<column>`, `fk_<table>_<referenced_table>`, `ck_<table>_<rule>`, `ix_<table>_<column>` — because the integrity-violation message (see Exceptions) carries exactly that name
+- DDL targets the named DBMS (PostgreSQL by default); no portable lowest-common-denominator SQL, since tests run against the production engine; in a CLI on H2 or SQLite use that engine's identity syntax and check its `IF NOT EXISTS` support
 - `/microprofile-server`: apply through Flyway (`quarkus-flyway`) at startup — ask before adding the dependency to `pom.xml`
 - `/java-cli-app`: a `Schema` control in the owning BC executes idempotent `CREATE TABLE IF NOT EXISTS` statements from a text block at startup; add a `schema_version` table only when destructive changes appear
 
 ### Type Mapping
 
-The inverse of the `getObject(column, Type.class)` rule in Row Mapping; one column per record component:
+The inverse of the `getObject(column, Type.class)` rule; one column per record component:
 
 - `long id` → `BIGINT GENERATED ALWAYS AS IDENTITY`
 - `String` → `VARCHAR(n)` when the compact constructor bounds the length, else `TEXT`
@@ -82,14 +75,13 @@ The inverse of the `getObject(column, Type.class)` rule in Row Mapping; one colu
 - `Instant` / `OffsetDateTime` → `TIMESTAMPTZ`; `LocalDate` → `DATE`; no `LocalDateTime` column (it has no zone)
 - `UUID` → `UUID`; `boolean` → `BOOLEAN`; `int` → `INTEGER`; `long` → `BIGINT`
 - enum → `VARCHAR` plus `CHECK (column IN ('A', 'B'))` listing the `name()` values
-- sealed interface → a `NOT NULL` discriminator column with a `CHECK` listing the variants, plus the variants' detail columns (or one `JSONB` column for wide variants); the `CHECK` list and the exhaustive `switch` enumerate the same set
+- sealed interface → discriminator `VARCHAR NOT NULL` with a `CHECK` listing the variants, plus the variants' detail columns typed by this table (see Row Mapping)
 
 ### Constraints and Indexes
 
-- constraints mirror the compact constructor: every invariant it checks and SQL can express becomes `NOT NULL`, `CHECK`, or `UNIQUE`; a component that is never `null` is `NOT NULL`; a nullable column exists only where the record documents an optional component
-- every column a control's `WHERE` or `ORDER BY` uses beyond the primary key gets an index, declared in the same migration as the query that needs it; every foreign key column is indexed
-- a reference inside the BC is a `FOREIGN KEY` to the owning table; a reference to another BC — the `id` component from Placement — is also a real `FOREIGN KEY`, declared in the referencing BC's migration, which is versioned after the referenced BC's `CREATE TABLE`; that FK is the only DDL that names another BC's table and remains a coupling signal
-- DDL targets the named DBMS (PostgreSQL by default); no portable lowest-common-denominator SQL, since tests run against the production engine; in a CLI on H2 or SQLite use that engine's identity syntax and check its `IF NOT EXISTS` support
+- constraints mirror the compact constructor: every invariant it checks and SQL can express becomes `NOT NULL`, `CHECK`, or `UNIQUE`
+- every column a control's `WHERE` or `ORDER BY` uses beyond the primary key gets an index, declared in the same migration as the query that needs it, or a one-line comment saying why not; every foreign key column is indexed
+- a reference inside the BC is a `FOREIGN KEY` to the owning table; a reference to another BC is also a real `FOREIGN KEY`, declared in the referencing BC's migration, which is versioned after the referenced BC's `CREATE TABLE`; that FK is the only DDL that names another BC's table
 
 ## Drivers
 
@@ -107,16 +99,9 @@ The inverse of the `getObject(column, Type.class)` rule in Row Mapping; one colu
 
 ## Checklist Before Finishing
 
-- no `java.sql` import in `entity`
-- no SQL string, `DataSource`, or `Connection` in a server `boundary`
-- no `SELECT *`, no string-built SQL
-- every `switch` over a sealed type is exhaustive without `default`; the discriminator switch's `default` throws
-- every `Connection`, `PreparedStatement`, `ResultSet` is in a try-with-resources
+- the column lists of the `INSERT`, the `bind`/`toX` pair, and the DDL agree
 - a round-trip test exists for every record that is persisted
-- every record component has a column of the mapped type, and the column lists of the `INSERT`, the `toX` mapper, and the DDL agree
 - every compact-constructor invariant SQL can express is a named constraint
-- every query predicate column has an index, or a one-line comment in the migration saying why not
-- every cross-BC `id` column has a `FOREIGN KEY` and an index
 
 ## Shape (`/microprofile-server`)
 
@@ -125,8 +110,8 @@ The inverse of the `getObject(column, Type.class)` rule in Row Mapping; one colu
 public class Orders {
 
     static final String INSERT = """
-        INSERT INTO purchase_order (customer, total, status, status_detail)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO purchase_order (customer, total, status, shipped_on, cancel_reason)
+        VALUES (?, ?, ?, ?, ?)
         RETURNING id
         """;
 
@@ -136,10 +121,7 @@ public class Orders {
     public Order save(Order order) {
         try (var connection = this.dataSource.getConnection();
              var statement = connection.prepareStatement(INSERT)) {
-            statement.setString(1, order.customer());
-            statement.setBigDecimal(2, order.total());
-            statement.setString(3, discriminator(order.status()));
-            statement.setString(4, detail(order.status()));
+            bind(statement, order);
             try (var keys = statement.executeQuery()) {
                 keys.next();
                 return order.withId(keys.getLong("id"));
@@ -149,27 +131,42 @@ public class Orders {
         }
     }
 
+    static void bind(PreparedStatement statement, Order order) throws SQLException {
+        statement.setString(1, order.customer());
+        statement.setBigDecimal(2, order.total());
+        switch (order.status()) {
+            case Open _ -> {
+                statement.setString(3, "OPEN");
+                statement.setObject(4, null);
+                statement.setString(5, null);
+            }
+            case Shipped shipped -> {
+                statement.setString(3, "SHIPPED");
+                statement.setObject(4, shipped.on());
+                statement.setString(5, null);
+            }
+            case Cancelled cancelled -> {
+                statement.setString(3, "CANCELLED");
+                statement.setObject(4, null);
+                statement.setString(5, cancelled.reason());
+            }
+        }
+    }
+
     static Order toOrder(ResultSet rows) throws SQLException {
         return new Order(
             rows.getLong("id"),
             rows.getString("customer"),
             rows.getBigDecimal("total"),
-            toStatus(rows.getString("status"), rows.getString("status_detail")));
+            toStatus(rows));
     }
 
-    static String discriminator(Status status) {
-        return switch (status) {
-            case Open _ -> "OPEN";
-            case Shipped _ -> "SHIPPED";
-            case Cancelled _ -> "CANCELLED";
-        };
-    }
-
-    static Status toStatus(String discriminator, String detail) {
+    static Status toStatus(ResultSet rows) throws SQLException {
+        var discriminator = rows.getString("status");
         return switch (discriminator) {
             case "OPEN" -> new Open();
-            case "SHIPPED" -> new Shipped(LocalDate.parse(detail));
-            case "CANCELLED" -> new Cancelled(detail);
+            case "SHIPPED" -> new Shipped(rows.getObject("shipped_on", LocalDate.class));
+            case "CANCELLED" -> new Cancelled(rows.getString("cancel_reason"));
             default -> throw new IllegalStateException("unknown order status: " + discriminator);
         };
     }
@@ -180,7 +177,7 @@ In a `/java-cli-app` the same class is an interface, the methods are `static`, a
 
 ## Shape (DDL)
 
-The migration behind `Orders`, `db/migration/V202610310900__orders_create.sql`; the column order equals the read order in `toOrder`:
+The migration behind `Orders`, `db/migration/V202610310900__orders_create.sql`:
 
 ```sql
 CREATE TABLE purchase_order (
@@ -188,7 +185,8 @@ CREATE TABLE purchase_order (
     customer      VARCHAR(120) NOT NULL,
     total         NUMERIC(12, 2) NOT NULL,
     status        VARCHAR(16) NOT NULL,
-    status_detail TEXT,
+    shipped_on    DATE,
+    cancel_reason TEXT,
     CONSTRAINT pk_purchase_order PRIMARY KEY (id),
     CONSTRAINT ck_purchase_order_total CHECK (total >= 0),
     CONSTRAINT ck_purchase_order_status CHECK (status IN ('OPEN', 'SHIPPED', 'CANCELLED'))
@@ -197,12 +195,9 @@ CREATE TABLE purchase_order (
 CREATE INDEX ix_purchase_order_customer ON purchase_order (customer);
 ```
 
-`status_detail` is nullable because `Open` carries no detail; `ck_purchase_order_total` mirrors the compact constructor's check; the index serves the `findByCustomer` query, not a guess.
+`shipped_on` and `cancel_reason` are the typed detail columns of `Shipped` and `Cancelled`, nullable because each belongs to one variant; `ck_purchase_order_total` mirrors the compact constructor's check; the index serves the `findByCustomer` query, not a guess.
 
 ## Composition
 
-- `/bce` owns BC carving and layer placement; this skill only says which persistence artifact lands in which layer
-- `/java-conventions` owns syntax and style; the only deviation here is the single `while (rows.next())` loop inside the row collector
-- `/microprofile-server` and `/java-cli-app` own build, configuration, lifecycle, and the test loop; this skill specializes how they reach the database and never contradicts them
 - `/sbce`: a persisted record and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
 - `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
