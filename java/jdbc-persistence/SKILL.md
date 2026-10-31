@@ -1,6 +1,6 @@
 ---
 name: jdbc-persistence
-description: Persist and query data with plain JDBC and Data-Oriented Programming — records as row shapes, sealed interfaces for variants, exhaustive pattern matching for the column mapping, hand-written SQL in controls, the unit of work owned by the boundary. No ORM, no JPA annotations, no reflection-based mapping. Composes with `/bce` for placement, `/java-conventions` for style, and the stack skill `/microprofile-server` or `/java-cli-app`. Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or when asked for "JDBC", "plain SQL", "data-oriented persistence", "persist records", "query records", "DataSource", "PreparedStatement", "ResultSet mapping", "schema", "DDL", "CREATE TABLE", "Flyway migration", "migration SQL", "no JPA", "no Hibernate". Not for JPA/Hibernate projects and not for NoSQL stores.
+description: Persist and query Java records with plain JDBC and Data-Oriented Programming: records as row shapes, sealed interfaces for variants, hand-written SQL, no ORM. Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or on "JDBC", "plain SQL", "DataSource", "PreparedStatement", "DDL", "CREATE TABLE", "migration". Not for JPA/Hibernate or NoSQL.
 argument-hint: "[BC, record, or query to persist]"
 ---
 
