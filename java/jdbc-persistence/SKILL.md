@@ -103,99 +103,43 @@ The inverse of the `getObject(column, Type.class)` rule; one column per record c
 - a round-trip test exists for every record that is persisted
 - every compact-constructor invariant SQL can express is a named constraint
 
-## Shape (`/microprofile-server`)
+## Sealed Mapping
+
+`Status` is `sealed` with `Open()`, `Shipped(LocalDate on)`, `Cancelled(String reason)`; the table has `status VARCHAR NOT NULL`, `shipped_on DATE`, `cancel_reason TEXT`:
 
 ```java
-@ApplicationScoped
-public class Orders {
-
-    static final String INSERT = """
-        INSERT INTO purchase_order (customer, total, status, shipped_on, cancel_reason)
-        VALUES (?, ?, ?, ?, ?)
-        RETURNING id
-        """;
-
-    @Inject
-    DataSource dataSource;
-
-    public Order save(Order order) {
-        try (var connection = this.dataSource.getConnection();
-             var statement = connection.prepareStatement(INSERT)) {
-            bind(statement, order);
-            try (var keys = statement.executeQuery()) {
-                keys.next();
-                return order.withId(keys.getLong("id"));
-            }
-        } catch (SQLException e) {
-            throw translate(e, INSERT);
+static void bind(PreparedStatement statement, Order order) throws SQLException {
+    statement.setString(1, order.customer());
+    statement.setBigDecimal(2, order.total());
+    switch (order.status()) {
+        case Open _ -> {
+            statement.setString(3, "OPEN");
+            statement.setObject(4, null);
+            statement.setString(5, null);
         }
-    }
-
-    static void bind(PreparedStatement statement, Order order) throws SQLException {
-        statement.setString(1, order.customer());
-        statement.setBigDecimal(2, order.total());
-        switch (order.status()) {
-            case Open _ -> {
-                statement.setString(3, "OPEN");
-                statement.setObject(4, null);
-                statement.setString(5, null);
-            }
-            case Shipped shipped -> {
-                statement.setString(3, "SHIPPED");
-                statement.setObject(4, shipped.on());
-                statement.setString(5, null);
-            }
-            case Cancelled cancelled -> {
-                statement.setString(3, "CANCELLED");
-                statement.setObject(4, null);
-                statement.setString(5, cancelled.reason());
-            }
+        case Shipped shipped -> {
+            statement.setString(3, "SHIPPED");
+            statement.setObject(4, shipped.on());
+            statement.setString(5, null);
         }
-    }
-
-    static Order toOrder(ResultSet rows) throws SQLException {
-        return new Order(
-            rows.getLong("id"),
-            rows.getString("customer"),
-            rows.getBigDecimal("total"),
-            toStatus(rows));
-    }
-
-    static Status toStatus(ResultSet rows) throws SQLException {
-        var discriminator = rows.getString("status");
-        return switch (discriminator) {
-            case "OPEN" -> new Open();
-            case "SHIPPED" -> new Shipped(rows.getObject("shipped_on", LocalDate.class));
-            case "CANCELLED" -> new Cancelled(rows.getString("cancel_reason"));
-            default -> throw new IllegalStateException("unknown order status: " + discriminator);
-        };
+        case Cancelled cancelled -> {
+            statement.setString(3, "CANCELLED");
+            statement.setObject(4, null);
+            statement.setString(5, cancelled.reason());
+        }
     }
 }
+
+static Status toStatus(ResultSet rows) throws SQLException {
+    var discriminator = rows.getString("status");
+    return switch (discriminator) {
+        case "OPEN" -> new Open();
+        case "SHIPPED" -> new Shipped(rows.getObject("shipped_on", LocalDate.class));
+        case "CANCELLED" -> new Cancelled(rows.getString("cancel_reason"));
+        default -> throw new IllegalStateException("unknown order status: " + discriminator);
+    };
+}
 ```
-
-In a `/java-cli-app` the same class is an interface, the methods are `static`, and `Connection connection` is the first parameter in place of the injected `DataSource`.
-
-## Shape (DDL)
-
-The migration behind `Orders`, `db/migration/V202610310900__orders_create.sql`:
-
-```sql
-CREATE TABLE purchase_order (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY,
-    customer      VARCHAR(120) NOT NULL,
-    total         NUMERIC(12, 2) NOT NULL,
-    status        VARCHAR(16) NOT NULL,
-    shipped_on    DATE,
-    cancel_reason TEXT,
-    CONSTRAINT pk_purchase_order PRIMARY KEY (id),
-    CONSTRAINT ck_purchase_order_total CHECK (total >= 0),
-    CONSTRAINT ck_purchase_order_status CHECK (status IN ('OPEN', 'SHIPPED', 'CANCELLED'))
-);
-
-CREATE INDEX ix_purchase_order_customer ON purchase_order (customer);
-```
-
-`shipped_on` and `cancel_reason` are the typed detail columns of `Shipped` and `Cancelled`, nullable because each belongs to one variant; `ck_purchase_order_total` mirrors the compact constructor's check; the index serves the `findByCustomer` query, not a guess.
 
 ## Composition
 
