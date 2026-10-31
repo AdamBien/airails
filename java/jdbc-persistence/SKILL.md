@@ -1,6 +1,6 @@
 ---
 name: jdbc-persistence
-description: Persist and query data with plain JDBC and Data-Oriented Programming (DOP) — records as row shapes, sealed interfaces for variants, exhaustive pattern matching for the column mapping, SQL in text blocks, and controls that execute the statements — CDI beans with an injected `DataSource` under a `@Transactional` boundary on the server, stateless functions over a boundary-owned `Connection` in a CLI. No ORM, no JPA annotations, no reflection-based mapping. Composes with `/bce` for placement, `/java-conventions` for style, and the stack skill — `/microprofile-server` (CDI, `@Inject DataSource`, Dev Services) or `/java-cli-app` (driver JAR on the classpath, explicit commit). Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or when asked for "JDBC", "plain SQL", "data-oriented persistence", "persist records", "query records", "DataSource", "PreparedStatement", "ResultSet mapping", "schema", "migration SQL", "no JPA", "no Hibernate". Not for JPA/Hibernate projects and not for NoSQL stores.
+description: Persist and query data with plain JDBC and Data-Oriented Programming (DOP) — records as row shapes, sealed interfaces for variants, exhaustive pattern matching for the column mapping, SQL in text blocks, and controls that execute the statements — CDI beans with an injected `DataSource` under a `@Transactional` boundary on the server, stateless functions over a boundary-owned `Connection` in a CLI. No ORM, no JPA annotations, no reflection-based mapping. Composes with `/bce` for placement, `/java-conventions` for style, and the stack skill — `/microprofile-server` (CDI, `@Inject DataSource`, Dev Services) or `/java-cli-app` (driver JAR on the classpath, explicit commit). Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or when asked for "JDBC", "plain SQL", "data-oriented persistence", "persist records", "query records", "DataSource", "PreparedStatement", "ResultSet mapping", "schema", "DDL", "CREATE TABLE", "Flyway migration", "migration SQL", "no JPA", "no Hibernate". Not for JPA/Hibernate projects and not for NoSQL stores.
 argument-hint: "[BC, record, or query to persist]"
 ---
 
@@ -65,11 +65,31 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 
 ## Schema
 
-- DDL is hand-written SQL in text, one file per BC, named for the BC: `db/migration/V<n>__<bc>_<change>.sql`
+- the agent derives the **first** migration from the records with the mapping below; from then on the DDL is the source of truth — a schema change starts in SQL and the record follows, never the other way round (no `ddl-auto`, no schema derived at runtime)
+- DDL is hand-written SQL in text, one file per BC per change, named for the BC with a timestamp version so BCs never collide: `db/migration/V<yyyyMMddHHmm>__<bc>_<change>.sql`
 - table and column names are `snake_case`, singular table per record (`order_line`), primary key `id`
+- every constraint and index is named — `pk_<table>`, `uq_<table>_<column>`, `fk_<table>_<referenced_table>`, `ck_<table>_<rule>`, `ix_<table>_<column>` — because the integrity-violation message (see Exceptions) carries exactly that name
 - `/microprofile-server`: apply through Flyway (`quarkus-flyway`) at startup — ask before adding the dependency to `pom.xml`
 - `/java-cli-app`: a `Schema` control in the owning BC executes idempotent `CREATE TABLE IF NOT EXISTS` statements from a text block at startup; add a `schema_version` table only when destructive changes appear
-- never let the application derive the schema from the records (no `ddl-auto`); the records follow the schema, not the other way round
+
+### Type Mapping
+
+The inverse of the `getObject(column, Type.class)` rule in Row Mapping; one column per record component:
+
+- `long id` → `BIGINT GENERATED ALWAYS AS IDENTITY`
+- `String` → `VARCHAR(n)` when the compact constructor bounds the length, else `TEXT`
+- `BigDecimal` → `NUMERIC(p, s)` with explicit precision and scale
+- `Instant` / `OffsetDateTime` → `TIMESTAMPTZ`; `LocalDate` → `DATE`; no `LocalDateTime` column (it has no zone)
+- `UUID` → `UUID`; `boolean` → `BOOLEAN`; `int` → `INTEGER`; `long` → `BIGINT`
+- enum → `VARCHAR` plus `CHECK (column IN ('A', 'B'))` listing the `name()` values
+- sealed interface → a `NOT NULL` discriminator column with a `CHECK` listing the variants, plus the variants' detail columns (or one `JSONB` column for wide variants); the `CHECK` list and the exhaustive `switch` enumerate the same set
+
+### Constraints and Indexes
+
+- constraints mirror the compact constructor: every invariant it checks and SQL can express becomes `NOT NULL`, `CHECK`, or `UNIQUE`; a component that is never `null` is `NOT NULL`; a nullable column exists only where the record documents an optional component
+- every column a control's `WHERE` or `ORDER BY` uses beyond the primary key gets an index, declared in the same migration as the query that needs it; every foreign key column is indexed
+- a reference inside the BC is a `FOREIGN KEY` to the owning table; a reference to another BC — the `id` component from Placement — is also a real `FOREIGN KEY`, declared in the referencing BC's migration, which is versioned after the referenced BC's `CREATE TABLE`; that FK is the only DDL that names another BC's table and remains a coupling signal
+- DDL targets the named DBMS (PostgreSQL by default); no portable lowest-common-denominator SQL, since tests run against the production engine; in a CLI on H2 or SQLite use that engine's identity syntax and check its `IF NOT EXISTS` support
 
 ## Drivers
 
@@ -93,6 +113,10 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - every `switch` over a sealed type is exhaustive without `default`; the discriminator switch's `default` throws
 - every `Connection`, `PreparedStatement`, `ResultSet` is in a try-with-resources
 - a round-trip test exists for every record that is persisted
+- every record component has a column of the mapped type, and the column lists of the `INSERT`, the `toX` mapper, and the DDL agree
+- every compact-constructor invariant SQL can express is a named constraint
+- every query predicate column has an index, or a one-line comment in the migration saying why not
+- every cross-BC `id` column has a `FOREIGN KEY` and an index
 
 ## Shape (`/microprofile-server`)
 
@@ -153,6 +177,27 @@ public class Orders {
 ```
 
 In a `/java-cli-app` the same class is an interface, the methods are `static`, and `Connection connection` is the first parameter in place of the injected `DataSource`.
+
+## Shape (DDL)
+
+The migration behind `Orders`, `db/migration/V202610310900__orders_create.sql`; the column order equals the read order in `toOrder`:
+
+```sql
+CREATE TABLE purchase_order (
+    id            BIGINT GENERATED ALWAYS AS IDENTITY,
+    customer      VARCHAR(120) NOT NULL,
+    total         NUMERIC(12, 2) NOT NULL,
+    status        VARCHAR(16) NOT NULL,
+    status_detail TEXT,
+    CONSTRAINT pk_purchase_order PRIMARY KEY (id),
+    CONSTRAINT ck_purchase_order_total CHECK (total >= 0),
+    CONSTRAINT ck_purchase_order_status CHECK (status IN ('OPEN', 'SHIPPED', 'CANCELLED'))
+);
+
+CREATE INDEX ix_purchase_order_customer ON purchase_order (customer);
+```
+
+`status_detail` is nullable because `Open` carries no detail; `ck_purchase_order_total` mirrors the compact constructor's check; the index serves the `findByCustomer` query, not a guess.
 
 ## Composition
 

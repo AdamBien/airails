@@ -9,7 +9,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 - Exhaustive `switch` mapping in both directions between a sealed type and its discriminator column
 - Boundary-owned unit of work: `@Transactional` on the server, explicit commit in a CLI
 - `SQLException` translated at the control: integrity violations become `IllegalArgumentException`, the rest `IllegalStateException`
-- Hand-written DDL per BC; Flyway on the server, idempotent `CREATE TABLE IF NOT EXISTS` in a CLI
+- Hand-written DDL per BC, derived from the records by a fixed type mapping, with named constraints mirroring the compact constructor; Flyway on the server, idempotent `CREATE TABLE IF NOT EXISTS` in a CLI
 - Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services, or `zunit` against a disposable database
 
 Not for JPA/Hibernate projects and not for NoSQL stores. For a collection-backed store with the same control contract, see [`memory-persistence`](../memory-persistence).
