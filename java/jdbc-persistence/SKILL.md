@@ -13,12 +13,12 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - model the data, the whole data, nothing but the data — one record per row shape, one record per projection; no record carries columns a query does not return
 - data is immutable and transparent — a change is a new record (`with`-style copy through the canonical constructor), then an `UPDATE`
 - make illegal states unrepresentable — closed sets as sealed interfaces or enums; the compiler, not a `default` branch, proves the column mapping complete
-- separate operations from data — SQL, binding, and row mapping live in the control; records carry components, invariants, and domain behavior, never `java.sql` imports
+- separate operations from data — SQL and binding live in the control; records carry components, invariants, domain behavior, and their own creation from a row (`fromResultSet`), the read-side twin of `toJSON()`; `java.sql` enters a record only through that factory
 
 ## Placement (BCE)
 
-- `entity` — the records and sealed interfaces; free of `java.sql`, annotations, and SQL strings
-- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Mapper`, `*Store`; a control holds the SQL, binding, and row mapping for the queries it answers and may read or write several tables of its BC in one method; one table is written by exactly one control
+- `entity` — the records and sealed interfaces; free of annotations and SQL strings; the only `java.sql` types a record sees are the `ResultSet` and `SQLException` of its `fromResultSet` factory
+- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Mapper`, `*Store`; a control holds the SQL, binding, and row collection for the queries it answers and may read or write several tables of its BC in one method; one table is written by exactly one control
 - `boundary` — owns the unit of work: one connection, one transaction, several control calls; never contains SQL
   - `/microprofile-server`: `@Transactional` on the boundary class, never on single methods, and `@Inject` of the control; the boundary never sees a `DataSource` or `Connection` — the container opens the transaction, the control's connections enlist in it, the container commits. When the project defines a `@Boundary` stereotype (a CDI `@Stereotype` carrying `@ApplicationScoped` and `@Transactional`), use it instead of an explicit `@Transactional`, likewise on the class; introduce the stereotype only when the project already has one or asks for it
   - `/java-cli-app`: the boundary opens the connection (`DriverManager.getConnection(url, user, password)` or a driver `DataSource`), sets `setAutoCommit(false)`, passes the connection to the controls, commits; a thrown exception rolls back in a `catch` and rethrows. A read-only query may run with auto-commit; a boundary method that writes never does
@@ -33,22 +33,22 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - every method does one statement, or one logical unit of statements; it never commits or rolls back
 - SQL lives in `static final String` text blocks next to the function that executes it; explicit column lists, never `SELECT *`
 - parameters are bound with `?` only; a dynamic clause (sort column, filter name) comes from an enum constant or a `switch` over a sealed type, never from an interpolated argument
-- a `ResultSet` never leaves the function that opened it: a `List<T>` result is collected in one `while (rows.next())` loop inside a single row-collector method — the one place where a loop beats a stream
+- a `ResultSet` never leaves the function that opened it: a `List<T>` result is collected in one `while (rows.next())` loop inside a single row-collector method that calls `Order.fromResultSet(rows)` per row — the one place where a loop beats a stream
 - bulk writes use `addBatch`/`executeBatch`
 - generated keys: `RETURNING id` (PostgreSQL) or `getGeneratedKeys`; the function returns the record **with** the id — the caller never mutates anything
 - a lookup by id returns `Optional<T>`; `List` results are empty, never `null`
 
 ## Row Mapping
 
-- one `static Order toOrder(ResultSet rows)` per record in the control, reading columns by **name** and funnelling through the canonical constructor, so the compact constructor validates persisted data on the way in
-- one `static void bind(PreparedStatement statement, Order order)` per record for writes; `save` and `update` share it
+- assume a persisted record has five or more columns, so the constructor call that reads them is a function of its own and belongs next to the components it fills: every persisted record and projection creates itself through `static Order fromResultSet(ResultSet rows) throws SQLException` on the record, reading columns by **name** and funnelling through the canonical constructor, so the compact constructor validates persisted data on the way in. The factory reads the current row only — it never calls `next()` — and the control's row collector is the sole caller; no `toOrder` in the control
+- writes stay in the control: one `static void bind(PreparedStatement statement, Order order)` per record, shared by `save` and `update`; a record never imports `PreparedStatement`
 - columns map to the most specific Java SE type through `getObject(column, Type.class)`: `Instant`/`OffsetDateTime`/`LocalDate` for temporal columns, `BigDecimal` for money, `UUID` where the DBMS supports it; never `java.sql.Timestamp` or `Date` in a record
 - enums are stored by `name()` and read with `Enum.valueOf`; never by ordinal
-- a sealed interface maps to a `NOT NULL` discriminator column plus one typed column per variant detail (or one `JSONB` column for wide variants); the DDL `CHECK` on the discriminator, the write `switch`, and the read `switch` enumerate the same set. Writing is an exhaustive `switch` over the sealed type with no `default`, so a new variant fails compilation until bound; reading is a `switch` over the discriminator whose only `default` throws — it guards against rows written by a newer deployment, not against a missing case
+- a sealed interface maps to a `NOT NULL` discriminator column plus one typed column per variant detail (or one `JSONB` column for wide variants); the DDL `CHECK` on the discriminator, the write `switch`, and the read `switch` enumerate the same set. Writing is an exhaustive `switch` over the sealed type with no `default` in the control's `bind`, so a new variant fails compilation until bound; reading is `static Status fromResultSet(ResultSet rows)` on the sealed interface, called from the owning record's `fromResultSet`, a `switch` over the discriminator whose only `default` throws — it guards against rows written by a newer deployment, not against a missing case
 - a nullable column is a modeling signal: prefer a variant (`Shipped(on)` vs `Open()`) or a separate table over a nullable component; a variant's detail column is nullable by nature, every other nullable column exists only where the record documents an optional component, read with `getObject(column, Type.class)`, and `null` never passes on into a collection
 - projections (a report row, a count with a name, a dropdown entry) get their own small record in `entity`; never a half-filled aggregate record
 - a parent with children (`Customer` with `List<Address>`) is loaded by one join grouped in the row collector, or by two queries when the child list is large; never by one query per parent
-- no reflection, no annotation-driven mapping, no mapping library; a record with twenty columns has a twenty-line mapper and that is fine
+- no reflection, no annotation-driven mapping, no mapping library; a record with twenty columns has a twenty-line `fromResultSet` and that is fine
 
 ## Exceptions
 
@@ -110,7 +110,7 @@ The inverse of the `getObject(column, Type.class)` rule; one column per record c
 
 ## Checklist Before Finishing
 
-- the column lists of the `INSERT`, the `bind`/`toX` pair, and the DDL agree
+- the column lists of the `INSERT`, the control's `bind`, the record's `fromResultSet`, and the DDL agree
 - a round-trip test exists for every record that is persisted
 - every compact-constructor invariant SQL can express is a named constraint
 
@@ -141,7 +141,8 @@ static void bind(PreparedStatement statement, Order order) throws SQLException {
     }
 }
 
-static Status toStatus(ResultSet rows) throws SQLException {
+// on the sealed interface Status, in entity
+static Status fromResultSet(ResultSet rows) throws SQLException {
     var discriminator = rows.getString("status");
     return switch (discriminator) {
         case "OPEN" -> new Open();
@@ -150,9 +151,18 @@ static Status toStatus(ResultSet rows) throws SQLException {
         default -> throw new IllegalStateException("unknown order status: " + discriminator);
     };
 }
+
+// on the record Order, in entity
+public static Order fromResultSet(ResultSet rows) throws SQLException {
+    return new Order(
+            rows.getLong("id"),
+            rows.getString("customer"),
+            rows.getBigDecimal("total"),
+            Status.fromResultSet(rows));
+}
 ```
 
 ## Composition
 
 - `/sbce`: a persisted record and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
-- `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
+- `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class, adding `fromResultSet` to its records, and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
