@@ -90,6 +90,12 @@ The inverse of the `getObject(column, Type.class)` rule; one column per record c
 - `/java-cli-app`: `zb` bundles no binary dependencies, so the driver JAR lives in `lib/` and is appended at launch — `java -cp zbo/app.jar:lib/* Main`; put that line in the `/java-cli-script` launcher; prefer a single-JAR, pure-Java driver (PostgreSQL, H2, SQLite) that needs no native setup
 - `DriverManager` auto-discovers drivers from `META-INF/services`; never call `Class.forName`
 
+## Health
+
+- a database-backed BC needs a readiness check that proves the pool can hand out a working connection; a server that answers ready while its `DataSource` is down fails requests with 500 instead of being taken out of rotation
+- this skill writes no check: the concrete MicroProfile runtime provides it (Quarkus registers a `DataSource` readiness check through `quarkus-smallrye-health` when the Agroal extension is present) and `/microprofile-server` owns any custom `@Readiness` check, placed in the boundary package; a control never exposes `isValid` or a `SELECT 1` for that purpose
+- `/java-cli-app`: no readiness probe exists; the boundary's first `getConnection` is the check, and its failure is reported as in Exceptions
+
 ## Testing
 
 - control functions are tested against a real connection of the **same DBMS** as production; no in-memory substitute unless production is that engine
