@@ -52,8 +52,9 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 
 ## Exceptions
 
-- control functions translate `SQLException` at the point of execution: SQLState class `23` (integrity violation) becomes an `IllegalArgumentException` whose message names the constraint; everything else becomes an `IllegalStateException` carrying the SQL statement
-- the boundary maps those to the protocol: `/microprofile-server` throws `ClientErrorException(Response.Status.CONFLICT)` for the integrity case and lets the rest surface as 500; `/java-cli-app` prints the message and exits non-zero
+- control functions translate `SQLException` at the point of execution, directly into the exception the stack already understands, so no layer maps it a second time; the `SQLException` travels as the cause
+  - `/microprofile-server`: SQLState class `23` (integrity violation) becomes `ClientErrorException(constraintName, Response.Status.CONFLICT, cause)`; everything else becomes `InternalServerErrorException(sql, cause)`. Both are `WebApplicationException`s (the `/microprofile-server` exception rule), so the JAX-RS runtime answers 409 or 500 and `@Transactional` rolls back; the boundary catches nothing and no `ExceptionMapper` is written
+  - `/java-cli-app`: class `23` becomes an `IllegalArgumentException` whose message names the constraint; everything else an `IllegalStateException` carrying the SQL statement; the boundary prints the message and exits non-zero
 
 ## Schema
 

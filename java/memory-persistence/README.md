@@ -6,7 +6,7 @@ An [AIrails.dev](https://airails.dev) skill for storing Java records in plain `j
 
 - Records and sealed interfaces in `entity`, identical to the JDBC variant
 - One control per aggregate root holding a `ConcurrentHashMap` and an `AtomicLong` sequence; `save`, `update`, `findById`, `all`, named query methods as streams
-- Explicit enforcement of what a schema would enforce: uniqueness rules throw `IllegalArgumentException`
+- Explicit enforcement of what a schema would enforce: uniqueness rules throw the stack's integrity exception from the `jdbc-persistence` contract (`ClientErrorException(CONFLICT)` on the server, `IllegalArgumentException` in a CLI)
 - No locks, no mutable statics, no live collection leaving the control
 - Opt-in JSON snapshot for demos that must survive a restart
 - Plain-object unit tests without a container

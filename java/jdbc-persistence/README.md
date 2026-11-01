@@ -8,7 +8,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 - Controls named after responsibilities, spanning the tables of their BC: `@ApplicationScoped` CDI beans with an injected `DataSource` on the server, as interfaces with `static` functions over a `Connection` in a CLI; SQL in text blocks, `?` binding, explicit column lists
 - Exhaustive `switch` mapping in both directions between a sealed type and its discriminator column
 - Boundary-owned unit of work: `@Transactional` on the server, explicit commit in a CLI
-- `SQLException` translated at the control: integrity violations become `IllegalArgumentException`, the rest `IllegalStateException`
+- `SQLException` translated once, at the control, into the stack's own exception: `ClientErrorException(CONFLICT)` / `InternalServerErrorException` on the server, `IllegalArgumentException` / `IllegalStateException` in a CLI — the boundary maps nothing
 - Hand-written DDL per BC, derived from the records by a fixed type mapping, with named constraints mirroring the compact constructor; Flyway on the server, idempotent `CREATE TABLE IF NOT EXISTS` in a CLI
 - Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services, or `zunit` against a disposable database
 

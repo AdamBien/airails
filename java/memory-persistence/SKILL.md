@@ -1,6 +1,6 @@
 ---
 name: memory-persistence
-description: In-memory persistence for Java records in plain `java.util` collections, following Data-Oriented Programming — the record is the stored shape, a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC starts in memory and moves to JDBC by replacing one control class. Composes with `/bce` for placement, `/java-conventions` for style, and the stack skill — `/microprofile-server` (`@ApplicationScoped` CDI bean) or `/java-cli-app` (one instance created at startup). Use for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs, or whenever asked for "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence`.
+description: In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. Use for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs, or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence`.
 argument-hint: "[BC or record to store in memory]"
 ---
 
@@ -29,7 +29,7 @@ The store is a collection of immutable records. No entity lifecycle, no identity
 - delete: `orders.remove(id)` returning whether something was removed
 - queries are pure streams over `orders.values()`: `.filter(...)`, `.sorted(...)`, `.toList()`; every predicate and comparator is a named method, never an inline lambda (`/java-conventions`)
 - `all` returns `List.copyOf(orders.values())`; no caller sees the live collection or an `Iterator` over it
-- constraints the schema would enforce are enforced here explicitly: a uniqueness rule is a `putIfAbsent` or a pre-check that throws `IllegalArgumentException` naming the rule, matching the `/jdbc-persistence` exception contract
+- constraints the schema would enforce are enforced here explicitly: a uniqueness rule is a `putIfAbsent` or a pre-check that throws the stack's integrity exception from the `/jdbc-persistence` contract, naming the rule — `ClientErrorException(rule, Response.Status.CONFLICT)` on `/microprofile-server`, `IllegalArgumentException` in a `/java-cli-app`
 - concurrency: rely on `ConcurrentHashMap` atomics (`compute`, `putIfAbsent`, `replace`); no `synchronized`, no `Collections.synchronizedMap`, no locks
 - no eviction, no size cap, no TTL unless the spec asks; then prefer the rule in the control over a caching library
 - `/microprofile-server`: the control is an `@ApplicationScoped` CDI bean; the collection is an instance field, so one store per application
