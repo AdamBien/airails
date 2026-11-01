@@ -33,7 +33,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - keep coarse-grained classes in the boundary package
 - place facades in the boundary package
 - health checks must be placed in the boundary package
-- @Transactional is only allowed in boundary layer
+- @Transactional is only allowed in boundary layer, declared on the class (or via the project's @Boundary stereotype), never on individual methods
 - if there is no Boundary stereotype, use ApplicationScope instead
 
 ## Control Layer
