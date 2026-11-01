@@ -30,6 +30,10 @@ graph TD
 
 Activated when adding persistence, tables, queries, or `ResultSet` mapping to a MicroProfile server or Java CLI project. The rules in [SKILL.md](SKILL.md) guide generation and review.
 
+## Example
+
+See [quarkus-microprofile-jdbc-dop](https://github.com/AdamBien/quarkus-microprofile-jdbc-dop) for a Quarkus application persisting records with plain JDBC along these rules.
+
 ## Test
 
 Clone the server sample:
