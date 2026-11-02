@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 public enum Arg {
     HELP("-help", "Show this help"),
+    VERSION("-version", "Show version"),
     VERBOSE("-verbose", "Enable verbose output"),
     OUTPUT("-output", "Specify output file");
 
@@ -89,6 +90,7 @@ Args parseArgs(String[] args) {
         var arg = args[i];
         switch (Arg.from(arg)) {
             case HELP -> printUsage();
+            case VERSION -> printVersion();
             case VERBOSE -> verbose = true;
             case OUTPUT -> output = extractValue(arg, args, i++);
             case null -> {
@@ -119,7 +121,18 @@ void printUsage() {
         """.formatted(Arg.usage()));
     System.exit(0);
 }
+
+void printVersion() {
+    Log.user(App.NAME + " " + App.VERSION);
+    System.exit(0);
+}
 ```
+
+## Help and Version
+
+`-help` and `-version` are only offered when the application accepts additional arguments — options, flags, or positional values. An application that takes no arguments has nothing to explain and just does its work: omit the `HELP` and `VERSION` constants, `printUsage()`, and `printVersion()` entirely.
+
+When the application accepts additional arguments, include both: `HELP` prints the usage derived from `Arg.usage()`, `VERSION` prints the application name and version.
 
 ## Key Design Principles
 
@@ -138,6 +151,7 @@ When generating argument parsing code, adapt these parts for the specific applic
 2. **`Args` record fields** — match the fields to the application's parsed result shape
 3. **`parseArgs` switch cases** — add a case for each enum constant
 4. **Usage text** — update the program name and description in `printUsage()`
+5. **Help and version** — keep `HELP` and `VERSION` only when the application accepts additional arguments; drop them otherwise
 
 ## Rules
 
@@ -148,3 +162,4 @@ When generating argument parsing code, adapt these parts for the specific applic
 5. Use `Log.user()` from zcl for usage/help output
 6. Use `List.copyOf()` for immutable positional argument lists in the `Args` record
 7. Prefer single-dash options (`-verbose`, not `--verbose`) for consistency
+8. Offer `-help` and `-version` only when the application accepts additional arguments; an application without arguments gets neither
