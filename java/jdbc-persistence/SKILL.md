@@ -1,6 +1,6 @@
 ---
 name: jdbc-persistence
-description: Persist and query Java records with plain JDBC and Data-Oriented Programming: records as row shapes, sealed interfaces for variants, hand-written SQL, no ORM. Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or on "JDBC", "plain SQL", "DataSource", "PreparedStatement", "DDL", "CREATE TABLE", "migration". Not for JPA/Hibernate or NoSQL.
+description: 'Persist and query Java records with plain JDBC and Data-Oriented Programming: records as row shapes, sealed interfaces for variants, hand-written SQL, no ORM. Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or on "JDBC", "plain SQL", "DataSource", "PreparedStatement", "DDL", "CREATE TABLE", "migration". Not for JPA/Hibernate or NoSQL.'
 argument-hint: "[BC, record, or query to persist]"
 ---
 

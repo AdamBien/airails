@@ -1,6 +1,6 @@
 ---
 name: memory-persistence
-description: In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. Use for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs, or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence`.
+description: 'In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. Use for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs, or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence`.'
 argument-hint: "[BC or record to store in memory]"
 ---
 
