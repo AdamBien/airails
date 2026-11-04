@@ -1,0 +1,204 @@
+#!/usr/bin/env -S java --source 25
+
+String name = MethodHandles.lookup().lookupClass().getName();
+String version = "2026-11-03.1";
+
+enum Log {
+    ERROR("\033[38;5;196m", System.err),
+    INFO("\033[38;5;46m", System.out),
+    USER("\033[38;5;51m", System.out);
+
+    static final String RESET = "\u001B[0m";
+    String code;
+    PrintStream out;
+
+    Log(String code, PrintStream out) {
+        this.code = code;
+        this.out = out;
+    }
+
+    String paint(String message) { return this.code + message + RESET; }
+    void out(String message) { this.out.println(paint(message)); }
+}
+
+int MAX_DESCRIPTION_LENGTH = 1024;
+String INDICATORS = "[]{}*&!%@`,#?";
+
+record Finding(Path file, int line, int column, String message) {
+    @Override
+    public String toString() {
+        return "%s:%d:%d: %s".formatted(file, line, column, message);
+    }
+}
+
+void printUsage() {
+    Log.USER.out("""
+        Usage: %s [path...]
+
+        Validates the YAML frontmatter of every SKILL.md below the paths
+        (default: current directory). Catches values strict YAML parsers reject,
+        e.g. an unquoted description containing ': ' or ' #', and checks that
+        'name' and 'description' (max %d characters) are present.
+
+        Options:
+          -help     Show this help
+          -version  Show version
+
+        Exit codes:
+          0  all frontmatter is valid
+          1  findings were reported
+
+        Example:
+          %s ~/.claude/skills""".formatted(name, MAX_DESCRIPTION_LENGTH, name));
+}
+
+void main(String... args) {
+    IO.println(name + " " + version);
+    if (args.length > 0 && args[0].equals("-help")) {
+        printUsage();
+        return;
+    }
+    if (args.length > 0 && args[0].equals("-version")) return;
+
+    var roots = args.length == 0 ? List.of(Path.of(".")) : Stream.of(args).map(Path::of).toList();
+    var skills = roots.stream().flatMap(this::skillFiles).toList();
+    var findings = skills.stream().flatMap(this::validate).toList();
+    findings.forEach(finding -> Log.ERROR.out(finding.toString()));
+    var summary = "%d skill(s) checked, %d finding(s)".formatted(skills.size(), findings.size());
+    if (findings.isEmpty()) {
+        Log.INFO.out(summary);
+        return;
+    }
+    Log.ERROR.out(summary);
+    System.exit(1);
+}
+
+Stream<Path> skillFiles(Path root) {
+    if (Files.isRegularFile(root)) {
+        return Stream.of(root);
+    }
+    try (var paths = Files.walk(root)) {
+        return paths
+                .filter(p -> p.getFileName().toString().equals("SKILL.md"))
+                .filter(p -> !p.toString().contains("target" + File.separator))
+                .sorted()
+                .toList()
+                .stream();
+    } catch (IOException e) {
+        Log.ERROR.out("cannot read " + root + ": " + e.getMessage());
+        return Stream.empty();
+    }
+}
+
+Stream<Finding> validate(Path file) {
+    List<String> lines;
+    try {
+        lines = Files.readAllLines(file);
+    } catch (IOException e) {
+        return Stream.of(new Finding(file, 1, 1, "cannot read: " + e.getMessage()));
+    }
+    if (lines.isEmpty() || !lines.getFirst().equals("---")) {
+        return Stream.of(new Finding(file, 1, 1, "missing frontmatter start '---'"));
+    }
+    var end = IntStream.range(1, lines.size())
+            .filter(i -> lines.get(i).equals("---"))
+            .findFirst();
+    if (end.isEmpty()) {
+        return Stream.of(new Finding(file, 1, 1, "missing frontmatter end '---'"));
+    }
+    var findings = new ArrayList<Finding>();
+    var keys = new HashMap<String, String>();
+    for (var i = 1; i < end.getAsInt(); i++) {
+        var line = lines.get(i);
+        if (line.isBlank() || line.startsWith(" ") || line.startsWith("#")) {
+            continue;
+        }
+        var colon = line.indexOf(':');
+        if (colon < 1) {
+            findings.add(new Finding(file, i + 1, 1, "not a 'key: value' line"));
+            continue;
+        }
+        var key = line.substring(0, colon);
+        var value = line.substring(colon + 1).strip();
+        var lineNumber = i + 1;
+        var valueColumn = line.indexOf(value, colon + 1) + 1;
+        keys.put(key, unquote(value));
+        validateValue(value).ifPresent(problem ->
+                findings.add(new Finding(file, lineNumber, valueColumn + problem.offset(), key + ": " + problem.message())));
+    }
+    if (!keys.containsKey("name")) {
+        findings.add(new Finding(file, 1, 1, "missing 'name'"));
+    }
+    var description = keys.get("description");
+    if (description == null || description.isBlank()) {
+        findings.add(new Finding(file, 1, 1, "missing 'description'"));
+    } else if (description.length() > MAX_DESCRIPTION_LENGTH) {
+        findings.add(new Finding(file, 1, 1, "description has %d characters, max is %d"
+                .formatted(description.length(), MAX_DESCRIPTION_LENGTH)));
+    }
+    return findings.stream();
+}
+
+record Problem(int offset, String message) {}
+
+Optional<Problem> validateValue(String value) {
+    if (value.isEmpty() || value.startsWith("|") || value.startsWith(">")) {
+        return Optional.empty();
+    }
+    return switch (value.charAt(0)) {
+        case '\'' -> validateSingleQuoted(value);
+        case '"' -> validateDoubleQuoted(value);
+        default -> validatePlain(value);
+    };
+}
+
+Optional<Problem> validatePlain(String value) {
+    if (INDICATORS.indexOf(value.charAt(0)) >= 0 || value.startsWith("- ")) {
+        return Optional.of(new Problem(0, "starts with indicator '%c', quote the value".formatted(value.charAt(0))));
+    }
+    var colon = value.indexOf(": ");
+    if (colon >= 0) {
+        return Optional.of(new Problem(colon, "unquoted ': ' is a mapping indicator, quote the value"));
+    }
+    if (value.endsWith(":")) {
+        return Optional.of(new Problem(value.length() - 1, "unquoted trailing ':', quote the value"));
+    }
+    var hash = value.indexOf(" #");
+    if (hash >= 0) {
+        return Optional.of(new Problem(hash + 1, "unquoted ' #' starts a comment, quote the value"));
+    }
+    return Optional.empty();
+}
+
+Optional<Problem> validateSingleQuoted(String value) {
+    if (value.length() < 2 || !value.endsWith("'")) {
+        return Optional.of(new Problem(0, "single-quoted value not closed"));
+    }
+    var inner = value.substring(1, value.length() - 1).replace("''", "");
+    var stray = inner.indexOf('\'');
+    if (stray >= 0) {
+        return Optional.of(new Problem(1, "unescaped ' inside single-quoted value, use ''"));
+    }
+    return Optional.empty();
+}
+
+Optional<Problem> validateDoubleQuoted(String value) {
+    if (value.length() < 2 || !value.endsWith("\"") || value.endsWith("\\\"")) {
+        return Optional.of(new Problem(0, "double-quoted value not closed"));
+    }
+    var inner = value.substring(1, value.length() - 1).replace("\\\\", "").replace("\\\"", "");
+    if (inner.indexOf('"') >= 0) {
+        return Optional.of(new Problem(1, "unescaped \" inside double-quoted value, use \\\""));
+    }
+    return Optional.empty();
+}
+
+String unquote(String value) {
+    if (value.length() >= 2 && value.startsWith("'") && value.endsWith("'")) {
+        return value.substring(1, value.length() - 1).replace("''", "'");
+    }
+    if (value.length() >= 2 && value.startsWith("\"") && value.endsWith("\"")) {
+        return value.substring(1, value.length() - 1).replace("\\\"", "\"");
+    }
+    return value;
+}
