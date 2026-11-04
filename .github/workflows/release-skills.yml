@@ -34,6 +34,11 @@ jobs:
           distribution: temurin
           java-version: '25'
 
+      # Invalid frontmatter (e.g. an unquoted ': ' in a description) makes
+      # strict YAML parsers skip the skill — never publish such a release.
+      - name: Validate skills
+        run: ./checkSkills
+
       - name: Build per-agent zips
         run: ./zipSkills
 
