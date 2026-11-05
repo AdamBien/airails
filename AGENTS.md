@@ -47,6 +47,13 @@ unzip -o airails-claude.zip -d ~
 
 Each zip contains all skills with the agent's skills directory baked into the entry paths (`airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`).
 
+Agent-neutral bundles hold a per-stack subset under a plain `skills/` prefix and unzip into the agent's skills directory instead of the home directory: `airails-sbce.zip` (core), `airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`. Prefer the bundle matching the project when one does, since it keeps unrelated skills out of the agent's context:
+
+```
+curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
+unzip -o airails-web.zip -d ~/.claude/skills
+```
+
 ## Listing and Removing
 
 `./installSkills -l` needs no TTY — safe to run from an agent shell. It lists all skills available in the repository and all skills installed per agent directory (requires a JDK 25+).

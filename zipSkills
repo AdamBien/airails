@@ -8,9 +8,16 @@
 /// unzip airails-claude.zip -d ~
 /// ```
 ///
-/// Additionally builds an agent-neutral `airails-skills.zip` whose entries
-/// live under a plain `skills/` prefix, for agents not listed in `targets()`
-/// or for manual installs into a custom location.
+/// Additionally builds agent-neutral zips whose entries live under a plain
+/// `skills/` prefix, for agents not listed in `targets()` or for manual
+/// installs into a custom location: `airails-skills.zip` with every skill,
+/// and one `airails-<bundle>.zip` per entry of `bundles()` with the skills a
+/// single stack composes from. Bundles are deliberately not multiplied by
+/// agent — they unzip into the agent's skills directory instead of `$HOME`:
+///
+/// ```
+/// unzip airails-web.zip -d ~/.claude/skills
+/// ```
 ///
 /// Run from the repository root — locally or from the release-skills GitHub
 /// Actions workflow, which publishes `target/*.zip` as release assets. The
@@ -18,10 +25,13 @@
 /// the managed, interactive install path — when an agent is added there, add
 /// it here too.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-07-28.1";
+String version = "2026-11-05.1";
 
 /// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
 record Target(String agent, String prefix) {}
+
+/// Bundle name (zip suffix) and the skills it ships, by directory name.
+record Bundle(String name, List<String> skills) {}
 
 List<Target> targets() {
     return List.of(
@@ -34,6 +44,47 @@ List<Target> targets() {
     );
 }
 
+/// The stack-neutral layers every bundle starts from: spec, architecture,
+/// definition of done, and the documentation skills that render them.
+List<String> core() {
+    return List.of(
+            "sbce", "ears-tests", "capability-brief", "system-brief",
+            "bce", "bce-reviewer", "concerns", "system-tests", "showtime",
+            "bce-diagrams", "drawio", "mermaid", "readme"
+    );
+}
+
+/// One bundle per stack, each a vertical slice through the skill layers:
+/// `core()` plus the stack skill, its building blocks, conventions, and test
+/// loop. Overlap between bundles is intended — unzipping two bundles writes
+/// identical files twice. A skill in no bundle still ships in the per-agent
+/// and `airails-skills.zip` archives; the build lists such skills.
+List<Bundle> bundles() {
+    return List.of(
+            new Bundle("sbce", core()),
+            new Bundle("java-server", with(
+                    "microprofile-server", "continuous-testing", "aws-cdk",
+                    "java-conventions", "jdbc-persistence", "memory-persistence", "zjson")),
+            new Bundle("java-cli", with(
+                    "java-cli-app", "java-cli-script", "java-conventions",
+                    "zb", "zb-release-pipeline", "zargs", "zcfg", "zcl", "zjson", "zunit",
+                    "zhtmldb", "zllm-scripts", "jdbc-persistence", "memory-persistence")),
+            new Bundle("web", with(
+                    "web-conventions", "javascript-conventions",
+                    "web-static", "web-sprinkles", "web-components",
+                    "web-system-tests", "web-latest", "web-pwa",
+                    "web-performance-reviewer", "web-standards-reviewer")),
+            new Bundle("migrations", with(
+                    "migration-advisor", "concept-extractor", "concept-clarifier",
+                    "bc-carver", "concept-annotator", "characterization-tests", "simplifier",
+                    "java-conventions", "java-distiller", "python-to-java"))
+    );
+}
+
+List<String> with(String... skills) {
+    return Stream.concat(core().stream(), Stream.of(skills)).toList();
+}
+
 void main() throws Exception {
     IO.println(name + " " + version);
     var source = Path.of("").toAbsolutePath();
@@ -42,12 +93,42 @@ void main() throws Exception {
     IO.println("%s: %d skill(s) in %s: %s".formatted(name, skills.size(), source, skillNames));
     var output = Files.createDirectories(Path.of("target"));
     for (var target : targets()) {
-        var zip = zipAgent(target.agent(), target.prefix(), skills, output);
+        var zip = archive(target.agent(), target.prefix(), skills, output);
         IO.println("  %s <- %s".formatted(zip, target.prefix()));
     }
-    var generic = zipAgent("skills", "skills", skills, output);
+    var generic = archive("skills", "skills", skills, output);
     IO.println("  %s <- %s".formatted(generic, "skills"));
+    var bundled = new TreeSet<String>();
+    for (var bundle : bundles()) {
+        var selected = select(bundle, skills);
+        var zip = archive(bundle.name(), "skills", selected, output);
+        IO.println("  %s <- %d skill(s)".formatted(zip, selected.size()));
+        bundled.addAll(bundle.skills());
+    }
+    var unbundled = skills.stream().map(this::skillName).filter(s -> !bundled.contains(s)).toList();
+    if (!unbundled.isEmpty()) {
+        IO.println("%s: in no bundle (per-agent and skills zips only): %s".formatted(name, String.join(", ", unbundled)));
+    }
     IO.println(name + ": done");
+}
+
+/// The skill directories a bundle names, in manifest order. A name that
+/// matches no skill (typo, renamed or removed skill) fails the build rather
+/// than silently publishing a thinner bundle; so does a bundle name that
+/// would overwrite an agent or the generic zip.
+List<Path> select(Bundle bundle, List<Path> skills) {
+    var reserved = Stream.concat(targets().stream().map(Target::agent), Stream.of("skills")).toList();
+    if (reserved.contains(bundle.name())) {
+        System.err.println("%s: bundle name '%s' collides with an agent zip".formatted(name, bundle.name()));
+        System.exit(1);
+    }
+    var byName = skills.stream().collect(Collectors.toMap(this::skillName, Function.identity()));
+    var missing = bundle.skills().stream().filter(s -> !byName.containsKey(s)).toList();
+    if (!missing.isEmpty()) {
+        System.err.println("%s: bundle '%s' names unknown skill(s): %s".formatted(name, bundle.name(), String.join(", ", missing)));
+        System.exit(1);
+    }
+    return bundle.skills().stream().distinct().map(byName::get).toList();
 }
 
 /// One zip whose entries all live under `prefix/<skill>/`, so extracting into
@@ -55,8 +136,8 @@ void main() throws Exception {
 /// are sorted for reproducible archives. Written through the zip filesystem
 /// provider with POSIX attributes enabled, so unix permissions (notably the
 /// exec bit of bundled `scripts/`) survive `unzip`.
-Path zipAgent(String agent, String prefix, List<Path> skills, Path output) throws IOException {
-    var zipFile = output.resolve("airails-" + agent + ".zip");
+Path archive(String suffix, String prefix, List<Path> skills, Path output) throws IOException {
+    var zipFile = output.resolve("airails-" + suffix + ".zip");
     // `create=true` opens an existing archive instead of replacing it.
     Files.deleteIfExists(zipFile);
     var env = Map.of("create", "true", "enablePosixFileAttributes", "true");
