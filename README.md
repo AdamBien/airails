@@ -36,7 +36,7 @@ curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails
 unzip -o airails-skills.zip -d ~/.claude
 ```
 
-Bundles are agent-neutral subsets in the same `skills/` layout, one per stack. Each contains the `sbce` core (spec, BCE, system tests, documentation) plus the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. Unzip into the agent's skills directory:
+Bundles are agent-neutral subsets in the same `skills/` layout. The stack bundles share a core of bce, bce-reviewer, system-tests, and readme, and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `sbce` and `documentation` bundles are add-ons for any stack. Unzip into the agent's skills directory:
 
 ```
 curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
@@ -45,11 +45,12 @@ unzip -o airails-web.zip -d ~/.claude/skills
 
 | Bundle | Contents |
 |---|---|
-| `airails-sbce.zip` | sbce, ears-tests, capability-brief, system-brief, bce, bce-reviewer, concerns, system-tests, showtime, bce-diagrams, drawio, mermaid, readme |
-| `airails-java-server.zip` | core + microprofile-server, continuous-testing, aws-cdk, java-conventions, jdbc-persistence, memory-persistence, zjson |
-| `airails-java-cli.zip` | core + java-cli-app, java-cli-script, java-conventions, zb, zb-release-pipeline, zargs, zcfg, zcl, zjson, zunit, zhtmldb, zllm-scripts, jdbc-persistence, memory-persistence |
+| `airails-java-server.zip` | core + microprofile-server, continuous-testing, aws-cdk, java-conventions, concerns, jdbc-persistence, memory-persistence, zjson |
+| `airails-java-cli.zip` | core + java-cli-app, java-cli-script, java-conventions, concerns, zb, zb-release-pipeline, zargs, zcfg, zcl, zjson, zunit, zhtmldb, zllm-scripts, jdbc-persistence, memory-persistence |
 | `airails-web.zip` | core + web-conventions, javascript-conventions, web-static, web-sprinkles, web-components, web-system-tests, web-latest, web-pwa, web-performance-reviewer, web-standards-reviewer |
-| `airails-migrations.zip` | core + migration-advisor, concept-extractor, concept-clarifier, bc-carver, concept-annotator, characterization-tests, simplifier, java-conventions, java-distiller, python-to-java |
+| `airails-migrations.zip` | core + migration-advisor, concept-extractor, concept-clarifier, bc-carver, concept-annotator, characterization-tests, simplifier, java-conventions, concerns, java-distiller, python-to-java |
+| `airails-sbce.zip` | sbce, ears-tests, capability-brief, system-brief — the spec-driven workflow on top of a stack bundle |
+| `airails-documentation.zip` | readme, bce-diagrams, mermaid, drawio |
 
 Bundles overlap by design; unzipping two writes identical files twice. The manifest lives in `bundles()` of [zipSkills](zipSkills).
 

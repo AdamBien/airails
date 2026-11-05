@@ -11,8 +11,8 @@
 /// Additionally builds agent-neutral zips whose entries live under a plain
 /// `skills/` prefix, for agents not listed in `targets()` or for manual
 /// installs into a custom location: `airails-skills.zip` with every skill,
-/// and one `airails-<bundle>.zip` per entry of `bundles()` with the skills a
-/// single stack composes from. Bundles are deliberately not multiplied by
+/// and one `airails-<bundle>.zip` per entry of `bundles()`: the skills a
+/// single stack composes from, plus the `sbce` and `documentation` add-ons. Bundles are deliberately not multiplied by
 /// agent — they unzip into the agent's skills directory instead of `$HOME`:
 ///
 /// ```
@@ -44,29 +44,27 @@ List<Target> targets() {
     );
 }
 
-/// The stack-neutral layers every bundle starts from: spec, architecture,
-/// definition of done, and the documentation skills that render them.
+/// What every stack composes with, spec-driven or not: the architecture,
+/// its review, the definition of done, and the README conventions.
 List<String> core() {
-    return List.of(
-            "sbce", "ears-tests", "capability-brief", "system-brief",
-            "bce", "bce-reviewer", "concerns", "system-tests", "showtime",
-            "bce-diagrams", "drawio", "mermaid", "readme"
-    );
+    return List.of("bce", "bce-reviewer", "system-tests", "readme");
 }
 
 /// One bundle per stack, each a vertical slice through the skill layers:
 /// `core()` plus the stack skill, its building blocks, conventions, and test
-/// loop. Overlap between bundles is intended — unzipping two bundles writes
-/// identical files twice. A skill in no bundle still ships in the per-agent
-/// and `airails-skills.zip` archives; the build lists such skills.
+/// loop. `sbce` and `documentation` are add-ons for any stack bundle and do
+/// not repeat the core. Overlap between bundles is intended — unzipping two
+/// bundles writes identical files twice. A skill in no bundle still ships in
+/// the per-agent and `airails-skills.zip` archives; the build lists such skills.
 List<Bundle> bundles() {
     return List.of(
-            new Bundle("sbce", core()),
+            new Bundle("sbce", List.of("sbce", "ears-tests", "capability-brief", "system-brief")),
+            new Bundle("documentation", List.of("readme", "bce-diagrams", "mermaid", "drawio")),
             new Bundle("java-server", with(
                     "microprofile-server", "continuous-testing", "aws-cdk",
-                    "java-conventions", "jdbc-persistence", "memory-persistence", "zjson")),
+                    "java-conventions", "concerns", "jdbc-persistence", "memory-persistence", "zjson")),
             new Bundle("java-cli", with(
-                    "java-cli-app", "java-cli-script", "java-conventions",
+                    "java-cli-app", "java-cli-script", "java-conventions", "concerns",
                     "zb", "zb-release-pipeline", "zargs", "zcfg", "zcl", "zjson", "zunit",
                     "zhtmldb", "zllm-scripts", "jdbc-persistence", "memory-persistence")),
             new Bundle("web", with(
@@ -77,7 +75,7 @@ List<Bundle> bundles() {
             new Bundle("migrations", with(
                     "migration-advisor", "concept-extractor", "concept-clarifier",
                     "bc-carver", "concept-annotator", "characterization-tests", "simplifier",
-                    "java-conventions", "java-distiller", "python-to-java"))
+                    "java-conventions", "concerns", "java-distiller", "python-to-java"))
     );
 }
 
