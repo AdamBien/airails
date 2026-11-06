@@ -36,11 +36,11 @@ curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails
 unzip -o airails-skills.zip -d ~/.claude
 ```
 
-Bundles are agent-neutral subsets in the same `skills/` layout. The stack bundles share a core of bce, bce-reviewer, system-tests, and readme, and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `sbce` and `documentation` bundles are add-ons for any stack. Unzip into the agent's skills directory:
+Bundles are agent-neutral subsets in the same `skills/` layout. The stack bundles share a core of bce, bce-reviewer, system-tests, and readme, and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `sbce` and `documentation` bundles are add-ons for any stack. Unzip into the agent's configuration directory:
 
 ```
 curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
-unzip -o airails-web.zip -d ~/.claude/skills
+unzip -o airails-web.zip -d ~/.claude
 ```
 
 | Bundle | Contents |
@@ -53,6 +53,19 @@ unzip -o airails-web.zip -d ~/.claude/skills
 | `airails-documentation.zip` | readme, bce-diagrams, mermaid, drawio |
 
 Bundles overlap by design; unzipping two writes identical files twice. The manifest lives in `bundles()` of [zipSkills](zipSkills).
+
+Skills can also be installed per project instead of per user. Claude Code picks up skills from `.claude/skills` in the project root, so a checked-in bundle ships with the repository and applies to everyone working on it; a project skill takes precedence over a user-level skill of the same name. Unzip a bundle into the project, or copy single skill directories from a clone:
+
+```
+cd <project-root>
+curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
+unzip -o airails-web.zip -d .claude
+```
+
+```
+mkdir -p <project-root>/.claude/skills
+cp -R web/web-conventions <project-root>/.claude/skills/
+```
 
 AI agents installing the skills themselves should follow [AGENTS.md](AGENTS.md) — `installSkills` requires an interactive terminal.
 
