@@ -2,7 +2,7 @@
 
 Instructions for AI agents asked to install, list, or remove the skills in this repository.
 
-A skill is a directory containing a `SKILL.md`, organized under `bce/`, `java/`, `web/`, and `documentation/`. Installation means copying the skill directory — preserving its folder name — into the skills directory of the target agent, either globally (home directory) or project-locally (project root, checked in with the project).
+A skill is a directory containing a `SKILL.md`, organized under `bce/`, `java/`, `web/`, `migrations/`, and `documentation/`. Installation means placing the skill directory — preserving its folder name — into the skills directory of the target agent, either globally (home directory) or project-locally (project root, checked in with the project).
 
 ## Skill Directories per Agent
 
@@ -21,11 +21,27 @@ Project-local paths are relative to the project root. Note that Copilot's projec
 
 Pick the first applicable option:
 
-### 1. Interactive terminal available (user is driving)
+### 1. Released bundles with the wizard (JDK 25+, network access)
 
-Ask the user to run `./installSkills` from the repository root, or `./installSkills -p <project-root>` for a project-local install. Do **not** run it from an agent shell — it requires an interactive terminal (`System.console()`) and exits with `interactive terminal required` when stdin is piped or non-TTY.
+`airails` installs released bundles and needs no TTY when every answer is given as a flag. Pipe it from GitHub, or run `./airails` from a clone:
 
-### 2. Agent shell (no TTY)
+```
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/airails | java --source 25 /dev/stdin -project <project-root> -agents claude -bundles web,sbce -yes
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/airails | java --source 25 /dev/stdin -global -agents claude,codex -bundles skills -yes
+```
+
+- `-global` installs globally, `-project <project-root>` into a project; exactly one of them. Values take either form, `-project <root>` or `-project:<root>`.
+- `-agents` takes comma-separated agent ids from the table above.
+- `-bundles` takes comma-separated bundle names: `java-server`, `java-cli`, `web`, `migrations`, `sbce`, `documentation`, or `skills` for every skill. `airails -list` lists what the release currently offers.
+- `-yes` skips the confirmation.
+
+Prefer the bundle matching the project, since it keeps unrelated skills out of the agent's context. Without flags the wizard asks its questions on `/dev/tty`; in a shell without a terminal it exits with `no terminal for questions`. It installs the last release, not the working tree — for an unreleased change use option 2 or 3.
+
+### 2. Working tree, interactive terminal available (user is driving)
+
+Ask the user to run `./installSkills` from the repository root, or `./installSkills -p <project-root>` for a project-local install. It copies every skill and prompts per agent directory. Do **not** run it from an agent shell — it requires an interactive terminal (`System.console()`) and exits with `interactive terminal required` when stdin is piped or non-TTY.
+
+### 3. Working tree, agent shell (no TTY)
 
 Copy the skill directories directly. From the repository root:
 
@@ -36,18 +52,9 @@ find . -name SKILL.md -not -path './target/*' | while read f; do
 done
 ```
 
-Replace `~/.claude/skills` with the target agent's directory from the table above. Copying overwrites an existing skill of the same name — acceptable, since this repository is the source of truth for these skills.
+Replace `~/.claude/skills` with the target directory from the table above — global or project-local. Copying overwrites an existing skill of the same name — acceptable, since this repository is the source of truth for these skills.
 
-With network access, `downloadSkills` installs a bundle subset instead — it needs no TTY and extracts straight into the skills directory given with `-d` (default `~/.claude/skills`). From a clone, or piped without one:
-
-```
-./downloadSkills web sbce -d ~/.claude/skills
-curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin web sbce -d ~/.claude/skills
-```
-
-Bundles: `skills` (every skill), `java-server`, `java-cli`, `web`, `migrations`, `sbce`, `documentation`. `./downloadSkills -h` lists them.
-
-### 3. No JDK, no git
+### 4. No JDK
 
 Download the per-agent zip from the rolling `skills` release and unzip into the home directory:
 
@@ -58,36 +65,13 @@ unzip -o airails-claude.zip -d ~
 
 Each zip contains all skills with the agent's skills directory baked into the entry paths (`airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`).
 
-Agent-neutral bundles hold a per-stack subset under a plain `skills/` prefix and unzip into the agent's configuration directory (the parent of its skills directory) instead of the home directory: `airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`, plus the add-ons `airails-sbce.zip` (spec-driven workflow) and `airails-documentation.zip`. Prefer the bundle matching the project when one does, since it keeps unrelated skills out of the agent's context:
+The bundle zips (`airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`, `airails-sbce.zip`, `airails-documentation.zip`, `airails-skills.zip`) carry a plain `skills/` prefix and unzip into the agent's configuration directory, the parent of its skills directory — globally or in the project:
 
 ```
 curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
 unzip -o airails-web.zip -d ~/.claude
+unzip -o airails-web.zip -d <project-root>/.claude
 ```
-
-## Project-Local Installation
-
-When the user asks to install skills into a project rather than for their user account, place them in the project-local directory of the agent from the table above, e.g. `.claude/skills` in the project root for Claude Code. A project skill takes precedence over a user-level skill of the same name, and a checked-in skills directory applies to everyone working on the repository. With a terminal, the user runs `./installSkills -p <project-root>`, which prompts per agent directory like the global install. From an agent shell, either copy single skill directories from this repository:
-
-```
-mkdir -p <project-root>/.claude/skills
-cp -R web/web-conventions <project-root>/.claude/skills/
-```
-
-Or install a bundle into the project with `downloadSkills` (JDK) or `unzip` (no JDK):
-
-```
-cd <project-root>
-./path/to/airails/downloadSkills web -d .claude/skills
-```
-
-```
-cd <project-root>
-curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
-unzip -o airails-web.zip -d .claude
-```
-
-Verify with the same checks as below, substituting the project-local directory for `~/.claude/skills`; `./installSkills -l -p <project-root>` lists what a project has installed and needs no TTY.
 
 ## Listing and Removing
 
@@ -101,13 +85,13 @@ rm -r ~/.claude/skills/<name>
 
 ## Verifying
 
-After installation, confirm the skill directories exist and each contains a `SKILL.md`:
+After installation, confirm the skill directories exist and each contains a `SKILL.md`, substituting the project-local directory for a project install:
 
 ```
 ls ~/.claude/skills/*/SKILL.md
 ```
 
-Skills that bundle executables in `scripts/` (e.g. `web-conventions/scripts/zws`) must keep the exec bit; `installSkills`, the zips, and `cp -R` all preserve it:
+Skills that bundle executables in `scripts/` (e.g. `web-conventions/scripts/zws`) must keep the exec bit; `airails`, `installSkills`, the zips, and `cp -R` all preserve it:
 
 ```
 ls -l ~/.claude/skills/*/scripts/

@@ -14,8 +14,8 @@
 /// and one `airails-<bundle>.zip` per entry of `bundles()`: the skills a
 /// single stack composes from, plus the `sbce` and `documentation` add-ons. Bundles are deliberately not multiplied by
 /// agent — they unzip into the agent's configuration directory, the parent of
-/// its skills directory, instead of `$HOME`; `downloadSkills <bundle>` strips
-/// the prefix and targets the skills directory itself:
+/// its skills directory, instead of `$HOME`; the `airails` wizard strips the
+/// prefix and targets the skills directory itself:
 ///
 /// ```
 /// unzip airails-web.zip -d ~/.claude
