@@ -36,6 +36,15 @@ done
 
 Replace `~/.claude/skills` with the target agent's directory from the table above. Copying overwrites an existing skill of the same name — acceptable, since this repository is the source of truth for these skills.
 
+With network access, `downloadSkills` installs a bundle subset instead — it needs no TTY and extracts straight into the skills directory given with `-d` (default `~/.claude/skills`). From a clone, or piped without one:
+
+```
+./downloadSkills web sbce -d ~/.claude/skills
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin web sbce -d ~/.claude/skills
+```
+
+Bundles: `skills` (every skill), `java-server`, `java-cli`, `web`, `migrations`, `sbce`, `documentation`. `./downloadSkills -h` lists them.
+
 ### 3. No JDK, no git
 
 Download the per-agent zip from the rolling `skills` release and unzip into the home directory:
@@ -63,7 +72,12 @@ mkdir -p <project-root>/.claude/skills
 cp -R web/web-conventions <project-root>/.claude/skills/
 ```
 
-Or unzip a bundle into the project's `.claude` directory:
+Or install a bundle into the project with `downloadSkills` (JDK) or `unzip` (no JDK):
+
+```
+cd <project-root>
+./path/to/airails/downloadSkills web -d .claude/skills
+```
 
 ```
 cd <project-root>

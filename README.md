@@ -54,6 +54,12 @@ unzip -o airails-web.zip -d ~/.claude
 
 Bundles overlap by design; unzipping two writes identical files twice. The manifest lives in `bundles()` of [zipSkills](zipSkills).
 
+With a JDK, `downloadSkills` installs bundles in one step, without `curl -O`, `unzip`, or the repository. It strips the `skills/` prefix, so `-d` names the skills directory itself and defaults to `~/.claude/skills`; `skills` is the bundle holding every skill:
+
+```
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin web sbce
+```
+
 Skills can also be installed per project instead of per user. Claude Code picks up skills from `.claude/skills` in the project root, so a checked-in bundle ships with the repository and applies to everyone working on it; a project skill takes precedence over a user-level skill of the same name. Unzip a bundle into the project, or copy single skill directories from a clone:
 
 ```
@@ -65,6 +71,11 @@ unzip -o airails-web.zip -d .claude
 ```
 mkdir -p <project-root>/.claude/skills
 cp -R web/web-conventions <project-root>/.claude/skills/
+```
+
+```
+cd <project-root>
+curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin web -d .claude/skills
 ```
 
 AI agents installing the skills themselves should follow [AGENTS.md](AGENTS.md) — `installSkills` requires an interactive terminal.
