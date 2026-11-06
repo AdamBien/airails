@@ -20,7 +20,11 @@ cd airails
 ./installSkills
 ```
 
-The installer finds all skills and prompts before copying to each supported agent directory (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`).
+The installer finds all skills and prompts before copying to each supported agent directory (`~/.claude/skills`, `~/.vibe/skills`, `~/.kiro/skills`, `~/.copilot/skills`, `~/.agents/skills`, `~/.config/goose/skills`). With `-p <project-root>` it installs into the project's agent directories instead (`.claude/skills`, `.vibe/skills`, `.kiro/skills`, `.github/skills` for Copilot, `.agents/skills` for Codex and Goose), so the skills are checked in with the project:
+
+```
+./installSkills -p ../myproject
+```
 
 Without a JDK or `git`, download the prepacked zip for your agent from the rolling [skills release](https://github.com/AdamBien/airails/releases/tag/skills) and unzip it into the home directory:
 
@@ -60,7 +64,7 @@ With a JDK, `downloadSkills` installs bundles in one step, without `curl -O`, `u
 curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/downloadSkills | java --source 25 /dev/stdin web sbce
 ```
 
-Skills can also be installed per project instead of per user. Claude Code picks up skills from `.claude/skills` in the project root, so a checked-in bundle ships with the repository and applies to everyone working on it; a project skill takes precedence over a user-level skill of the same name. Unzip a bundle into the project, or copy single skill directories from a clone:
+Skills can also be installed per project instead of per user. Claude Code picks up skills from `.claude/skills` in the project root, so a checked-in bundle ships with the repository and applies to everyone working on it; a project skill takes precedence over a user-level skill of the same name. `./installSkills -p <project-root>` is the prompted way for all agents; alternatively unzip a bundle into the project, or copy single skill directories from a clone:
 
 ```
 cd <project-root>
@@ -87,6 +91,8 @@ Manage installed skills:
 ./installSkills -d <name>    # delete a skill by name
 ./installSkills -h           # show help
 ```
+
+Add `-p <project-root>` to list or delete within a project instead of the home directory.
 
 ## Skill Layers
 

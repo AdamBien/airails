@@ -2,18 +2,20 @@
 
 Instructions for AI agents asked to install, list, or remove the skills in this repository.
 
-A skill is a directory containing a `SKILL.md`, organized under `bce/`, `java/`, `web/`, and `documentation/`. Installation means copying the skill directory — preserving its folder name — into the skills directory of the target agent.
+A skill is a directory containing a `SKILL.md`, organized under `bce/`, `java/`, `web/`, and `documentation/`. Installation means copying the skill directory — preserving its folder name — into the skills directory of the target agent, either globally (home directory) or project-locally (project root, checked in with the project).
 
 ## Skill Directories per Agent
 
-| Agent | Skills directory |
-|---|---|
-| claude | `~/.claude/skills` |
-| vibe | `~/.vibe/skills` |
-| kiro | `~/.kiro/skills` |
-| copilot | `~/.copilot/skills` |
-| codex | `~/.agents/skills` |
-| goose | `~/.config/goose/skills` |
+| Agent | Global | Project-local |
+|---|---|---|
+| claude | `~/.claude/skills` | `.claude/skills` |
+| vibe | `~/.vibe/skills` | `.vibe/skills` |
+| kiro | `~/.kiro/skills` | `.kiro/skills` |
+| copilot | `~/.copilot/skills` | `.github/skills` |
+| codex | `~/.agents/skills` | `.agents/skills` |
+| goose | `~/.config/goose/skills` | `.agents/skills` |
+
+Project-local paths are relative to the project root. Note that Copilot's project directory is `.github/skills`, not `.copilot/skills`, and that Codex and Goose share `.agents/skills`.
 
 ## How to Install
 
@@ -21,7 +23,7 @@ Pick the first applicable option:
 
 ### 1. Interactive terminal available (user is driving)
 
-Ask the user to run `./installSkills` from the repository root. Do **not** run it from an agent shell — it requires an interactive terminal (`System.console()`) and exits with `interactive terminal required` when stdin is piped or non-TTY.
+Ask the user to run `./installSkills` from the repository root, or `./installSkills -p <project-root>` for a project-local install. Do **not** run it from an agent shell — it requires an interactive terminal (`System.console()`) and exits with `interactive terminal required` when stdin is piped or non-TTY.
 
 ### 2. Agent shell (no TTY)
 
@@ -65,7 +67,7 @@ unzip -o airails-web.zip -d ~/.claude
 
 ## Project-Local Installation
 
-When the user asks to install skills into a project rather than for their user account, place them under `.claude/skills` in the project root. Claude Code loads them from there; a project skill takes precedence over a user-level skill of the same name, and a checked-in `.claude/skills` applies to everyone working on the repository. Either copy single skill directories from this repository:
+When the user asks to install skills into a project rather than for their user account, place them in the project-local directory of the agent from the table above, e.g. `.claude/skills` in the project root for Claude Code. A project skill takes precedence over a user-level skill of the same name, and a checked-in skills directory applies to everyone working on the repository. With a terminal, the user runs `./installSkills -p <project-root>`, which prompts per agent directory like the global install. From an agent shell, either copy single skill directories from this repository:
 
 ```
 mkdir -p <project-root>/.claude/skills
@@ -85,13 +87,13 @@ curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails
 unzip -o airails-web.zip -d .claude
 ```
 
-Verify with the same checks as below, substituting `<project-root>/.claude/skills` for `~/.claude/skills`.
+Verify with the same checks as below, substituting the project-local directory for `~/.claude/skills`; `./installSkills -l -p <project-root>` lists what a project has installed and needs no TTY.
 
 ## Listing and Removing
 
-`./installSkills -l` needs no TTY — safe to run from an agent shell. It lists all skills available in the repository and all skills installed per agent directory (requires a JDK 25+).
+`./installSkills -l` needs no TTY — safe to run from an agent shell. It lists all skills available in the repository and all skills installed per agent directory (requires a JDK 25+); with `-p <project-root>` it lists the project's agent directories instead.
 
-`./installSkills -d <name>` is interactive; from an agent shell remove the skill directory directly instead:
+`./installSkills -d <name>` (optionally with `-p <project-root>`) is interactive; from an agent shell remove the skill directory directly instead:
 
 ```
 rm -r ~/.claude/skills/<name>

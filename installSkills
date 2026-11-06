@@ -2,51 +2,107 @@
 
 /// Installs airails.dev skills from the cloned (or downloaded) repository into
 /// the skill directories of supported AI agents. Run from the repository root:
-/// `./installSkills`. Based on https://github.com/adambien/zeeds.
+/// `./installSkills` for the agents' home directories (global scope), or
+/// `./installSkills -p <project-root>` for the agents' project directories
+/// (project scope), which a repository checks in so the skills apply to
+/// everyone working on it. Based on https://github.com/adambien/zeeds.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-06-21.1";
+String version = "2026-11-06.1";
 
-List<Path> targets(Path home) {
-    return List.of(
-            home.resolve(".claude/skills"),
-            home.resolve(".vibe/skills"),
-            home.resolve(".kiro/skills"),
-            home.resolve(".copilot/skills"),
-            home.resolve(".agents/skills"), // codex
-            home.resolve(".config/goose/skills")
-    );
+/// A skills directory relative to a scope root, and the agents reading it.
+record Target(String agents, String directory) {}
+
+/// Where the skills land: a root (`$HOME` or a project) and its targets.
+record Scope(String label, Path root, List<Target> targets) {
+    List<Path> directories() {
+        return targets.stream().map(t -> root.resolve(t.directory())).toList();
+    }
+
+    String agentsOf(Path directory) {
+        return targets.stream()
+                .filter(t -> root.resolve(t.directory()).equals(directory))
+                .map(Target::agents)
+                .findFirst()
+                .orElse("");
+    }
+}
+
+/// Home-relative skills directories, one per agent.
+Scope global() {
+    return new Scope("global", Path.of(System.getProperty("user.home")), List.of(
+            new Target("claude", ".claude/skills"),
+            new Target("vibe", ".vibe/skills"),
+            new Target("kiro", ".kiro/skills"),
+            new Target("copilot", ".copilot/skills"),
+            new Target("codex", ".agents/skills"),
+            new Target("goose", ".config/goose/skills")
+    ));
+}
+
+/// Project-relative skills directories. Not the home layout moved down a
+/// level: Copilot reads `.github/skills` in a repository, and Codex and Goose
+/// both read `.agents/skills`, so that directory is offered once for both.
+Scope project(Path root) {
+    return new Scope("project", root, List.of(
+            new Target("claude", ".claude/skills"),
+            new Target("vibe", ".vibe/skills"),
+            new Target("kiro", ".kiro/skills"),
+            new Target("copilot", ".github/skills"),
+            new Target("codex, goose", ".agents/skills")
+    ));
 }
 
 void main(String... args) throws Exception {
     IO.println(name + " " + version);
-    var home = Path.of(System.getProperty("user.home"));
-    switch (args.length == 0 ? "" : args[0]) {
+    var scope = global();
+    var rest = new ArrayList<String>();
+    for (var i = 0; i < args.length; i++) {
+        if (args[i].equals("-p")) {
+            if (++i == args.length) {
+                fail("-p requires a project root");
+            }
+            scope = project(projectRoot(args[i]));
+        } else {
+            rest.add(args[i]);
+        }
+    }
+    switch (rest.isEmpty() ? "" : rest.getFirst()) {
         case "-version" -> {}
         case "-h" -> help();
-        case "-l" -> listSkills(home);
-        case "-d" -> deleteSkill(home, args.length > 1 ? args[1] : null);
-        default -> installSkills(home);
+        case "-l" -> listSkills(scope);
+        case "-d" -> deleteSkill(scope, rest.size() > 1 ? rest.get(1) : null);
+        default -> installSkills(scope);
     }
 }
 
 void help() {
     IO.println("""
-            Usage: %1$s            install all skills
-                   %1$s -l         list available and installed skills
-                   %1$s -d <name>  delete a skill by folder name
-                   %1$s -h         show this help
-                   %1$s -version   show version
+            Usage: %1$s                           install all skills into the agents' home directories
+                   %1$s -p <project-root>         install all skills into the agents' directories of a project
+                   %1$s -l [-p <project-root>]    list available and installed skills
+                   %1$s -d <name> [-p <project-root>]  delete a skill by folder name
+                   %1$s -h                        show this help
+                   %1$s -version                  show version
             """.formatted(name));
 }
 
-void installSkills(Path home) throws IOException {
+Path projectRoot(String arg) {
+    var root = Path.of(arg).toAbsolutePath().normalize();
+    if (!Files.isDirectory(root)) {
+        fail("project root %s is not a directory".formatted(root));
+    }
+    return root;
+}
+
+void installSkills(Scope scope) throws IOException {
     var source = Path.of("").toAbsolutePath();
     var skills = findSkillDirs(source);
     var skillNames = skills.stream().map(this::skillName).collect(Collectors.joining(", "));
     IO.println("%s: %d skill(s) in %s: %s".formatted(name, skills.size(), source, skillNames));
+    IO.println("%s: %s scope, root %s".formatted(name, scope.label(), scope.root()));
     var console = requireConsole();
-    for (var target : targets(home)) {
-        if (!isYes(console.readLine("Install to %s? [y/N] ", target))) {
+    for (var target : scope.directories()) {
+        if (!isYes(console.readLine("Install to %s (%s)? [y/N] ", target, scope.agentsOf(target)))) {
             IO.println("  skipped");
             continue;
         }
@@ -59,32 +115,31 @@ void installSkills(Path home) throws IOException {
     IO.println(name + ": done");
 }
 
-void listSkills(Path home) throws IOException {
+void listSkills(Scope scope) throws IOException {
     IO.println(name + ": available");
     for (var skill : findSkillDirs(Path.of("").toAbsolutePath())) {
         IO.println("  " + skillName(skill));
     }
-    IO.println(name + ": installed");
-    for (var target : targets(home)) {
+    IO.println("%s: installed (%s scope, root %s)".formatted(name, scope.label(), scope.root()));
+    for (var target : scope.directories()) {
         var skills = findSkillDirs(target);
         if (skills.isEmpty()) {
             continue;
         }
-        IO.println("  " + target);
+        IO.println("  %s (%s)".formatted(target, scope.agentsOf(target)));
         for (var skill : skills) {
             IO.println("    " + skillName(skill));
         }
     }
 }
 
-void deleteSkill(Path home, String skill) throws IOException {
+void deleteSkill(Scope scope, String skill) throws IOException {
     if (skill == null) {
-        System.err.println(name + ": -d requires a skill name");
-        System.exit(1);
+        fail("-d requires a skill name");
     }
     var console = requireConsole();
     var found = false;
-    for (var target : targets(home)) {
+    for (var target : scope.directories()) {
         var dir = target.resolve(skill);
         if (!Files.exists(dir)) {
             continue;
@@ -98,7 +153,7 @@ void deleteSkill(Path home, String skill) throws IOException {
         }
     }
     if (!found) {
-        System.err.println("%s: skill '%s' not found in any target".formatted(name, skill));
+        System.err.println("%s: skill '%s' not found in any %s target".formatted(name, skill, scope.label()));
     }
 }
 
@@ -154,10 +209,14 @@ void deleteRecursively(Path dir) throws IOException {
 Console requireConsole() {
     var console = System.console();
     if (console == null) {
-        System.err.println(name + ": interactive terminal required — run ./installSkills directly, not piped");
-        System.exit(1);
+        fail("interactive terminal required — run ./installSkills directly, not piped");
     }
     return console;
+}
+
+void fail(String message) {
+    System.err.println("%s: %s".formatted(name, message));
+    System.exit(1);
 }
 
 boolean isNoise(Path relative) {
