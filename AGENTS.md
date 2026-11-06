@@ -47,12 +47,31 @@ unzip -o airails-claude.zip -d ~
 
 Each zip contains all skills with the agent's skills directory baked into the entry paths (`airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`).
 
-Agent-neutral bundles hold a per-stack subset under a plain `skills/` prefix and unzip into the agent's skills directory instead of the home directory: `airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`, plus the add-ons `airails-sbce.zip` (spec-driven workflow) and `airails-documentation.zip`. Prefer the bundle matching the project when one does, since it keeps unrelated skills out of the agent's context:
+Agent-neutral bundles hold a per-stack subset under a plain `skills/` prefix and unzip into the agent's configuration directory (the parent of its skills directory) instead of the home directory: `airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`, plus the add-ons `airails-sbce.zip` (spec-driven workflow) and `airails-documentation.zip`. Prefer the bundle matching the project when one does, since it keeps unrelated skills out of the agent's context:
 
 ```
 curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
-unzip -o airails-web.zip -d ~/.claude/skills
+unzip -o airails-web.zip -d ~/.claude
 ```
+
+## Project-Local Installation
+
+When the user asks to install skills into a project rather than for their user account, place them under `.claude/skills` in the project root. Claude Code loads them from there; a project skill takes precedence over a user-level skill of the same name, and a checked-in `.claude/skills` applies to everyone working on the repository. Either copy single skill directories from this repository:
+
+```
+mkdir -p <project-root>/.claude/skills
+cp -R web/web-conventions <project-root>/.claude/skills/
+```
+
+Or unzip a bundle into the project's `.claude` directory:
+
+```
+cd <project-root>
+curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip
+unzip -o airails-web.zip -d .claude
+```
+
+Verify with the same checks as below, substituting `<project-root>/.claude/skills` for `~/.claude/skills`.
 
 ## Listing and Removing
 
