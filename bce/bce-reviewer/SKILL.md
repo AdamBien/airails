@@ -26,7 +26,7 @@ Verify the BCE structure of $ARGUMENTS and report as briefly as possible. Review
 Both modes build the same BC map first: direct children of the top-level package are BCs; record each BC's layers, the cross-BC dependency edges, and per BC two counts — internal references (file pairs inside the BC that reference each other) and outgoing cross-BC references (file pairs reaching another BC). A reference is one `import` or fully qualified use per referencing file, counted once per target file; a reference to another BC's entity counts twice, because it bypasses the control contract.
 
 - `full` reports every finding in the map
-- `diff` reports only findings the change creates or worsens: new, moved, or renamed packages and files, added imports, added public control methods, added classes. Carving checks (cycles, fan-in/fan-out) use the full map as context but are reported only when the diff introduced the edge. Pre-existing findings in touched files collapse to one trailing line.
+- `diff` reports only findings the change creates or worsens: new, moved, or renamed packages and files, added imports, added public control methods, added classes. Carving checks (fan-in/fan-out, cohesion ratio) use the full map as context but are reported only when the diff introduced the edge. Pre-existing findings in touched files collapse to one trailing line.
 
 ## Checks
 
@@ -34,7 +34,6 @@ Carving:
 - layer-first layout: `boundary`, `control`, `entity` outside a BC (e.g. `app.boundary`)
 - BC whose one-line responsibility joins two responsibilities with "and" → split candidate
 - BC with a single small class consumed by exactly one other BC → merge candidate
-- dependency cycle between BCs
 - excessive cross-BC references or shared configuration → split, merge, or rebalance
 - cohesion ratio below 1 — more outgoing cross-BC references than internal ones (`0/0` is not a finding) → merge into the referenced BC, or move the reaching code there
 - BC with no internal references and more than one class → a folder, not a component; split or merge
@@ -45,7 +44,7 @@ Layering:
 - upward dependency: entity → control or boundary, control → boundary
 - cross-cutting wrapper (transaction, authorization check, request/response mapping) in control or entity
 - anemic entity: state only, its behavior lives in a control
-- public control method used only inside its own BC → package-private
+- public control method used only inside its own control package → package-private
 
 Naming, BCs:
 - technical or generic name (`util`, `common`, `model`, `dto`, `services`, `helpers`, `api`, `impl`, `core`, `app`, `base`, `shared`, `domain`, `data`, `logic`) → name after the responsibility

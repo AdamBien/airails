@@ -8,6 +8,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 - structure code using the Boundary-Control-Entity (BCE/ECB) pattern
 - the unit of organization is the business component (BC); each BC owns a responsibility and is composed of one or more layers
 - the three layers are boundary, control, entity; each has a distinct responsibility (see layer sections below)
+- dependencies point downward only: boundary may use control and entity, control may use entity; control never references boundary, entity never references control or boundary
 - do not explain the BCE pattern in generated documentation
 
 ## Package / Directory Structure
@@ -25,6 +26,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 - not every BC needs a dedicated boundary; control contents may be consumed directly when no facade is justified
 - prefer a dedicated BC over the root application package when a shared concern carries domain or protocol semantics, exposes more than one operation, or is expected to grow
 - reserve the root application package for trivial single-class plumbing with no business semantics and no protocol coupling
+- BCs may depend on each other in both directions (e.g. an entity of A references an entity of B while a control of B calls a control of A); mutual references are not a violation — only excessive ones are a refactoring signal
 - create new BCs with minimal logic and essential fields only
 
 ## Boundary Layer
@@ -39,7 +41,8 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 - implement procedural business logic in the control layer
 - prefer stateless, function-like units for procedural logic
 - control may be called by the boundary of the same BC or directly by other BCs; the boundary is not a gate for cross-BC calls
-- control methods have two visibility levels: public for operations consumed by other BCs, package-private (or the language equivalent) for operations used only inside the BC; the public surface of a control is its cross-BC contract
+- a control method is public when it is called from outside the control package — by the BC's own boundary or by another BC; keep it package-private (or the language equivalent) when it is used only inside the control package
+- visibility cannot separate the BC's own boundary from other BCs, so it does not express a cross-BC contract; the control methods another BC may call are a carving decision, not a modifier
 
 ## Entity Layer
 
