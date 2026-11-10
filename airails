@@ -16,7 +16,7 @@ import module java.net.http;
 interface Boundary {
 
     String NAME = scriptName();
-    String VERSION = "2026-11-10.1";
+    String VERSION = "2026-11-10.2";
 
     /// Piped from `curl`, the class is named after `/dev/stdin`, not the script.
     static String scriptName() {
@@ -36,10 +36,9 @@ interface Boundary {
         var scope = scope(invocation, terminal);
         var agents = agents(invocation, terminal);
         var bundles = bundles(invocation, released, terminal);
-        var work = Files.createTempDirectory(NAME + "-");
+        IO.println("%s: fetching %s from the skills release".formatted(NAME, String.join(", ", bundles)));
+        var downloaded = download(bundles);
         try {
-            IO.println("%s: fetching %s from the skills release".formatted(NAME, String.join(", ", bundles)));
-            var downloaded = download(bundles, work);
             var directories = scope.directories(agents);
             IO.println(plan(scope, downloaded, directories));
             if (!invocation.yes() && !terminal.confirm("Proceed? (y/n)")) {
@@ -55,7 +54,7 @@ interface Boundary {
             }
             IO.println(NAME + ": done");
         } finally {
-            Control.deleteRecursively(work);
+            Control.discard(downloaded);
         }
     }
 
@@ -81,11 +80,11 @@ interface Boundary {
                 case PROJECT -> project = projectRoot(valueAt(tokens, ++i, token));
                 case AGENTS -> agents = csv(valueAt(tokens, ++i, token));
                 case BUNDLES -> bundles = csv(valueAt(tokens, ++i, token));
-                case null -> Log.stop("unknown argument %s — try -help".formatted(token));
+                case null -> throw Log.stop("unknown argument %s — try -help".formatted(token));
             }
         }
         if (global && project != null) {
-            Log.stop("-global and -project exclude each other");
+            throw Log.stop("-global and -project exclude each other");
         }
         return new Entity.Invocation(list, global, project, agents, bundles, yes);
     }
@@ -101,7 +100,7 @@ interface Boundary {
 
     static String valueAt(List<String> tokens, int index, String option) {
         if (index >= tokens.size()) {
-            Log.stop("missing value for " + option);
+            throw Log.stop("missing value for " + option);
         }
         return tokens.get(index);
     }
@@ -109,7 +108,7 @@ interface Boundary {
     static Path projectRoot(String argument) {
         var root = Path.of(argument).toAbsolutePath().normalize();
         if (!Files.isDirectory(root)) {
-            Log.stop("project root %s is not a directory".formatted(root));
+            throw Log.stop("project root %s is not a directory".formatted(root));
         }
         return root;
     }
@@ -123,7 +122,7 @@ interface Boundary {
             return Control.releasedBundles();
         } catch (IOException | InterruptedException e) {
             Log.warn("release listing unavailable (%s), using built-in bundle names".formatted(e.getMessage()));
-            return Entity.BUNDLES;
+            return Entity.Known.BUNDLES;
         }
     }
 
@@ -152,7 +151,7 @@ interface Boundary {
 
     static List<String> bundles(Entity.Invocation invocation, List<String> released, Terminal terminal) throws IOException {
         return invocation.bundles().isEmpty()
-                ? terminal.choose("Bundles", released, Entity::hint, List.of("fullstack"))
+                ? terminal.choose("Bundles", released, Entity.Known::hint, List.of("fullstack"))
                 : resolve("bundle", invocation.bundles(), released);
     }
 
@@ -163,17 +162,16 @@ interface Boundary {
         }
         var unknown = requested.stream().filter(Predicate.not(options::contains)).toList();
         if (!unknown.isEmpty()) {
-            Log.stop("unknown %s(s) %s — choose from: %s".formatted(what, unknown, String.join(", ", options)));
+            throw Log.stop("unknown %s(s) %s — choose from: %s".formatted(what, unknown, String.join(", ", options)));
         }
         return requested.stream().distinct().toList();
     }
 
-    static List<Entity.Bundle> download(List<String> bundles, Path work) throws InterruptedException {
+    static List<Entity.Bundle> download(List<String> bundles) throws InterruptedException {
         try {
-            return Control.download(bundles, work);
+            return Control.download(bundles);
         } catch (IOException e) {
-            Log.stop(e.getMessage());
-            return List.of();
+            throw Log.stop(e.getMessage());
         }
     }
 
@@ -188,7 +186,7 @@ interface Boundary {
 
     static String listing(List<String> released) {
         return released.stream()
-                .map(bundle -> "  %-14s %s".formatted(bundle, Entity.hint(bundle)))
+                .map(bundle -> "  %-14s %s".formatted(bundle, Entity.Known.hint(bundle)))
                 .collect(Collectors.joining("\n"));
     }
 
@@ -219,12 +217,12 @@ interface Boundary {
 
         String ask(String prompt, String fallback) throws IOException {
             if (reader == null) {
-                Log.stop("no terminal for questions — answer them with options: -global|-project <root>, -agents <ids>, -bundles <names>, -yes; see -help");
+                throw Log.stop("no terminal for questions — answer them with options: -global|-project <root>, -agents <ids>, -bundles <names>, -yes; see -help");
             }
             IO.print("%s [%s]: ".formatted(prompt, fallback));
             var line = reader.readLine();
             if (line == null) {
-                Log.stop("input closed");
+                throw Log.stop("input closed");
             }
             return line.isBlank() ? fallback : line.strip();
         }
@@ -242,16 +240,28 @@ interface Boundary {
                 if (tokens.contains("all")) {
                     return options;
                 }
-                var unknown = tokens.stream().filter(token -> Entity.pick(options, token).isEmpty()).toList();
+                var unknown = tokens.stream().filter(token -> pick(options, token).isEmpty()).toList();
                 if (!unknown.isEmpty()) {
                     IO.println("  unknown: " + String.join(", ", unknown));
                     continue;
                 }
-                var chosen = tokens.stream().map(token -> Entity.pick(options, token).orElseThrow()).distinct().toList();
+                var chosen = tokens.stream().map(token -> pick(options, token).orElseThrow()).distinct().toList();
                 if (!chosen.isEmpty()) {
                     return chosen;
                 }
             }
+        }
+
+        /// A menu answer token: a 1-based number or an option name.
+        static Optional<String> pick(List<String> options, String token) {
+            if (isIndex(token, options.size())) {
+                return Optional.of(options.get(Integer.parseInt(token) - 1));
+            }
+            return options.contains(token) ? Optional.of(token) : Optional.empty();
+        }
+
+        static boolean isIndex(String token, int size) {
+            return token.matches("\\d{1,3}") && Integer.parseInt(token) >= 1 && Integer.parseInt(token) <= size;
         }
 
         static String menu(String what, List<String> options, Function<String, String> hint) {
@@ -285,9 +295,12 @@ interface Boundary {
             WARN.out(message);
         }
 
-        static void stop(String message) {
+        /// Exits; the returned exception lets callers write `throw Log.stop(...)`
+        /// so the compiler sees the end of the path.
+        static IllegalStateException stop(String message) {
             ERROR.out(message);
             System.exit(1);
+            return new IllegalStateException(message);
         }
     }
 }
@@ -318,7 +331,7 @@ interface Control {
         if (assets.isEmpty()) {
             throw new IOException("no bundle assets found");
         }
-        return Entity.ordered(assets);
+        return Entity.Known.ordered(assets);
     }
 
     static boolean isBundle(String asset) {
@@ -333,7 +346,9 @@ interface Control {
         return Files.isDirectory(HOME.resolve(agent.marker()));
     }
 
-    static List<Entity.Bundle> download(List<String> names, Path work) throws IOException, InterruptedException {
+    /// Into a fresh temporary directory; `discard` removes it again.
+    static List<Entity.Bundle> download(List<String> names) throws IOException, InterruptedException {
+        var work = Files.createTempDirectory("airails-");
         var bundles = new ArrayList<Entity.Bundle>();
         for (var name : names) {
             bundles.add(download(name, work));
@@ -420,6 +435,12 @@ interface Control {
         }
     }
 
+    static void discard(List<Entity.Bundle> bundles) throws IOException {
+        if (!bundles.isEmpty()) {
+            deleteRecursively(bundles.getFirst().zip().getParent());
+        }
+    }
+
     static void deleteRecursively(Path dir) throws IOException {
         try (var paths = Files.walk(dir)) {
             for (var path : (Iterable<Path>) paths.sorted(Comparator.reverseOrder())::iterator) {
@@ -431,47 +452,35 @@ interface Control {
 
 interface Entity {
 
-    /// The known bundles with their hints, in menu order. Also the listing
-    /// used when the release API is unreachable (downloads still go against
-    /// the release). A bundle the release adds later sorts after these, by
-    /// name, without a hint.
-    record Hint(String bundle, String text) {}
+    /// A bundle this script knows, with its menu hint. `ALL` is the menu
+    /// order and the listing used when the release API is unreachable
+    /// (downloads still go against the release). A bundle the release adds
+    /// later sorts after these, by name, without a hint.
+    record Known(String bundle, String hint) {
 
-    List<Hint> HINTS = List.of(
-            new Hint("fullstack", "sbce, documentation, java-server and web bundles combined"),
-            new Hint("skills", "every skill"),
-            new Hint("java-server", "MicroProfile / Jakarta EE servers"),
-            new Hint("web", "static sites, sprinkles, web components"),
-            new Hint("java-cli", "Java CLI applications and scripts"),
-            new Hint("sbce", "spec-driven BCE, add-on to a stack bundle"),
-            new Hint("documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"),
-            new Hint("migrations", "legacy system migration")
-    );
+        static final List<Known> ALL = List.of(
+                new Known("fullstack", "sbce, documentation, java-server and web bundles combined"),
+                new Known("skills", "every skill"),
+                new Known("java-server", "MicroProfile / Jakarta EE servers"),
+                new Known("web", "static sites, sprinkles, web components"),
+                new Known("java-cli", "Java CLI applications and scripts"),
+                new Known("sbce", "spec-driven BCE, add-on to a stack bundle"),
+                new Known("documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"),
+                new Known("migrations", "legacy system migration")
+        );
+        static final List<String> BUNDLES = ALL.stream().map(Known::bundle).toList();
 
-    List<String> BUNDLES = HINTS.stream().map(Hint::bundle).toList();
-
-    /// Known bundles in their declared order, then the rest by name.
-    static List<String> ordered(Collection<String> released) {
-        return Stream.concat(
-                BUNDLES.stream().filter(released::contains),
-                released.stream().filter(Predicate.not(BUNDLES::contains)).sorted()
-        ).toList();
-    }
-
-    static String hint(String bundle) {
-        return HINTS.stream().filter(hint -> hint.bundle().equals(bundle)).map(Hint::text).findFirst().orElse("");
-    }
-
-    /// A menu answer token: a 1-based number or an option name.
-    static Optional<String> pick(List<String> options, String token) {
-        if (isIndex(token, options.size())) {
-            return Optional.of(options.get(Integer.parseInt(token) - 1));
+        static String hint(String bundle) {
+            return ALL.stream().filter(known -> known.bundle.equals(bundle)).map(Known::hint).findFirst().orElse("");
         }
-        return options.contains(token) ? Optional.of(token) : Optional.empty();
-    }
 
-    static boolean isIndex(String token, int size) {
-        return token.matches("\\d{1,3}") && Integer.parseInt(token) >= 1 && Integer.parseInt(token) <= size;
+        /// Known bundles in their declared order, then the rest by name.
+        static List<String> ordered(Collection<String> released) {
+            return Stream.concat(
+                    BUNDLES.stream().filter(released::contains),
+                    released.stream().filter(Predicate.not(BUNDLES::contains)).sorted()
+            ).toList();
+        }
     }
 
     enum Arg {
