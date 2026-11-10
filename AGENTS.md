@@ -32,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/AdamBien/airails/main/airails | jav
 
 - `-global` installs globally, `-project <project-root>` into a project; exactly one of them. Values take either form, `-project <root>` or `-project:<root>`.
 - `-agents` takes comma-separated agent ids from the table above.
-- `-bundles` takes comma-separated bundle names: `java-server`, `java-cli`, `web`, `migrations`, `sbce`, `documentation`, or `skills` for every skill. `airails -list` lists what the release currently offers.
+- `-bundles` takes comma-separated bundle names: `java-server`, `java-cli`, `web`, `migrations`, `fullstack`, `sbce`, `documentation`, or `skills` for every skill. `airails -list` lists what the release currently offers.
 - `-yes` skips the confirmation.
 
 Prefer the bundle matching the project, since it keeps unrelated skills out of the agent's context. Without flags the wizard asks its questions on `/dev/tty`; in a shell without a terminal it exits with `no terminal for questions`. It installs the last release, not the working tree — for an unreleased change use option 2 or 3.
@@ -65,7 +65,7 @@ unzip -o airails-claude.zip -d ~
 
 Each zip contains all skills with the agent's skills directory baked into the entry paths (`airails-claude.zip`, `airails-vibe.zip`, `airails-kiro.zip`, `airails-copilot.zip`, `airails-codex.zip`, `airails-goose.zip`).
 
-The bundle zips (`airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`, `airails-sbce.zip`, `airails-documentation.zip`, `airails-skills.zip`) carry a plain `skills/` prefix and unzip into the agent's configuration directory, the parent of its skills directory — globally or in the project:
+The bundle zips (`airails-java-server.zip`, `airails-java-cli.zip`, `airails-web.zip`, `airails-migrations.zip`, `airails-fullstack.zip`, `airails-sbce.zip`, `airails-documentation.zip`, `airails-skills.zip`) carry a plain `skills/` prefix and unzip into the agent's configuration directory, the parent of its skills directory — globally or in the project:
 
 ```
 curl -fsSLO https://github.com/AdamBien/airails/releases/download/skills/airails-web.zip

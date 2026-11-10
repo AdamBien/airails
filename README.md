@@ -30,7 +30,7 @@ A project skill takes precedence over a global skill of the same name.
 
 ### Bundles
 
-Bundles are agent-neutral subsets, one zip per bundle in the rolling [skills release](https://github.com/AdamBien/airails/releases/tag/skills). The stack bundles share a core of bce, bce-reviewer, system-tests, and readme, and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `sbce` and `documentation` bundles are add-ons for any stack; `skills` holds every skill.
+Bundles are agent-neutral subsets, one zip per bundle in the rolling [skills release](https://github.com/AdamBien/airails/releases/tag/skills). The stack bundles share a core of bce, bce-reviewer, system-tests, and readme, and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `fullstack` bundle is the one horizontal cut: the spec-driven workflow, the MicroProfile backend, and the web-components frontend in a single install. The `sbce` and `documentation` bundles are add-ons for any stack; `skills` holds every skill.
 
 | Bundle | Contents |
 |---|---|
@@ -38,6 +38,7 @@ Bundles are agent-neutral subsets, one zip per bundle in the rolling [skills rel
 | `java-cli` | core + java-cli-app, java-cli-script, java-conventions, concerns, zb, zb-release-pipeline, zargs, zcfg, zcl, zjson, zunit, zhtmldb, zllm-scripts, jdbc-persistence, memory-persistence |
 | `web` | core + web-conventions, javascript-conventions, web-static, web-sprinkles, web-components, web-system-tests, web-latest, web-pwa, web-performance-reviewer, web-standards-reviewer |
 | `migrations` | core + migration-advisor, concept-extractor, concept-clarifier, bc-carver, concept-annotator, characterization-tests, simplifier, java-conventions, concerns, java-distiller, python-to-java |
+| `fullstack` | core + system-brief, capability-brief, sbce, ears-tests, microprofile-server, continuous-testing, java-conventions, concerns, jdbc-persistence, memory-persistence, web-components, web-conventions, javascript-conventions, web-system-tests, web-standards-reviewer, web-latest — from system brief to a running backend and frontend |
 | `sbce` | sbce, ears-tests, capability-brief, system-brief — the spec-driven workflow on top of a stack bundle |
 | `documentation` | readme, bce-diagrams, mermaid, drawio |
 | `skills` | every skill |

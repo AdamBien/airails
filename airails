@@ -438,12 +438,13 @@ interface Entity {
             "java-cli", "Java CLI applications and scripts",
             "web", "static sites, sprinkles, web components",
             "migrations", "legacy system migration",
+            "fullstack", "spec-driven MicroProfile backend plus web-components frontend",
             "sbce", "spec-driven BCE, add-on to a stack bundle",
             "documentation", "diagrams and README, add-on to a stack bundle"
     );
 
     /// For when the release API is unreachable; downloads still go against the release.
-    List<String> FALLBACK_BUNDLES = List.of("skills", "java-server", "java-cli", "web", "migrations", "sbce", "documentation");
+    List<String> FALLBACK_BUNDLES = List.of("skills", "java-server", "java-cli", "web", "migrations", "fullstack", "sbce", "documentation");
 
     Comparator<String> SKILLS_FIRST = Comparator.comparing((String bundle) -> !bundle.equals("skills"))
             .thenComparing(Comparator.naturalOrder());

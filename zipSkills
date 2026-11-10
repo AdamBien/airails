@@ -27,7 +27,7 @@
 /// the managed, interactive install path — when an agent is added there, add
 /// it here too.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-11-05.1";
+String version = "2026-11-10.1";
 
 /// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
 record Target(String agent, String prefix) {}
@@ -55,7 +55,10 @@ List<String> core() {
 /// One bundle per stack, each a vertical slice through the skill layers:
 /// `core()` plus the stack skill, its building blocks, conventions, and test
 /// loop. `sbce` and `documentation` are add-ons for any stack bundle and do
-/// not repeat the core. Overlap between bundles is intended — unzipping two
+/// not repeat the core. `fullstack` is the one horizontal cut: the spec-driven
+/// workflow from system brief to EARS tests, a MicroProfile backend, and a
+/// web-components frontend in a single install, so a system with both tiers
+/// needs no second bundle. Overlap between bundles is intended — unzipping two
 /// bundles writes identical files twice. A skill in no bundle still ships in
 /// the per-agent and `airails-skills.zip` archives; the build lists such skills.
 List<Bundle> bundles() {
@@ -77,7 +80,13 @@ List<Bundle> bundles() {
             new Bundle("migrations", with(
                     "migration-advisor", "concept-extractor", "concept-clarifier",
                     "bc-carver", "concept-annotator", "characterization-tests", "simplifier",
-                    "java-conventions", "concerns", "java-distiller", "python-to-java"))
+                    "java-conventions", "concerns", "java-distiller", "python-to-java")),
+            new Bundle("fullstack", with(
+                    "system-brief", "capability-brief", "sbce", "ears-tests",
+                    "microprofile-server", "continuous-testing",
+                    "java-conventions", "concerns", "jdbc-persistence", "memory-persistence",
+                    "web-components", "web-conventions", "javascript-conventions",
+                    "web-system-tests", "web-standards-reviewer", "web-latest"))
     );
 }
 
