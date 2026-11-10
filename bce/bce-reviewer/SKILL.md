@@ -8,6 +8,7 @@ Verify the BCE structure of $ARGUMENTS and report as briefly as possible. Review
 
 ## Composition
 
+- the pattern derives from Ivar Jacobson's Boundary-Control-Entity (OOSE, 1992)
 - rules come from `/bce`; this skill owns only the procedure and the output format
 - the composed stack skill supplies the stack layer rules (e.g. "JAX-RS resources are boundary classes") and what counts as an external entry point; what it explicitly allows is not a finding
 - dependencies are read from the source as the stack expresses them: Java `import`, ES module `import … from`, fully qualified references

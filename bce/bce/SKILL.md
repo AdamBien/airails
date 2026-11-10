@@ -5,6 +5,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 
 ## Pattern
 
+- derived from Ivar Jacobson's Boundary-Control-Entity (OOSE, 1992)
 - the unit of organization is the business component (BC): it owns one responsibility and consists of the layers boundary, control, entity — only those it needs
 - dependencies point downward only: boundary may use control and entity, control may use entity; never upward
 
