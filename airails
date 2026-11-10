@@ -16,7 +16,7 @@ import module java.net.http;
 interface Boundary {
 
     String NAME = scriptName();
-    String VERSION = "2026-11-06.2";
+    String VERSION = "2026-11-10.1";
 
     /// Piped from `curl`, the class is named after `/dev/stdin`, not the script.
     static String scriptName() {
@@ -152,7 +152,7 @@ interface Boundary {
 
     static List<String> bundles(Entity.Invocation invocation, List<String> released, Terminal terminal) throws IOException {
         return invocation.bundles().isEmpty()
-                ? terminal.choose("Bundles", released, Entity::hint, List.of("skills"))
+                ? terminal.choose("Bundles", released, Entity::hint, List.of("fullstack"))
                 : resolve("bundle", invocation.bundles(), released);
     }
 
@@ -314,7 +314,7 @@ interface Control {
                 .results()
                 .map(match -> match.group(1))
                 .filter(Control::isBundle)
-                .sorted(Entity.SKILLS_FIRST)
+                .sorted(Entity.MENU_ORDER)
                 .toList();
         if (bundles.isEmpty()) {
             throw new IOException("no bundle assets found");
@@ -444,9 +444,11 @@ interface Entity {
     );
 
     /// For when the release API is unreachable; downloads still go against the release.
-    List<String> FALLBACK_BUNDLES = List.of("skills", "java-server", "java-cli", "web", "migrations", "fullstack", "sbce", "documentation");
+    List<String> FALLBACK_BUNDLES = List.of("fullstack", "skills", "documentation", "java-cli", "java-server", "migrations", "sbce", "web");
 
-    Comparator<String> SKILLS_FIRST = Comparator.comparing((String bundle) -> !bundle.equals("skills"))
+    /// Menu order: the horizontal cut, then every skill, then the rest by name.
+    List<String> FIRST = List.of("fullstack", "skills");
+    Comparator<String> MENU_ORDER = Comparator.comparing((String bundle) -> FIRST.contains(bundle) ? FIRST.indexOf(bundle) : FIRST.size())
             .thenComparing(Comparator.naturalOrder());
 
     static String hint(String bundle) {
