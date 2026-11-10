@@ -438,7 +438,7 @@ interface Entity {
             "java-cli", "Java CLI applications and scripts",
             "web", "static sites, sprinkles, web components",
             "migrations", "legacy system migration",
-            "fullstack", "spec-driven MicroProfile backend plus web-components frontend",
+            "fullstack", "sbce, java-server and web bundles combined",
             "sbce", "spec-driven BCE, add-on to a stack bundle",
             "documentation", "diagrams and README, add-on to a stack bundle"
     );

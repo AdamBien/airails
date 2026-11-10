@@ -27,7 +27,7 @@
 /// the managed, interactive install path — when an agent is added there, add
 /// it here too.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-11-10.1";
+String version = "2026-11-10.2";
 
 /// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
 record Target(String agent, String prefix) {}
@@ -55,43 +55,42 @@ List<String> core() {
 /// One bundle per stack, each a vertical slice through the skill layers:
 /// `core()` plus the stack skill, its building blocks, conventions, and test
 /// loop. `sbce` and `documentation` are add-ons for any stack bundle and do
-/// not repeat the core. `fullstack` is the one horizontal cut: the spec-driven
-/// workflow from system brief to EARS tests, a MicroProfile backend, and a
-/// web-components frontend in a single install, so a system with both tiers
-/// needs no second bundle. Overlap between bundles is intended — unzipping two
-/// bundles writes identical files twice. A skill in no bundle still ships in
-/// the per-agent and `airails-skills.zip` archives; the build lists such skills.
+/// not repeat the core. `fullstack` is the one horizontal cut: the `sbce`
+/// add-on plus the `java-server` and `web` bundles, derived from them so it
+/// cannot drift, so a system with both tiers needs no second bundle. Overlap
+/// between bundles is intended — unzipping two bundles writes identical files
+/// twice. A skill in no bundle still ships in the per-agent and
+/// `airails-skills.zip` archives; the build lists such skills.
 List<Bundle> bundles() {
-    return List.of(
-            new Bundle("sbce", List.of("sbce", "ears-tests", "capability-brief", "system-brief")),
-            new Bundle("documentation", List.of("readme", "bce-diagrams", "mermaid", "drawio")),
-            new Bundle("java-server", with(
-                    "microprofile-server", "continuous-testing", "aws-cdk",
-                    "java-conventions", "concerns", "jdbc-persistence", "memory-persistence", "zjson")),
-            new Bundle("java-cli", with(
-                    "java-cli-app", "java-cli-script", "java-conventions", "concerns",
-                    "zb", "zb-release-pipeline", "zargs", "zcfg", "zcl", "zjson", "zunit",
-                    "zhtmldb", "zllm-scripts", "jdbc-persistence", "memory-persistence")),
-            new Bundle("web", with(
-                    "web-conventions", "javascript-conventions",
-                    "web-static", "web-sprinkles", "web-components",
-                    "web-system-tests", "web-latest", "web-pwa",
-                    "web-performance-reviewer", "web-standards-reviewer")),
-            new Bundle("migrations", with(
-                    "migration-advisor", "concept-extractor", "concept-clarifier",
-                    "bc-carver", "concept-annotator", "characterization-tests", "simplifier",
-                    "java-conventions", "concerns", "java-distiller", "python-to-java")),
-            new Bundle("fullstack", with(
-                    "system-brief", "capability-brief", "sbce", "ears-tests",
-                    "microprofile-server", "continuous-testing",
-                    "java-conventions", "concerns", "jdbc-persistence", "memory-persistence",
-                    "web-components", "web-conventions", "javascript-conventions",
-                    "web-system-tests", "web-standards-reviewer", "web-latest"))
-    );
+    var sbce = new Bundle("sbce", List.of("sbce", "ears-tests", "capability-brief", "system-brief"));
+    var documentation = new Bundle("documentation", List.of("readme", "bce-diagrams", "mermaid", "drawio"));
+    var javaServer = new Bundle("java-server", with(
+            "microprofile-server", "continuous-testing", "aws-cdk",
+            "java-conventions", "concerns", "jdbc-persistence", "memory-persistence", "zjson"));
+    var javaCli = new Bundle("java-cli", with(
+            "java-cli-app", "java-cli-script", "java-conventions", "concerns",
+            "zb", "zb-release-pipeline", "zargs", "zcfg", "zcl", "zjson", "zunit",
+            "zhtmldb", "zllm-scripts", "jdbc-persistence", "memory-persistence"));
+    var web = new Bundle("web", with(
+            "web-conventions", "javascript-conventions",
+            "web-static", "web-sprinkles", "web-components",
+            "web-system-tests", "web-latest", "web-pwa",
+            "web-performance-reviewer", "web-standards-reviewer"));
+    var migrations = new Bundle("migrations", with(
+            "migration-advisor", "concept-extractor", "concept-clarifier",
+            "bc-carver", "concept-annotator", "characterization-tests", "simplifier",
+            "java-conventions", "concerns", "java-distiller", "python-to-java"));
+    var fullstack = new Bundle("fullstack", union(sbce, javaServer, web));
+    return List.of(sbce, documentation, javaServer, javaCli, web, migrations, fullstack);
 }
 
 List<String> with(String... skills) {
     return Stream.concat(core().stream(), Stream.of(skills)).toList();
+}
+
+/// The skills of several bundles, each once, in bundle order.
+List<String> union(Bundle... bundles) {
+    return Stream.of(bundles).flatMap(bundle -> bundle.skills().stream()).distinct().toList();
 }
 
 void main() throws Exception {
