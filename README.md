@@ -30,17 +30,17 @@ A project skill takes precedence over a global skill of the same name.
 
 ### Bundles
 
-Bundles are agent-neutral subsets, one zip per bundle in the rolling [skills release](https://github.com/AdamBien/airails/releases/tag/skills). The stack bundles share a core of bce, bce-reviewer, system-tests, and readme, and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `fullstack` bundle is the one horizontal cut: the `sbce`, `java-server`, and `web` bundles in a single install, derived from them so it cannot drift. The `sbce` and `documentation` bundles are add-ons for any stack; `skills` holds every skill.
+Bundles are agent-neutral subsets, one zip per bundle in the rolling [skills release](https://github.com/AdamBien/airails/releases/tag/skills). The stack bundles share a core of bce, bce-reviewer, system-tests, and the `documentation` skills (readme, bce-diagrams, mermaid, drawio), and add the stack skill, its building blocks, conventions, and test loop, so a web project does not carry the Java or migration skills in its context. The `fullstack` bundle is the one horizontal cut: the `sbce`, `documentation`, `java-server`, and `web` bundles in a single install, derived from them so it cannot drift. The `sbce` bundle is an add-on for any stack; `documentation` is part of every stack bundle and also published standalone for custom installs; `skills` holds every skill.
 
 | Bundle | Contents |
 |---|---|
-| `java-server` | core + microprofile-server, continuous-testing, aws-cdk, java-conventions, concerns, jdbc-persistence, memory-persistence, zjson |
+| `java-server` | core + microprofile-server, continuous-testing, aws-cdk, java-conventions, concerns, jdbc-persistence, memory-persistence |
 | `java-cli` | core + java-cli-app, java-cli-script, java-conventions, concerns, zb, zb-release-pipeline, zargs, zcfg, zcl, zjson, zunit, zhtmldb, zllm-scripts, jdbc-persistence, memory-persistence |
 | `web` | core + web-conventions, javascript-conventions, web-static, web-sprinkles, web-components, web-system-tests, web-latest, web-pwa, web-performance-reviewer, web-standards-reviewer |
 | `migrations` | core + migration-advisor, concept-extractor, concept-clarifier, bc-carver, concept-annotator, characterization-tests, simplifier, java-conventions, concerns, java-distiller, python-to-java |
-| `fullstack` | `sbce` + `java-server` + `web` — from system brief to a running backend and frontend |
+| `fullstack` | `sbce` + `documentation` + `java-server` + `web` — from system brief to a running, documented backend and frontend |
 | `sbce` | sbce, ears-tests, capability-brief, system-brief — the spec-driven workflow on top of a stack bundle |
-| `documentation` | readme, bce-diagrams, mermaid, drawio |
+| `documentation` | readme, bce-diagrams, mermaid, drawio — inside every stack bundle's core, standalone for custom installs |
 | `skills` | every skill |
 
 Bundles overlap by design; installing two writes identical files twice. The manifest lives in `bundles()` of [zipSkills](zipSkills), which CI runs to publish the release; the wizard reads the bundle names from the release, so a new bundle shows up there after the next release build.

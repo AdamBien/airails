@@ -438,9 +438,9 @@ interface Entity {
             "java-cli", "Java CLI applications and scripts",
             "web", "static sites, sprinkles, web components",
             "migrations", "legacy system migration",
-            "fullstack", "sbce, java-server and web bundles combined",
+            "fullstack", "sbce, documentation, java-server and web bundles combined",
             "sbce", "spec-driven BCE, add-on to a stack bundle",
-            "documentation", "diagrams and README, add-on to a stack bundle"
+            "documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"
     );
 
     /// For when the release API is unreachable; downloads still go against the release.

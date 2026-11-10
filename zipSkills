@@ -27,7 +27,7 @@
 /// the managed, interactive install path — when an agent is added there, add
 /// it here too.
 String name = MethodHandles.lookup().lookupClass().getName();
-String version = "2026-11-10.2";
+String version = "2026-11-10.3";
 
 /// Agent name (zip suffix) and its home-relative skills directory (entry prefix).
 record Target(String agent, String prefix) {}
@@ -46,27 +46,34 @@ List<Target> targets() {
     );
 }
 
+/// The README conventions and the diagram skills; part of `core()` and also
+/// published as its own bundle for custom installs.
+List<String> documentation() {
+    return List.of("readme", "bce-diagrams", "mermaid", "drawio");
+}
+
 /// What every stack composes with, spec-driven or not: the architecture,
-/// its review, the definition of done, and the README conventions.
+/// its review, the definition of done, and the documentation skills.
 List<String> core() {
-    return List.of("bce", "bce-reviewer", "system-tests", "readme");
+    return Stream.concat(Stream.of("bce", "bce-reviewer", "system-tests"), documentation().stream()).toList();
 }
 
 /// One bundle per stack, each a vertical slice through the skill layers:
 /// `core()` plus the stack skill, its building blocks, conventions, and test
-/// loop. `sbce` and `documentation` are add-ons for any stack bundle and do
-/// not repeat the core. `fullstack` is the one horizontal cut: the `sbce`
-/// add-on plus the `java-server` and `web` bundles, derived from them so it
-/// cannot drift, so a system with both tiers needs no second bundle. Overlap
+/// loop. `sbce` is the add-on for any stack bundle and does not repeat the
+/// core; `documentation` is already inside the core and ships standalone for
+/// custom installs. `fullstack` is the one horizontal cut: both plus the
+/// `java-server` and `web` bundles, derived from them so it cannot drift, so
+/// a system with both tiers needs no second bundle. Overlap
 /// between bundles is intended — unzipping two bundles writes identical files
 /// twice. A skill in no bundle still ships in the per-agent and
 /// `airails-skills.zip` archives; the build lists such skills.
 List<Bundle> bundles() {
     var sbce = new Bundle("sbce", List.of("sbce", "ears-tests", "capability-brief", "system-brief"));
-    var documentation = new Bundle("documentation", List.of("readme", "bce-diagrams", "mermaid", "drawio"));
+    var documentation = new Bundle("documentation", documentation());
     var javaServer = new Bundle("java-server", with(
             "microprofile-server", "continuous-testing", "aws-cdk",
-            "java-conventions", "concerns", "jdbc-persistence", "memory-persistence", "zjson"));
+            "java-conventions", "concerns", "jdbc-persistence", "memory-persistence"));
     var javaCli = new Bundle("java-cli", with(
             "java-cli-app", "java-cli-script", "java-conventions", "concerns",
             "zb", "zb-release-pipeline", "zargs", "zcfg", "zcl", "zjson", "zunit",
@@ -80,7 +87,7 @@ List<Bundle> bundles() {
             "migration-advisor", "concept-extractor", "concept-clarifier",
             "bc-carver", "concept-annotator", "characterization-tests", "simplifier",
             "java-conventions", "concerns", "java-distiller", "python-to-java"));
-    var fullstack = new Bundle("fullstack", union(sbce, javaServer, web));
+    var fullstack = new Bundle("fullstack", union(sbce, documentation, javaServer, web));
     return List.of(sbce, documentation, javaServer, javaCli, web, migrations, fullstack);
 }
 
