@@ -123,7 +123,7 @@ interface Boundary {
             return Control.releasedBundles();
         } catch (IOException | InterruptedException e) {
             Log.warn("release listing unavailable (%s), using built-in bundle names".formatted(e.getMessage()));
-            return Entity.FALLBACK_BUNDLES;
+            return Entity.BUNDLES;
         }
     }
 
@@ -310,16 +310,15 @@ interface Control {
         if (response.statusCode() != HttpURLConnection.HTTP_OK) {
             throw new IOException("HTTP " + response.statusCode());
         }
-        var bundles = ASSET_NAME.matcher(response.body())
+        var assets = ASSET_NAME.matcher(response.body())
                 .results()
                 .map(match -> match.group(1))
                 .filter(Control::isBundle)
-                .sorted(Entity.MENU_ORDER)
-                .toList();
-        if (bundles.isEmpty()) {
+                .collect(Collectors.toSet());
+        if (assets.isEmpty()) {
             throw new IOException("no bundle assets found");
         }
-        return bundles;
+        return Entity.ordered(assets);
     }
 
     static boolean isBundle(String asset) {
@@ -432,27 +431,35 @@ interface Control {
 
 interface Entity {
 
-    Map<String, String> HINTS = Map.of(
-            "skills", "every skill",
-            "java-server", "MicroProfile / Jakarta EE servers",
-            "java-cli", "Java CLI applications and scripts",
-            "web", "static sites, sprinkles, web components",
-            "migrations", "legacy system migration",
-            "fullstack", "sbce, documentation, java-server and web bundles combined",
-            "sbce", "spec-driven BCE, add-on to a stack bundle",
-            "documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"
+    /// The known bundles with their hints, in menu order. Also the listing
+    /// used when the release API is unreachable (downloads still go against
+    /// the release). A bundle the release adds later sorts after these, by
+    /// name, without a hint.
+    record Hint(String bundle, String text) {}
+
+    List<Hint> HINTS = List.of(
+            new Hint("fullstack", "sbce, documentation, java-server and web bundles combined"),
+            new Hint("skills", "every skill"),
+            new Hint("java-server", "MicroProfile / Jakarta EE servers"),
+            new Hint("web", "static sites, sprinkles, web components"),
+            new Hint("java-cli", "Java CLI applications and scripts"),
+            new Hint("sbce", "spec-driven BCE, add-on to a stack bundle"),
+            new Hint("documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"),
+            new Hint("migrations", "legacy system migration")
     );
 
-    /// For when the release API is unreachable; downloads still go against the release.
-    List<String> FALLBACK_BUNDLES = List.of("fullstack", "skills", "documentation", "java-cli", "java-server", "migrations", "sbce", "web");
+    List<String> BUNDLES = HINTS.stream().map(Hint::bundle).toList();
 
-    /// Menu order: the horizontal cut, then every skill, then the rest by name.
-    List<String> FIRST = List.of("fullstack", "skills");
-    Comparator<String> MENU_ORDER = Comparator.comparing((String bundle) -> FIRST.contains(bundle) ? FIRST.indexOf(bundle) : FIRST.size())
-            .thenComparing(Comparator.naturalOrder());
+    /// Known bundles in their declared order, then the rest by name.
+    static List<String> ordered(Collection<String> released) {
+        return Stream.concat(
+                BUNDLES.stream().filter(released::contains),
+                released.stream().filter(Predicate.not(BUNDLES::contains)).sorted()
+        ).toList();
+    }
 
     static String hint(String bundle) {
-        return HINTS.getOrDefault(bundle, "");
+        return HINTS.stream().filter(hint -> hint.bundle().equals(bundle)).map(Hint::text).findFirst().orElse("");
     }
 
     /// A menu answer token: a 1-based number or an option name.
