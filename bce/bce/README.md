@@ -10,7 +10,7 @@ An [AIrails.dev](https://airails.dev) skill defining the generic, composable [Bo
 - Cross-BC relationships and refactoring signals
 - Naming conventions for BCs and classes
 
-Technology-neutral. No language, framework, build, testing, or protocol rules — those come from composed skills.
+Technology-neutral. No language, framework, build, testing, persistence, or protocol rules — those come from composed skills.
 
 ## Composition
 

@@ -5,69 +5,51 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 
 ## Pattern
 
-- structure code using the Boundary-Control-Entity (BCE/ECB) pattern
-- the unit of organization is the business component (BC); each BC owns a responsibility and is composed of one or more layers
-- the three layers are boundary, control, entity; each has a distinct responsibility (see layer sections below)
-- dependencies point downward only: boundary may use control and entity, control may use entity; control never references boundary, entity never references control or boundary
-- do not explain the BCE pattern in generated documentation
+- the unit of organization is the business component (BC): it owns one responsibility and consists of the layers boundary, control, entity — only those it needs
+- dependencies point downward only: boundary may use control and entity, control may use entity; never upward
 
 ## Package / Directory Structure
 
-- package or directory path: `[ORGANIZATION].[PROJECT].[BC].[boundary|control|entity]`
-- the top-level package reflects the application responsibility or name
-- business components are direct children of the top-level package and named after their responsibilities
-- the `boundary`, `control`, `entity` segments are only allowed inside a business component
-- name packages after their domain responsibilities, not technical concerns
+- path: `[ORGANIZATION].[PROJECT].[BC].[boundary|control|entity]`; the top-level package reflects the application's name or responsibility
+- BCs are direct children of the top-level package; `boundary`, `control`, `entity` appear only inside a BC
+- reserve the top-level package for trivial single-class plumbing; anything with domain or protocol semantics, more than one operation, or expected growth is a BC
 
 ## Business Components (BC)
 
-- a BC may represent a domain concept or a shared concern; both are valid when the responsibility has a name and is reused
-- a BC does not need every layer; a BC may consist of only a control layer when its responsibility is procedural and consumed by other BCs
-- not every BC needs a dedicated boundary; control contents may be consumed directly when no facade is justified
-- prefer a dedicated BC over the root application package when a shared concern carries domain or protocol semantics, exposes more than one operation, or is expected to grow
-- reserve the root application package for trivial single-class plumbing with no business semantics and no protocol coupling
-- BCs may depend on each other in both directions (e.g. an entity of A references an entity of B while a control of B calls a control of A); mutual references are not a violation — only excessive ones are a refactoring signal
+- a BC is a domain concept, or a shared concern with a name that is reused by other BCs
+- a control-only BC is valid when its responsibility is procedural; a boundary exists only when a facade is justified
+- BCs may depend on each other in both directions, including entity-to-entity references; aim for maximal cohesion and minimal coupling — excessive cross-BC references or shared configuration are a signal to split, merge, or rebalance
 - create new BCs with minimal logic and essential fields only
 
 ## Boundary Layer
 
-- keep coarse-grained classes in the boundary
-- place facades that adapt external protocols, transports, or UI events to internal operations in the boundary
-- boundary classes are the only entry points called from outside the system; external actors (UI, protocols, transports, tests) never reach control or entity directly
-- cross-cutting concerns that wrap an operation (transactions, authorization checks, request/response mapping) belong in the boundary, not in control or entity
+- boundary classes are coarse-grained facades that adapt external protocols, transports, or UI events to internal operations
+- they are the only entry points from outside the system; UI, protocols, transports, and system tests never reach control or entity directly
+- cross-cutting concerns that wrap an operation (transactions, authorization checks, request/response mapping) live here, never in control or entity
 
 ## Control Layer
 
-- implement procedural business logic in the control layer
-- prefer stateless, function-like units for procedural logic
-- control may be called by the boundary of the same BC or directly by other BCs; the boundary is not a gate for cross-BC calls
-- a control method is public when it is called from outside the control package — by the BC's own boundary or by another BC; keep it package-private (or the language equivalent) when it is used only inside the control package
-- visibility cannot separate the BC's own boundary from other BCs, so it does not express a cross-BC contract; the control methods another BC may call are a carving decision, not a modifier
+- procedural business logic in stateless, function-like units
+- callable by the BC's own boundary and directly by other BCs
+- a control method is public when called from outside the control package, package-private (or the language equivalent) otherwise; visibility does not express a cross-BC contract
 
 ## Entity Layer
 
-- maintain domain objects, data classes, and entities in the entity layer
-- entities maintain state and corresponding behavior; they are not anemic data holders
-- model value objects as enums or equivalent closed sets where the language supports them
-- direct references between entities from independent BCs are allowed, but always aim for Maximal Cohesion and Minimal Coupling between BCs
-- if a relation exists in the persistent store (e.g. foreign key), the entities must carry a corresponding reference (id field or association); the schema is the source of truth
-- excessive cross-BC references or shared configuration is a refactoring signal — split, merge, or rebalance the BCs to restore cohesion
+- domain objects that hold state and the behavior on that state; never anemic data holders
+- model enumerable value objects as enums or the language's closed-set equivalent
 
 ## Naming
 
-- name classes, modules, and files after their responsibilities
-- avoid meaningless suffixes (e.g. `*Impl`, `*Service`, `*Manager`, `*Creator`)
-- a class or module name must not end with `Control`
-- reserve protocol- or pattern-specific suffixes (e.g. `Resource`, `Factory`, `Builder`) for elements that actually fulfill that role
+- name packages, classes, modules, and files after their responsibilities, never after technical concerns
+- no meaningless suffixes: `*Impl`, `*Service`, `*Manager`, `*Creator`, `*Control`
+- protocol or pattern suffixes (`Resource`, `Factory`, `Builder`) only on elements that fulfill that role
 
 ## Documentation
 
-- document only domain-specific packages where the purpose is not self-evident
-- when documenting a top-level package or BC, describe design decisions and responsibilities — not contents
-- in Java, use `package-info.java` with JavaDoc to document packages
-- do not write documentation that restates the BCE pattern itself
+- a BC's package doc states its responsibility and design decisions, never its contents; the stack skill names the file and format
+- never restate the BCE pattern in generated documentation
 
 ## Composition with Other Skills
 
-- this skill defines only the architectural pattern; language, framework, build, testing, and protocol rules come from the composed skill (e.g. `microprofile-server`, `web-components`, `aws-cdk`, `java-cli-app`)
-- when a composed skill adds a layer rule (e.g. "health checks belong in boundary", "JAX-RS resources are boundary classes"), apply it on top of the BCE rules above; the composed skill always specializes, never contradicts
+- this skill defines only the pattern; language, framework, build, testing, persistence, and protocol rules come from the composed skill (e.g. `microprofile-server`, `web-components`, `aws-cdk`, `java-cli-app`)
+- a composed skill specializes these rules (e.g. "JAX-RS resources are boundary classes"), never contradicts them
