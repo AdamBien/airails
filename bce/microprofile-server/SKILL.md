@@ -13,6 +13,9 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 ## Dependencies
 - prefer dependencies in this order: Java SE, MicroProfile, Jakarta EE
 
+## CDI
+- do not use constructor injection — prefer field injection
+
 ## Exceptions (JAX-RS)
 - in JAX-RS projects, inherit from WebApplicationException for custom exceptions
 - use explicit exceptions like BadRequestException for Response.Status.BAD_REQUEST
