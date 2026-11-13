@@ -11,7 +11,7 @@ strictly.
 ## Guiding principles
 
 - The spec **is** the boundary contract — *what the boundary promises*, never *how*.
-- The spec **lives in the BC's package doc** (`package-info.java` with `///` Markdown, or `package-info.md` for web), co-located with the code it governs — no separate `specs/` tree. In Java `javadoc` renders it, so one file is source-of-truth *and* published contract.
+- The spec **lives in the BC's package doc** (`package-info.java` with `///` Markdown, `package-info.md` for web, or the leading `///` doc comment of a single-file script), co-located with the code it governs — no separate `specs/` tree. In Java `javadoc` renders it, so one file is source-of-truth *and* published contract.
 - One capability spec ≡ one business component, named the same. No translation between "what" and "where".
 - The task list is the **gap**, read off `spec` vs `BC` on demand — never a hand-maintained tasks file.
 - One spec per capability, the single source of truth — never diff or merge two specs.
@@ -29,6 +29,7 @@ checkout                                      # BC name == the only identity
   spec = package doc, co-located with code:
     Java: src/main/java/<base>/checkout/package-info.java   # `///` Markdown (JEP 467)
     web:  app/src/checkout/package-info.md                  # Markdown
+    single-file Java (`/java-cli-script`): the leading `///` doc comment of checkout.java
   code = same folder, {boundary,control,entity}/            # stack skill places it
 ```
 
@@ -40,7 +41,8 @@ checkout                                      # BC name == the only identity
 
 An **optional** doc one altitude up — the base package's `package-info.java` /
 `app/src/package-info.md` — for concerns that **span** BCs and have no other home. Add a section
-only when a real cross-BC concern appears; a one-BC system needs none. Author from
+only when a real cross-BC concern appears; a one-BC system needs none beyond the `Stack` line
+(see "Resolving the stack"). Author from
 `references/system-doc-template.md`, which carries the per-section rules. Sections:
 
 - **Mission** — the `>` one-liner under the title, the only mandatory line.
@@ -60,7 +62,7 @@ map is **generated** from the per-BC docs.
 An **optional** repo-root `README.md` — a human on-ramp that is a **projection of the specs, not a
 source of truth**. Author from `references/readme-template.md`. Two slices, handled oppositely:
 
-- **Generated** (never hand-edited), fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`: Mission + Vision, a BC map (name, `>` one-liner, link to its `package-info`), and a Mermaid `flowchart` of the **declared** `## Components` wiring — projection, never inference from code; no `## Components` → nodes only, or omit. `apply` regenerates this slice; no markers → README untouched.
+- **Generated** (never hand-edited), fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`: Mission + Vision, a BC map (name, `>` one-liner, link to its `package-info`), and a Mermaid `flowchart` of the **declared** `## Components` wiring — projection, never inference from code; no `## Components` → omit the diagram. `apply` regenerates this slice; no markers → README untouched.
 - **Hand-maintained** (outside the markers, so it can't drift): `## Conventions` — project-specific, **non-behavioral** standards ("money is always cents"), declared not verified, no `Sn`, distinct from a tested system invariant and from a `Dn` — plus build/run/test delegated to the stack skill and free-form meta. This prose is also the **inception seed** `/sbce new` (no argument) reads, never rewrites.
 
 ## Determinism boundary
@@ -82,14 +84,17 @@ source of truth**. Author from `references/readme-template.md`. Two slices, hand
 
 Both modes need the composed stack skill and the package base before touching a file. Resolve in
 order: the system doc's `Stack` line if present, else `AGENTS.md`/`README`, else ask once (a brief
-may have parked "stack not declared" under `## Open issues`). Read the system doc's `## Decisions`
+may have parked "stack not declared" under `## Open issues`) and record the answer as the system
+doc's `Stack` line — creating a minimal system doc (title, mission, `Stack`) if none exists — so no
+later run re-asks. Read the system doc's `## Decisions`
 if present — never propose or implement an alternative a `Dn` records as rejected. The stack skill
 owns the source root: ask it where the package doc lives and to place the doc and layer dirs.
 
 ## Invocation modes: new · apply
 
-Read mode + capability from the invocation (`/sbce apply checkout`). If mode is missing, infer: no
-spec yet → `new`; spec exists but not converged → `apply`; else ask.
+Read mode + capability from the invocation (`/sbce apply checkout`). If mode is missing, infer: a
+feature description, a brief, or a BC name with no spec yet → `new`; a BC name whose spec exists →
+`apply` (a converged BC is a no-op).
 
 ### new — declare
 
@@ -137,9 +142,9 @@ brief it is inception input, not a source of truth.
 **BC name** (`/sbce new checkout`):
 
 1. Validate the name — a single lowercase noun, no dots/hyphens/spaces/uppercase. Reject otherwise.
-2. Ask the stack skill where the package doc lives. If it exists, do **not** overwrite — report and stop unless the user confirms a rewrite.
+2. Ask the stack skill where the package doc lives. If it exists, never overwrite: when the intent is an extension (feature path step 4, or the user says so), run the clarify loop and append ops / requirements to that single doc; otherwise report and stop unless the user confirms a rewrite.
 3. Author the spec into the package doc from `references/spec-template.md`: one-line responsibility, boundary ops, EARS requirements, optional entities, out-of-scope.
-4. Ask the stack skill to place the doc and scaffold empty `boundary`/`control`/`entity` dirs. Write **no** BC source.
+4. Ask the stack skill to place the doc and scaffold empty `boundary`/`control`/`entity` dirs where missing. Write **no** BC source.
 5. Report the open gap (counts of ops / requirements) and point to `/sbce apply <bc-name>`.
 
 **Feature description** (`/sbce new "let a customer check out a cart"`):
@@ -167,8 +172,8 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 2. Resolve the stack (see above).
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → report "already converged" and go to 6.
 4. Else read the gap — both directions — and close it:
-   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test via `/ears-tests` (one parameterized test per `### Rn`, one labeled row per `Rn.m`); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
-   - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and stop on it. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
+   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
+   - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 6. If the README carries `sbce:generated` markers, regenerate that slice from the system doc + package docs; touch nothing outside the markers.
 
@@ -197,7 +202,7 @@ Green build + no structural gap or drift is the only definition of done.
 
 - Every statement uses `shall` and is mandatory **and** tested — no `SHOULD`/`MAY` gradation (the oracle is binary); express optionality with the `Where` pattern.
 - Ids are **stable**: never renumber on reorder; a removed id is retired, not reused.
-- Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id**, checked in both directions: a new `Rn.m` with no test is a gap; a method, trace id, or `entity` type with no spec counterpart is drift (surfaced, never absorbed into the spec). `/ears-tests` defines the trace form per stack; SBCE only requires the id be grep-visible.
+- Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id**, checked in both directions: a new `Rn.m` with no test is a gap; a method, trace id, or `entity` type with no spec counterpart is drift (surfaced, never absorbed into the spec). `/ears-tests` defines the trace form per stack; SBCE only requires the id be grep-visible in the test's label — an id that appears only in a comment is no trace.
 - **Optional `why`.** Any `Rn.m` statement (or boundary op) may carry a trailing `_(why: …)_` — terse *origin/intent*. Rationale, not contract: non-verified, not a trace target, bound to its id (retires with it; the `Rn.m` prefix stays first). Capture *why the rule exists*, never *how it currently works*.
 - **Optional `## References`.** External specifications the BC implements (RFC, Jakarta/MicroProfile chapter, regulation) — format and rules in the spec template. Rationale, not contract: a reference **informs** requirements, never replaces them — behaviour is still a tested `Rn.m`, never an untested "shall conform to X". The stack skill may read the linked document while closing the gap.
 - The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
