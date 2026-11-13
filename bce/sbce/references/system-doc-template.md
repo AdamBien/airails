@@ -8,7 +8,7 @@ package's doc — there is no separate `specs/` tree:
 
 Each BC's own `package-info` answers *what that one boundary promises*. The system doc answers only
 the questions that **span** BCs and have nowhere else to live. Add a section only when a real
-cross-BC concern appears — a one-BC system needs no system doc.
+cross-BC concern appears — a one-BC system needs none beyond a `Stack` line, which `/sbce new` records (with the title and mission) once it had to ask for the stack.
 
 Rules for filling it in:
 
