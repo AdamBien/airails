@@ -11,7 +11,7 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS.
 - **Default: multi-file CLI apps compose with the `/bce` skill.** The package path follows `/bce`'s `[ORGANIZATION].[PROJECT].[BC].[layer]` scheme: the organization package (e.g. `airhacks`) contains the application-level project package (e.g. `zbl`), whose direct children are the feature business components (BCs); `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the application-level package.
   ```
   src/main/java/
-    Main.java                                              # unnamed package, compact source
+    <organization>/App.java                                 
     <organization>/<project>/<bc-a>/{boundary,control,entity}/
     <organization>/<project>/<bc-b>/{boundary,control,entity}/
     <organization>/<project>/<bc-c>/control/               # BC may have only the layers it needs
@@ -21,7 +21,7 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS.
 
 ## Build
 
-- For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure. When the user asks for a minimal starter, use https://github.com/adambien/z-java-cli-app instead.
+- For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure.
 - Build and run with the `/zb` skill — no Maven or Gradle required; zb compiles all `.java` files from `src/main/java/` into `zbo/app.jar`
 - Offer to generate an executable launcher script with the `/java-cli-script` skill so the app runs by name instead of `java -jar zbo/app.jar`
 
