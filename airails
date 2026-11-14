@@ -1,6 +1,5 @@
 #!/usr/bin/env -S java --source 25
 
-import module java.base;
 import module java.net.http;
 
 /// Installs released airails.dev skill bundles in one shot — select, download,
@@ -16,7 +15,7 @@ import module java.net.http;
 interface Boundary {
 
     String NAME = scriptName();
-    String VERSION = "2026-11-10.2";
+    String VERSION = "2026-11-14.1";
 
     /// Piped from `curl`, the class is named after `/dev/stdin`, not the script.
     static String scriptName() {
@@ -311,6 +310,8 @@ interface Control {
     String RELEASE_API = "https://api.github.com/repos/AdamBien/airails/releases/tags/skills";
     String BUNDLE_URL = "https://github.com/AdamBien/airails/releases/download/skills/airails-%s.zip";
     Pattern ASSET_NAME = Pattern.compile("\"name\"\\s*:\\s*\"airails-([^\"]+)\\.zip\"");
+    String PREFIX = "skills";
+    Map<String, String> POSIX_ZIP = Map.of("enablePosixFileAttributes", "true");
     HttpClient HTTP = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.ALWAYS)
             .connectTimeout(Duration.ofSeconds(20))
@@ -366,17 +367,21 @@ interface Control {
         return new Entity.Bundle(name, zip, skillsIn(zip));
     }
 
+    /// Bundle entries live under `skills/<skill>/`, so the first level names the skills.
     static SortedSet<String> skillsIn(Path zip) throws IOException {
-        var skills = new TreeSet<String>();
-        try (var in = new ZipInputStream(Files.newInputStream(zip))) {
-            for (var entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
-                var stripped = stripPrefix(entry.getName());
-                if (!stripped.isEmpty()) {
-                    skills.add(skillOf(stripped));
-                }
-            }
+        try (var archive = open(zip); var skills = Files.list(archive.getPath(PREFIX))) {
+            return skills.map(Control::name).collect(Collectors.toCollection(TreeSet::new));
         }
-        return skills;
+    }
+
+    /// Through the zip filesystem with POSIX attributes, the way `zipSkills` writes
+    /// the archives, so the exec bit of bundled `scripts/` is readable.
+    static FileSystem open(Path zip) throws IOException {
+        return FileSystems.newFileSystem(zip, POSIX_ZIP);
+    }
+
+    static String name(Path path) {
+        return path.getFileName().toString();
     }
 
     /// Distinct skills written, bundles overlapping by design.
@@ -390,43 +395,33 @@ interface Control {
 
     /// Drops the leading `skills/` so `target/<skill>/SKILL.md` results; rejects
     /// entries resolving outside `target` (Zip-Slip); overwrites a skill of the
-    /// same name, the release being the source of truth; re-grants `+x` to
-    /// shebang files, which `ZipInputStream` cannot carry.
+    /// same name, the release being the source of truth.
     static SortedSet<String> unzipInto(Path zip, Path target) throws IOException {
         var base = target.toAbsolutePath().normalize();
         var written = new TreeSet<String>();
-        try (var in = new ZipInputStream(Files.newInputStream(zip))) {
-            for (var entry = in.getNextEntry(); entry != null; entry = in.getNextEntry()) {
-                var stripped = stripPrefix(entry.getName());
-                if (stripped.isEmpty()) {
-                    continue;
-                }
-                var resolved = base.resolve(stripped).normalize();
+        try (var archive = open(zip); var files = Files.walk(archive.getPath(PREFIX))) {
+            for (var file : files.filter(Files::isRegularFile).toList()) {
+                var relative = file.subpath(1, file.getNameCount());
+                var resolved = base.resolve(relative.toString()).normalize();
                 if (!resolved.startsWith(base)) {
-                    throw new IOException("blocked path traversal: " + entry.getName());
+                    throw new IOException("blocked path traversal: " + file);
                 }
-                written.add(skillOf(stripped));
-                if (entry.isDirectory()) {
-                    Files.createDirectories(resolved);
-                    continue;
-                }
+                written.add(name(relative.getName(0)));
                 Files.createDirectories(resolved.getParent());
-                Files.copy(in, resolved, StandardCopyOption.REPLACE_EXISTING);
-                if (startsWithShebang(resolved)) {
-                    resolved.toFile().setExecutable(true, false);
-                }
+                Files.copy(file, resolved, StandardCopyOption.REPLACE_EXISTING);
+                permissions(file, resolved);
             }
         }
         return written;
     }
 
-    static String stripPrefix(String entryName) {
-        var slash = entryName.indexOf('/');
-        return slash < 0 ? "" : entryName.substring(slash + 1);
-    }
-
-    static String skillOf(String strippedEntry) {
-        return strippedEntry.split("/", 2)[0];
+    /// POSIX targets take the archived permissions; elsewhere shebang files get `+x`.
+    static void permissions(Path entry, Path file) throws IOException {
+        if (file.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+            Files.setPosixFilePermissions(file, Files.getPosixFilePermissions(entry));
+        } else if (startsWithShebang(file)) {
+            file.toFile().setExecutable(true, false);
+        }
     }
 
     static boolean startsWithShebang(Path file) throws IOException {
@@ -435,17 +430,13 @@ interface Control {
         }
     }
 
+    /// The zips and their temporary directory are everything `download` created.
     static void discard(List<Entity.Bundle> bundles) throws IOException {
-        if (!bundles.isEmpty()) {
-            deleteRecursively(bundles.getFirst().zip().getParent());
+        for (var bundle : bundles) {
+            Files.delete(bundle.zip());
         }
-    }
-
-    static void deleteRecursively(Path dir) throws IOException {
-        try (var paths = Files.walk(dir)) {
-            for (var path : (Iterable<Path>) paths.sorted(Comparator.reverseOrder())::iterator) {
-                Files.delete(path);
-            }
+        if (!bundles.isEmpty()) {
+            Files.delete(bundles.getFirst().zip().getParent());
         }
     }
 }
