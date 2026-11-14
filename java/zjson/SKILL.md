@@ -120,7 +120,7 @@ new JSONArray(Collection<?> c);    // from a Java Collection
 
 1. Copy the `org/json` package into the source root — never add a Maven/Gradle dependency.
 2. Keep the `package org.json;` declarations unchanged; import with `import org.json.*;`.
-3. Treat the copied files as vendored source — do not edit them; re-copy to update.
+3. Treat the copied files as vendored source — do not edit them; re-copy to update. Never read them into context; the API section above is sufficient.
 4. Use `opt*` accessors with defaults for optional fields; reserve `get*` for mandatory keys where a missing value should fail fast.
 5. Build JSON with chained `put(...)` on `JSONObject`/`JSONArray`; use `toString(indentFactor)` for human-readable output.
 6. In `microprofile-server` projects, prefer the platform JSON-P (`jakarta.json`) instead — zjson targets zero-dependency CLI scripts and zb projects.
