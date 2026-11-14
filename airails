@@ -121,7 +121,7 @@ interface Boundary {
             return Control.releasedBundles();
         } catch (IOException | InterruptedException e) {
             Log.warn("release listing unavailable (%s), using built-in bundle names".formatted(e.getMessage()));
-            return Entity.Known.BUNDLES;
+            return Entity.KnownBundle.NAMES;
         }
     }
 
@@ -150,7 +150,7 @@ interface Boundary {
 
     static List<String> bundles(Entity.Invocation invocation, List<String> released, Terminal terminal) throws IOException {
         return invocation.bundles().isEmpty()
-                ? terminal.choose("Bundles", released, Entity.Known::hint, List.of("fullstack"))
+                ? terminal.choose("Bundles", released, Entity.KnownBundle::hint, List.of("fullstack"))
                 : resolve("bundle", invocation.bundles(), released);
     }
 
@@ -185,7 +185,7 @@ interface Boundary {
 
     static String listing(List<String> released) {
         return released.stream()
-                .map(bundle -> "  %-14s %s".formatted(bundle, Entity.Known.hint(bundle)))
+                .map(bundle -> "  %-14s %s".formatted(bundle, Entity.KnownBundle.hint(bundle)))
                 .collect(Collectors.joining("\n"));
     }
 
@@ -343,7 +343,7 @@ interface Control {
         if (assets.isEmpty()) {
             throw new IOException("no bundle assets found");
         }
-        return Entity.Known.ordered(assets);
+        return Entity.KnownBundle.ordered(assets);
     }
 
     static boolean isBundle(String asset) {
@@ -458,29 +458,29 @@ interface Entity {
     /// order and the listing used when the release API is unreachable
     /// (downloads still go against the release). A bundle the release adds
     /// later sorts after these, by name, without a hint.
-    record Known(String bundle, String hint) {
+    record KnownBundle(String bundle, String hint) {
 
-        static final List<Known> ALL = List.of(
-                new Known("fullstack", "sbce, documentation, java-server and web bundles combined"),
-                new Known("skills", "every skill"),
-                new Known("java-server", "MicroProfile / Jakarta EE servers"),
-                new Known("web", "static sites, sprinkles, web components"),
-                new Known("java-cli", "Java CLI applications and scripts"),
-                new Known("sbce", "spec-driven BCE, add-on to a stack bundle"),
-                new Known("documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"),
-                new Known("migrations", "legacy system migration")
+        static final List<KnownBundle> ALL = List.of(
+                new KnownBundle("fullstack", "sbce, documentation, java-server and web bundles combined"),
+                new KnownBundle("skills", "every skill"),
+                new KnownBundle("java-server", "MicroProfile / Jakarta EE servers"),
+                new KnownBundle("web", "static sites, sprinkles, web components"),
+                new KnownBundle("java-cli", "Java CLI applications and scripts"),
+                new KnownBundle("sbce", "spec-driven BCE, add-on to a stack bundle"),
+                new KnownBundle("documentation", "diagrams and README, inside every stack bundle; standalone for custom installs"),
+                new KnownBundle("migrations", "legacy system migration")
         );
-        static final List<String> BUNDLES = ALL.stream().map(Known::bundle).toList();
+        static final List<String> NAMES = ALL.stream().map(KnownBundle::bundle).toList();
 
         static String hint(String bundle) {
-            return ALL.stream().filter(known -> known.bundle.equals(bundle)).map(Known::hint).findFirst().orElse("");
+            return ALL.stream().filter(known -> known.bundle.equals(bundle)).map(KnownBundle::hint).findFirst().orElse("");
         }
 
         /// Known bundles in their declared order, then the rest by name.
         static List<String> ordered(Collection<String> released) {
             return Stream.concat(
-                    BUNDLES.stream().filter(released::contains),
-                    released.stream().filter(Predicate.not(BUNDLES::contains)).sorted()
+                    NAMES.stream().filter(released::contains),
+                    released.stream().filter(Predicate.not(NAMES::contains)).sorted()
             ).toList();
         }
     }
