@@ -15,7 +15,7 @@ import module java.net.http;
 interface Boundary {
 
     String NAME = scriptName();
-    String VERSION = "2026-11-14.1";
+    String VERSION = "2026-11-14.2";
 
     /// Piped from `curl`, the class is named after `/dev/stdin`, not the script.
     static String scriptName() {
@@ -204,35 +204,46 @@ interface Boundary {
     /// Questions go to the controlling terminal, not stdin: piped from `curl`,
     /// stdin carries the script itself. Without a terminal every answer must
     /// arrive as an option.
-    record Terminal(BufferedReader reader) {
+    sealed interface Terminal {
+
+        Pattern NUMBER = Pattern.compile("\\d{1,3}");
 
         static Terminal open() {
             try {
-                return new Terminal(Files.newBufferedReader(Path.of("/dev/tty")));
+                return new Interactive(Files.newBufferedReader(Path.of("/dev/tty")));
             } catch (IOException _) {
-                return new Terminal(null);
+                return new Headless();
             }
         }
 
-        String ask(String prompt, String fallback) throws IOException {
-            if (reader == null) {
+        String ask(String prompt, String fallback) throws IOException;
+
+        record Interactive(BufferedReader reader) implements Terminal {
+
+            public String ask(String prompt, String fallback) throws IOException {
+                IO.print("%s [%s]: ".formatted(prompt, fallback));
+                var line = reader.readLine();
+                if (line == null) {
+                    throw Log.stop("input closed");
+                }
+                return line.isBlank() ? fallback : line.strip();
+            }
+        }
+
+        record Headless() implements Terminal {
+
+            public String ask(String prompt, String fallback) {
                 throw Log.stop("no terminal for questions — answer them with options: -global|-project <root>, -agents <ids>, -bundles <names>, -yes; see -help");
             }
-            IO.print("%s [%s]: ".formatted(prompt, fallback));
-            var line = reader.readLine();
-            if (line == null) {
-                throw Log.stop("input closed");
-            }
-            return line.isBlank() ? fallback : line.strip();
         }
 
-        boolean confirm(String prompt) throws IOException {
+        default boolean confirm(String prompt) throws IOException {
             return ask(prompt, "y").toLowerCase().startsWith("y");
         }
 
         /// Numbers or names, comma or space separated, `all` for everything;
         /// empty keeps the default. Re-asks on an unknown token.
-        List<String> choose(String what, List<String> options, Function<String, String> hint, List<String> defaults) throws IOException {
+        default List<String> choose(String what, List<String> options, Function<String, String> hint, List<String> defaults) throws IOException {
             IO.println(menu(what, options, hint));
             while (true) {
                 var tokens = csv(ask("%s (numbers or names, all)".formatted(what), String.join(",", defaults)));
@@ -251,16 +262,16 @@ interface Boundary {
             }
         }
 
-        /// A menu answer token: a 1-based number or an option name.
+        /// A menu answer token: an option name or its 1-based number.
         static Optional<String> pick(List<String> options, String token) {
-            if (isIndex(token, options.size())) {
-                return Optional.of(options.get(Integer.parseInt(token) - 1));
+            if (options.contains(token)) {
+                return Optional.of(token);
             }
-            return options.contains(token) ? Optional.of(token) : Optional.empty();
-        }
-
-        static boolean isIndex(String token, int size) {
-            return token.matches("\\d{1,3}") && Integer.parseInt(token) >= 1 && Integer.parseInt(token) <= size;
+            if (!NUMBER.matcher(token).matches()) {
+                return Optional.empty();
+            }
+            var number = Integer.parseInt(token);
+            return number >= 1 && number <= options.size() ? Optional.of(options.get(number - 1)) : Optional.empty();
         }
 
         static String menu(String what, List<String> options, Function<String, String> hint) {
