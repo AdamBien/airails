@@ -40,7 +40,7 @@ description: Generic, composable Java 25 code conventions that apply across all 
 ## Interfaces & Classes
 
 - only use interfaces with multiple implementations or for the strategy pattern; never create an interface whose only purpose is to be implemented by one class
-- for stateless or procedural logic, prefer interfaces with `static` methods over classes with private constructors
+- a type without instance state is an `interface` with `static` methods, never a `class` — this covers utility helpers as well as BCE boundaries and controls that hold no fields; a class with a private constructor, or a class whose methods are all `static`, is the shape to avoid. Frameworks that require instances (e.g. CDI beans) are the composed skill's exception
 - in utility interfaces, prefer `static` over `default` methods
 - avoid anonymous inner classes — extract them into named, testable top-level classes instead of instantiating an interface inline
 - use records by default for value types and data carriers

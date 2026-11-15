@@ -24,7 +24,7 @@ Composed skills always specialize, never contradict. When silent, `java-conventi
 |---|---|
 | **Syntax** | `var`, records, sealed types, pattern matching, switch expressions, module imports, instance `void main()` |
 | **Visibility** | Package-private over `private`, no `final` on fields/locals/params, field injection in CDI |
-| **Types** | Records for data, sealed hierarchies for closed dispatch, interfaces only with >1 impl, `static` over `default` in utility interfaces |
+| **Types** | Records for data, sealed hierarchies for closed dispatch, interfaces only with >1 impl, stateless types are interfaces with `static` methods (never classes), `static` over `default` in utility interfaces |
 | **Naming** | No `*Impl` / `*Service` / `*Manager` / `*Control`; no `get` prefix; protocol suffixes reserved for actual role |
 | **Methods** | Short and cohesive, no multi-statement lambdas, method references over lambdas, named predicates over inline booleans |
 | **Streams** | `Stream` over `for`, terminal operations that return values, `.toList()`, `List.of` / `Set.of` / `Map.of`, never `null` collections |
