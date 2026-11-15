@@ -26,6 +26,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - JAX-RS resources and health checks are boundary classes
 - @Transactional is only allowed in the boundary, declared on the class (or via the project's @Boundary stereotype), never on individual methods
 - if there is no Boundary stereotype, use @ApplicationScoped instead
+- boundaries and controls are CDI beans and therefore classes, even when stateless — this is the deliberate exception to the `java-conventions` rule that stateless types are interfaces with `static` methods; it does not apply to CLI projects without a container
 - if a relation exists in the database (e.g. JPA foreign key), the entities must carry a corresponding reference (id field or association); the DB schema is the source of truth
 - do not copy entities into structurally identical objects (DTOs, VOs, mirror records) across layers or BCs; pass the entity itself
 - introduce a separate type only when its shape or semantics differ (e.g. projection, aggregation, versioned external contract)
