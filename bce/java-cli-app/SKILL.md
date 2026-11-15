@@ -20,6 +20,7 @@ Compose with `/bce` for the architecture (business components, boundary/control/
   ```
   - If a design doc or input layout places `boundary/control/entity` directly under the application-level package, flag it as a BCE violation and propose feature BCs before scaffolding.
   - Boundaries and controls without instance state are `interface`s with `static` methods, like `App` above — never classes (`/java-conventions`). Only a control that genuinely owns state (e.g. an in-memory store holding a map) is a class, instantiated once in the entry point.
+  - `App` is the composition root, not a boundary: it lives outside every BC, instantiates the stateful controls, and hands `args` to exactly one boundary method, at most wrapped as `List.of(args)`. Argument grammar, validation, dispatch, usage and exit codes live in the boundary, never in `App`. Boundaries stay the only entry into a BC; `App` is the process entry the JVM requires. Never move `App` into a BC.
 - Exception: small single-purpose tools (one screen of logic, no distinct concerns) — keep everything in one unnamed class with top-level methods, no BCs, no packages.
 
 ## Build

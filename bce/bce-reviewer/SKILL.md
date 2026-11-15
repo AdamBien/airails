@@ -41,7 +41,7 @@ Carving:
 - non-trivial code in the root package → dedicated BC
 
 Layering:
-- external entry point (protocol handler, transport adapter, UI event handler, CLI entry) outside boundary
+- external entry point (protocol handler, transport adapter, UI event handler, CLI entry) outside boundary — a composition root the stack skill declares outside the BCs (e.g. `App` in `java-cli-app`, `main` in `java-cli-script`) is not a finding as long as it only wires controls and calls one boundary; logic or argument parsing in it is
 - upward dependency: entity → control or boundary, control → boundary
 - cross-cutting wrapper (transaction, authorization check, request/response mapping) in control or entity
 - anemic entity: state only, its behavior lives in a control
