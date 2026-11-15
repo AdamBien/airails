@@ -6,6 +6,8 @@ argument-hint: "[description of the CLI application to build]"
 
 Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS.
 
+Compose with `/bce` for the architecture (business components, boundary/control/entity layering, package structure) and with `/java-conventions` for all language-level Java rules (syntax, style, naming, visibility, interfaces/classes, methods, streams, exceptions). Load both before writing any code; the sections below only add the CLI-app specifics.
+
 ## Architecture
 
 - **Default: multi-file CLI apps compose with the `/bce` skill.** The package path follows `/bce`'s `[ORGANIZATION].[PROJECT].[BC].[layer]` scheme: the organization package (e.g. `airhacks`) contains the application-level project package (e.g. `zsmith`), whose direct children are the feature business components (BCs); `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the application-level package.
@@ -17,6 +19,7 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS.
     <organization>/<project>/<bc-c>/control/               # BC may have only the layers it needs
   ```
   - If a design doc or input layout places `boundary/control/entity` directly under the application-level package, flag it as a BCE violation and propose feature BCs before scaffolding.
+  - Boundaries and controls without instance state are `interface`s with `static` methods, like `App` above — never classes (`/java-conventions`). Only a control that genuinely owns state (e.g. an in-memory store holding a map) is a class, instantiated once in the entry point.
 - Exception: small single-purpose tools (one screen of logic, no distinct concerns) — keep everything in one unnamed class with top-level methods, no BCs, no packages.
 
 ## Build
