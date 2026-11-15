@@ -8,10 +8,10 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS.
 
 ## Architecture
 
-- **Default: multi-file CLI apps compose with the `/bce` skill.** The package path follows `/bce`'s `[ORGANIZATION].[PROJECT].[BC].[layer]` scheme: the organization package (e.g. `airhacks`) contains the application-level project package (e.g. `zbl`), whose direct children are the feature business components (BCs); `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the application-level package.
+- **Default: multi-file CLI apps compose with the `/bce` skill.** The package path follows `/bce`'s `[ORGANIZATION].[PROJECT].[BC].[layer]` scheme: the organization package (e.g. `airhacks`) contains the application-level project package (e.g. `zsmith`), whose direct children are the feature business components (BCs); `boundary`, `control`, `entity` only appear *inside* a BC, never directly under the application-level package.
   ```
   src/main/java/
-    <organization>/App.java                                 
+    <organization>/App.java    # entry point: `interface App` with `static void main(String... args)`
     <organization>/<project>/<bc-a>/{boundary,control,entity}/
     <organization>/<project>/<bc-b>/{boundary,control,entity}/
     <organization>/<project>/<bc-c>/control/               # BC may have only the layers it needs
@@ -22,8 +22,9 @@ Create or maintain a multi-file Java 25 CLI application using $ARGUMENTS.
 ## Build
 
 - For new projects, clone https://github.com/AdamBien/java-cli-app as the project skeleton — it includes the zb build setup and directory structure.
-- Build and run with the `/zb` skill — no Maven or Gradle required; zb compiles all `.java` files from `src/main/java/` into `zbo/app.jar`
-- Offer to generate an executable launcher script with the `/java-cli-script` skill so the app runs by name instead of `java -jar zbo/app.jar`
+- The skeleton's `.zb` ships with `jar.file.name=app.jar`; set it to `jar.file.name=[APP_NAME].jar` so the JAR carries the application's name. zunit reads `jar.dir` and `jar.file.name` from `.zb`, so the renamed JAR stays on its classpath.
+- Build and run with the `/zb` skill — no Maven or Gradle required; zb compiles all `.java` files from `src/main/java/` into `zbo/[APP_NAME].jar`
+- Offer to generate an executable launcher script with the `/java-cli-script` skill so the app runs by name instead of `java -jar zbo/[APP_NAME].jar`
 
 ## Dependencies
 
@@ -51,6 +52,5 @@ Source locations and copy targets for common dependencies are owned by their ski
 
 **Default: compose with the `/java-conventions` skill** for generic Java style, naming, visibility, structure, streams, exceptions, and documentation rules. The rules below override or extend it for the CLI-app context.
 
-- Use unnamed classes with top-level methods for `Main.java` — no package declaration
 - Use `IO.println()` for printing (or `IO::println` as method reference) — never `System.out.println()`
 - For colored terminal output, suggest zcl via the `/zcl` skill

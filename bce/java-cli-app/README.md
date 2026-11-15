@@ -10,7 +10,7 @@ An [AIrails.dev](https://airails.dev) skill for creating and maintaining multi-f
 - Source-bundled dependencies (no classpath resolution) — common libraries like `org.json`, `zcfg`, `zcl`
 - Unit testing via the `zunit` skill
 - Version management using `YYYY-MM-DD.N` convention
-- Unnamed classes with top-level methods for `Main.java`; `IO.println()` instead of `System.out.println()`
+- `App.java` in the organization package as the entry point; `IO.println()` instead of `System.out.println()`
 
 Not intended for single-file scripts — use `java-cli-script` for those.
 

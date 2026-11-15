@@ -66,13 +66,13 @@ project-root/
 ├── test/                   # zunit test sources
 │   ├── SomethingTest.java
 │   └── AnotherTest.java
-├── zbo/app.jar             # zb output (auto-detected as classpath)
+├── zbo/[APP_NAME].jar      # zb output, name set by jar.file.name in .zb (classpath)
 └── .zb                     # zb config
 ```
 
 ### Classpath
 
-zunit auto-detects `zbo/app.jar` as the classpath. Tests import main classes directly — zb packages everything into `app.jar`.
+zunit resolves the classpath from `.zb` (`jar.dir` + `jar.file.name`), falling back to `zbo/app.jar` when no `.zb` is present — a JAR renamed in `.zb` is picked up automatically. Tests import main classes directly — zb packages everything into that JAR.
 
 ## How to Generate Tests
 
@@ -104,8 +104,8 @@ When tests make network calls using `java.net.http.HttpClient`, always set expli
 
 After generating test files:
 
-1. **Build first**: `zb` (compiles main sources into `zbo/app.jar`)
-2. **Run tests**: `zunit` (discovers `test/*Test.java`, runs against `zbo/app.jar`)
+1. **Build first**: `zb` (compiles main sources into `zbo/[APP_NAME].jar`, per `jar.file.name` in `.zb`)
+2. **Run tests**: `zunit` (discovers `test/*Test.java`, runs against the JAR resolved from `.zb`)
 3. Alternatively: `zb && zunit`
 
 Use `zunit -verbose` to debug classpath or discovery issues.
