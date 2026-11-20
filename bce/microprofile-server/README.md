@@ -4,7 +4,7 @@ An [AIrails.dev](https://airails.dev) skill defining architecture and coding rul
 
 ## Scope
 
-- Server-specific [BCE](https://bce.design) rules on top of the `bce` skill: resources and health checks as boundary, `@Transactional` placement, entity references and no DTO mirrors
+- Server-specific [BCE](https://bce.design) rules on top of the `bce` skill: resources and health checks as boundary, `@Transactional` placement, entity references and no DTO mirrors, outbound REST clients in control
 - JAX-RS resources and exception mapping via `WebApplicationException`
 - JSON-P preferred over JSON-B; `toJSON` / `fromJSON` on record entities
 - Testing conventions: unit, integration (`*IT`), and system tests in a dedicated `-st` module using microprofile-rest-client

@@ -28,6 +28,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 ## BCE Specializations
 - package structure: `[ORGANIZATION_NAME].[PROJECT_NAME].[COMPONENT_NAME].[boundary|control|entity]`, as `bce` defines it; suggest renaming the top-level `[PROJECT_NAME]` package when it does not reflect the project's name or responsibility
 - JAX-RS resources and health checks are boundary classes
+- outbound integrations are controls, as `bce` defines it: a MicroProfile REST Client interface (`@RegisterRestClient`) or a messaging producer lives in the control package of the BC that uses it and is injected into a control, never into a JAX-RS resource; the control converts the remote representation into the BC's entities
 - @Transactional is only allowed in the boundary, declared on the class (or via the project's @Boundary stereotype), never on individual methods
 - if there is no Boundary stereotype, use @ApplicationScoped instead
 - boundaries and controls are CDI beans and therefore classes, even when stateless — this is the deliberate exception to the `java-conventions` rule that stateless types are interfaces with `static` methods; it does not apply to CLI projects without a container
