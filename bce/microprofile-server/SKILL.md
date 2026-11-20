@@ -53,6 +53,7 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - test classes: src/test/java of the -st module
 - name client interfaces after the resource with "Client" suffix (e.g., GreetingsResource -> GreetingsResourceClient)
 - RegisterRestClient configKey: "service_uri" — the configured coordinate of the running system
+- the coordinate is one property line in the -st module's `application.properties`: `service_uri/mp-rest/url=http://localhost:8080`; a different environment overrides it through MicroProfile Config (e.g. the env var `SERVICE_URI_MP_REST_URL`), never by editing the file
 - STs end with "IT" suffix
 - do not use RestAssured. Write e2e test in the -st module
 - execute system tests after every major change to the service module
