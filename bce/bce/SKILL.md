@@ -33,6 +33,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 - procedural business logic in stateless, function-like units
 - callable by the BC's own boundary and directly by other BCs
 - a control method is public when called from outside the control package, package-private (or the language equivalent) otherwise; visibility does not express a cross-BC contract
+- outbound integration is a control concern: a client to an external system (remote API, message producer, third-party service) is owned and wrapped by a control in the BC that needs it; the boundary remains the inbound perimeter and never calls out itself; the stack skill names the client technology
 
 ## Entity Layer
 
