@@ -28,6 +28,27 @@ constraint. For applications that need client-side state, routing, or templating
 
 HTML semantics, heading hierarchy, labels, and skip links follow `/web-conventions`.
 
+## Version Metadata
+
+Every page carries its version in `<head>`, formatted per the `/version-bump` convention —
+`YYYY.MM.DD.NN`, the date of the change plus a zero-padded two-digit sequence within that day:
+
+```html
+<meta name="version" content="2026.11.20.01">
+```
+
+- **One value per site** — all pages carry the same version; a site is released as a whole,
+  never page by page
+- **Bump on every change** — same day increments `NN` (`.01`, `.02`, …), a new day resets to
+  `.01`; the bump lands in the same commit as the change
+- **Literal, not injected** — there is no build step to stamp it in, so the value is written
+  into each page's HTML; a multipage site updates every `<head>` in the same change
+- **Mirror `version.txt` when present** — a project with a `version.txt` at the root is governed
+  by `/version-bump`: run `zbump`, then copy the new value into the `<meta>` tags; the file stays
+  the source of truth and the tag must match it byte for byte
+- Never derive the version from the clock at runtime — the no-JavaScript constraint forbids it,
+  and the tag documents when the page was published, not when it was viewed
+
 ## CSS Rules
 
 Design tokens, logical properties, modern CSS features, accessibility, and the Baseline policy
@@ -139,6 +160,7 @@ the test browser, not in the site.
 
 1. **Console** — `list_console_messages`: no errors, no failed requests (also proves the no-JavaScript constraint holds).
 2. **Structure** — `take_snapshot` (accessibility tree): exactly one `main`, no skipped heading levels, a label on every form input, `aria-label` on each nav when several exist, skip link first in tab order, alt text on every image.
+   Also read-only `evaluate_script` over `document.querySelector('meta[name="version"]').content`: present, matches `^\d{4}\.\d{2}\.\d{2}\.\d{2}$`, identical on every page, and equal to `version.txt` when the project has one.
 3. **Responsive** — `resize_page` to 375×667 and 1280×800: the layout adapts, and mobile patterns (hamburger, stacked columns) appear only at the narrow width.
 4. **Preferences** — `emulate` with `colorScheme: dark`: the page restyles. The MCP cannot emulate reduced motion, so check it statically: read-only `evaluate_script` over `document.styleSheets` (or a source grep) confirms the `prefers-reduced-motion: reduce` query exists and neutralizes animations/transitions.
 5. **Lighthouse** — `lighthouse_audit` (covers accessibility, best-practices, SEO — not performance): accessibility = 100 (includes WCAG AA contrast), best-practices and SEO ≥ 90. When performance is in question, invoke `/web-performance-reviewer` (throttled traces, Core Web Vitals, waterfall) — on explicit request, never part of standard green.
