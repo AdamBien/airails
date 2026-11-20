@@ -11,6 +11,7 @@ An [AIrails.dev](https://airails.dev) skill defining architecture and coding rul
 - Maven project structure
 - Minimal dependencies (Java SE → MicroProfile → Jakarta EE)
 - OTEL / OpenTelemetry for metrics and observability
+- Blocking code on virtual threads; no reactive APIs unless explicitly requested
 Not intended for serverless deployments.
 
 ## Composition

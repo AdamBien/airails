@@ -13,6 +13,10 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 ## Dependencies
 - prefer dependencies in this order: Java SE, MicroProfile, Jakarta EE
 
+## Concurrency
+- write blocking, synchronous code and run it on virtual threads (e.g. `@RunOnVirtualThread` on Quarkus); never introduce reactive APIs (Mutiny `Uni`/`Multi`, reactive streams, `CompletionStage` chains) unless the user explicitly asks
+- blocking calls (JDBC, REST client, file I/O) in boundaries and controls are the expected shape, not a smell
+
 ## CDI
 - do not use constructor injection — prefer field injection
 
