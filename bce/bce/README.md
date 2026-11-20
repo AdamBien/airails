@@ -8,7 +8,7 @@ An [AIrails.dev](https://airails.dev) skill defining the generic, composable [Bo
 - Business component (BC) concept and composition
 - Package / directory structure
 - Cross-BC relationships and refactoring signals
-- Naming conventions for BCs and classes
+- Naming conventions for BCs and classes, including the list of forbidden generic BC names (`util`, `common`, `core`, …)
 
 Technology-neutral. No language, framework, build, testing, persistence, or protocol rules — those come from composed skills.
 

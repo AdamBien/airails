@@ -43,6 +43,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 ## Naming
 
 - name packages, classes, modules, and files after their responsibilities, never after technical concerns
+- no generic or technical BC names: `util`, `common`, `model`, `dto`, `services`, `helpers`, `api`, `impl`, `core`, `app`, `base`, `shared`, `domain`, `data`, `logic`; a shared concern becomes a BC only under the name the other BCs use for it (e.g. `pricing`, not `common`)
 - no meaningless suffixes: `*Impl`, `*Service`, `*Manager`, `*Creator`, `*Control`
 - protocol or pattern suffixes (`Resource`, `Factory`, `Builder`) only on elements that fulfill that role
 
