@@ -33,9 +33,22 @@ checkout                                      # BC name == the only identity
   code = same folder, {boundary,control,entity}/            # stack skill places it
 ```
 
-- `## Boundary` op ↔ one `boundary` entry-point method.
+- `## Boundary` op ↔ one `boundary` entry-point method (`## Control` op ↔ one public `control` method in a control-only BC).
 - `## Requirements` (EARS) ↔ behaviour **and** the tests covering it.
 - `## Entities` ↔ the `entity` layer.
+
+## Control-only BC
+
+`/bce` allows a BC without a boundary — procedural responsibility, no facade justified, called only
+by other BCs. Its spec declares that by heading the ops section `## Control` instead of
+`## Boundary`; the heading is the only marker.
+
+- The contract is what the BC promises the BCs calling it. Every rule for a `## Boundary` op — here, in `/ears-tests`, in a brief's mapping — applies to a `## Control` op unchanged.
+- `## Control` op ↔ one public `control` method. The BC has no `boundary` layer; neither mode creates one.
+- Drift (code → spec): a public `control` method with no declared op, or any `boundary` type.
+- A spec carries `## Boundary` **or** `## Control`, never both — with a boundary, `control` is implementation and stays unspecified.
+- `new` proposes control-only when no actor outside the system addresses the BC — user-confirmed, like the carving. Its callers are cross-BC wiring for the system doc's `## Components`.
+- Adding a facade later is a spec change: the user renames the heading to `## Boundary`, then `apply` converges. Never rename it to match code.
 
 ## System doc (base package)
 
@@ -109,7 +122,7 @@ guessed spec makes the oracle verify assumptions, not intent.
 - **Loop, don't stop at one.** Each answer exposes new gaps; re-derive and re-ask until resolved. Never proceed on partial answers.
 - **Never assume silently.** Lean on a default only by naming it — "I'd assume create-only; confirm or correct".
 - **One ambiguity per question, specific over generic.** Offer enumerable options with an "other" escape; skip what context already answers; no meta-questions.
-- **Interrogate per boundary op** — trigger/response (event-driven), invalid/edge triggers (`If…then`), state constraints (`While…`) — and across the BC: scope (create-only vs full lifecycle), entities and fields (required/optional, identity, validation), and what "done" means.
+- **Interrogate per boundary op** — trigger/response (event-driven), invalid/edge triggers (`If…then`), state constraints (`While…`) — and across the BC: callers (an actor outside the system, or only other BCs → control-only), scope (create-only vs full lifecycle), entities and fields (required/optional, identity, validation), and what "done" means.
 - **Stop only when** every boundary op and EARS statement, happy *and* unhappy, is answerable from the user's words such that another engineer would author the same spec. If in doubt, ask one more.
 
 **Brief input — the loop already ran.** A use case or user story authored with `/capability-brief`
@@ -144,7 +157,7 @@ brief it is inception input, not a source of truth.
 1. Validate the name — a single lowercase noun, no dots/hyphens/spaces/uppercase. Reject otherwise.
 2. Ask the stack skill where the package doc lives. If it exists, never overwrite: when the intent is an extension (feature path step 4, or the user says so), run the clarify loop and append ops / requirements to that single doc; otherwise report and stop unless the user confirms a rewrite.
 3. Author the spec into the package doc from `references/spec-template.md`: one-line responsibility, boundary ops, EARS requirements, optional entities, out-of-scope.
-4. Ask the stack skill to place the doc and scaffold empty `boundary`/`control`/`entity` dirs where missing. Write **no** BC source.
+4. Ask the stack skill to place the doc and scaffold empty `boundary`/`control`/`entity` dirs where missing — no `boundary` for a control-only BC. Write **no** BC source.
 5. Report the open gap (counts of ops / requirements) and point to `/sbce apply <bc-name>`.
 
 **Feature description** (`/sbce new "let a customer check out a cart"`):
@@ -172,8 +185,8 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 2. Resolve the stack (see above).
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → report "already converged" and go to 6.
 4. Else read the gap — both directions — and close it:
-   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
-   - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
+   - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method (control-only BC: a public `control` method); each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
+   - **code → spec** (surface, never auto-author): a `boundary` method with no declared op (control-only BC: a public `control` method with no declared op, or any `boundary` type), a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 6. If the README carries `sbce:generated` markers, regenerate that slice from the system doc + package docs; touch nothing outside the markers.
 
@@ -187,7 +200,7 @@ Green build + no structural gap or drift is the only definition of done.
 
 ## Spec format rules
 
-- Sections in order: `# Title` + one-line responsibility, `## Boundary`, `## Requirements`, optional `## Entities`, optional `## Decisions` (BC-local, same rules as the system doc's), optional `## References`, `## Out of scope`.
+- Sections in order: `# Title` + one-line responsibility, `## Boundary` (`## Control` in a control-only BC), `## Requirements`, optional `## Entities`, optional `## Decisions` (BC-local, same rules as the system doc's), optional `## References`, `## Out of scope`.
 - Boundary operations are verb-noun and transport-neutral (`place-order`, not `POST /orders`).
 - Requirements are [EARS](https://alistairmavin.com/ears/) statements — one of six patterns, the system always **the BC** — grouped under a titled `### Rn`, each statement carrying a stable id `Rn.m` (group `n`, statement `m`). Reach for `If…then` and `While…` to capture error and edge cases.
 
@@ -205,7 +218,7 @@ Green build + no structural gap or drift is the only definition of done.
 - Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id**, checked in both directions: a new `Rn.m` with no test is a gap; a method, trace id, or `entity` type with no spec counterpart is drift (surfaced, never absorbed into the spec). `/ears-tests` defines the trace form per stack; SBCE only requires the id be grep-visible in the test's label — an id that appears only in a comment is no trace.
 - **Optional `why`.** Any `Rn.m` statement (or boundary op) may carry a trailing `_(why: …)_` — terse *origin/intent*. Rationale, not contract: non-verified, not a trace target, bound to its id (retires with it; the `Rn.m` prefix stays first). Capture *why the rule exists*, never *how it currently works*.
 - **Optional `## References`.** External specifications the BC implements (RFC, Jakarta/MicroProfile chapter, regulation) — format and rules in the spec template. Rationale, not contract: a reference **informs** requirements, never replaces them — behaviour is still a tested `Rn.m`, never an untested "shall conform to X". The stack skill may read the linked document while closing the gap.
-- The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
+- Behind a boundary the `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary` (or a control-only BC's `## Control`), `## Requirements`, and `## Entities` map to code.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
 ## Reference spec
