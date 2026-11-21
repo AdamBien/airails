@@ -34,7 +34,7 @@ The Markdown body (this is the whole system doc — every section optional excep
 
 ## Components
 <!-- this system's concrete wiring — direction matters; each BC's own contract lives in its package-info -->
-- `checkout` calls `inventory`'s `reserve-stock`; never the reverse.
+- `checkout` may call `inventory`; never the reverse.
 - `payment` is reached only via `checkout`'s `place-order`.
 
 ## System invariants
@@ -70,7 +70,7 @@ In **Java**, prefix every line with `///` and end the file with the base package
 /// - Make checkout so fast the customer never abandons a cart.
 ///
 /// ## Components
-/// - `checkout` calls `inventory`'s `reserve-stock`; never the reverse.
+/// - `checkout` may call `inventory`; never the reverse.
 /// …
 package airhacks;
 ```
