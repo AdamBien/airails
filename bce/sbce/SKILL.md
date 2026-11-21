@@ -11,6 +11,7 @@ strictly.
 ## Guiding principles
 
 - The spec **is** the boundary contract — *what the boundary promises*, never *how*.
+- **Specification vs. realization.** The spec covers what is reachable from outside the system: boundary ops, their EARS statements, the entities named. Everything behind the boundary is realization — `control` in this or another BC, and control-only BCs: no spec, no drift, verified only through the boundary's tests.
 - The spec **lives in the BC's package doc** (`package-info.java` with `///` Markdown, `package-info.md` for web, or the leading `///` doc comment of a single-file script), co-located with the code it governs — no separate `specs/` tree. In Java `javadoc` renders it, so one file is source-of-truth *and* published contract.
 - One capability spec ≡ one business component, named the same. No translation between "what" and "where".
 - The task list is the **gap**, read off `spec` vs `BC` on demand — never a hand-maintained tasks file.
@@ -36,8 +37,8 @@ checkout                                      # BC name == the only identity
 - `## Boundary` op ↔ one `boundary` entry-point method.
 - `## Requirements` (EARS) ↔ behaviour **and** the tests covering it.
 - `## Entities` ↔ the `entity` layer.
-- A spec'd BC always has a boundary: `new` realizes use cases — all-or-nothing functionality reachable from outside the system. `control`, this BC's or another's, is implementation: no spec section, no ops, no drift.
-- A control-only BC (`/bce`) is implementation too and carries no spec — every spec is one BC, not every BC has a spec. Its package doc is `# Title` plus the `>` one-line responsibility, optionally `## Decisions` — never `## Boundary` or `## Requirements`; a package doc without `## Boundary` is not a spec.
+- A spec'd BC always has a boundary: `new` realizes use cases — all-or-nothing functionality reachable from outside the system.
+- A control-only BC (`/bce`) is realization and carries no spec — every spec is one BC, not every BC has a spec. Its package doc is `# Title` plus the `>` one-line responsibility, optionally `## Decisions` — never `## Boundary` or `## Requirements`; a package doc without `## Boundary` is not a spec.
 
 ## System doc (base package)
 
@@ -208,7 +209,7 @@ Green build + no structural gap or drift is the only definition of done.
 - Every boundary op traces to a group `Rn`; every statement `Rn.m` traces to ≥1 test that **embeds its id**, checked in both directions: a new `Rn.m` with no test is a gap; a method, trace id, or `entity` type with no spec counterpart is drift (surfaced, never absorbed into the spec). `/ears-tests` defines the trace form per stack; SBCE only requires the id be grep-visible in the test's label — an id that appears only in a comment is no trace.
 - **Optional `why`.** Any `Rn.m` statement (or boundary op) may carry a trailing `_(why: …)_` — terse *origin/intent*. Rationale, not contract: non-verified, not a trace target, bound to its id (retires with it; the `Rn.m` prefix stays first). Capture *why the rule exists*, never *how it currently works*.
 - **Optional `## References`.** External specifications the BC implements (RFC, Jakarta/MicroProfile chapter, regulation) — format and rules in the spec template. Rationale, not contract: a reference **informs** requirements, never replaces them — behaviour is still a tested `Rn.m`, never an untested "shall conform to X". The stack skill may read the linked document while closing the gap.
-- The `control` layer is implementation — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
+- The `control` layer is realization — pure *how* — so it has **no spec section**; only `## Boundary`, `## Requirements`, and `## Entities` map to code.
 - Stack-neutral throughout: no types, transports, framework verbs, or *how*.
 
 ## Reference spec

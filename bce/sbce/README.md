@@ -11,6 +11,7 @@ spec is the boundary contract. One slash-invocable skill, two modes: `new → ap
   - **new** (declare) — author the spec into the BC's package doc (`package-info.java` / `package-info.md`) and scaffold the BC's empty `boundary/control/entity` dirs. Accepts a BC name (one precise spec) **or** a natural-language feature description that decomposes into one or several BCs — coining new ones or extending existing specs, after you confirm the carving
   - **apply** (converge) — close the gap between spec and BC, then loop the stack's test suite until green (the kubectl/terraform "make it so" step)
 - The identity is the **BC name** (`checkout`); the spec **is** the BC's package doc, co-located with the code — Java: `package-info.java` (`///` Markdown, [JEP 467](https://openjdk.org/jeps/467)), web: `package-info.md`, single-file script: the leading `///` doc comment. No separate `specs/` tree
+- **Specification vs. realization** — a spec covers what is reachable from outside the system: boundary operations, EARS requirements, entities. Everything behind the boundary — `control` in any BC, control-only BCs — is realization: no spec, verified through the boundary's tests
 - **Parallel by construction** — spec, code, and tests live in the BC's own package, and the task list is *read* as the spec↔code gap, never persisted. Teams converge distinct BCs concurrently with no central spec tree, tasks file, or merge-back step to serialize on; coordination concentrates in the one shared artifact — the system doc — exactly where cross-BC coupling is declared
 - An **optional system doc** one altitude up — the base package's `package-info` — holds cross-BC concerns that have no other home: a one-line mission, an optional aspirational vision, the concrete BC-to-BC wiring and integration events, system-wide invariants, the **ubiquitous language** (shared domain nouns defined once — name plus one-line intent, no fields, no types — so each BC's `## Entities` stays terse), an append-only **decision log** (`Dn` — confirmed choices with their rejected alternatives, so later runs never re-litigate them), and the composed stack. Add it only when a real cross-cutting concern appears; a one-BC system needs none. Template: [references/system-doc-template.md](references/system-doc-template.md)
 - An **optional top-level `README.md`** — a human on-ramp that *projects* the specs: a generated block (mission, vision, BC map) regenerated on `apply` inside `<!-- sbce:generated -->` markers, plus hand-maintained sections no spec covers (`## Conventions` for project-local standards, build/run via the stack skill). Never a source of truth. It also **doubles as the optional inception seed** `/sbce new` (no argument) reads to bootstrap the vision and specs. Template: [references/readme-template.md](references/readme-template.md)
@@ -41,7 +42,8 @@ install these alongside it (all ship via airails `installSkills`):
 
 Read as a whole, the composition is a stepwise refinement from one system down to its code: each
 skill adds one kind of decision and specializes, never contradicts, the ones above it. All but the
-last are stack-neutral, so the stack skill is interchangeable.
+last are stack-neutral, so the stack skill is interchangeable. `bce` and the stack skill together
+are the realization of a spec: `bce` owns its structure, the stack skill its implementation.
 
 | Skill | Term | Question | Commits to | Neutral to |
 |---|---|---|---|---|
@@ -49,7 +51,7 @@ last are stack-neutral, so the stack skill is interchangeable.
 | [`capability-brief`](../capability-brief) | Intent | Why, for whom | actors, outcome, failures | structure and stack |
 | `sbce` | Contract | What is promised | EARS statements, operations, entities; one capability is one BC | structure rules and stack |
 | [`bce`](../bce) | Structure | Where it lives, and what makes the cut good | BC per responsibility, layer semantics, cohesion and coupling rules, entity requirements, naming | stack |
-| stack skill, e.g. [`microprofile-server`](../microprofile-server), [`web-components`](../../web/web-components), [`java-cli-app`](../java-cli-app), [`aws-cdk`](../aws-cdk) | Realization | How it is built | runtime, layout, build, test loop | nothing |
+| stack skill, e.g. [`microprofile-server`](../microprofile-server), [`web-components`](../../web/web-components), [`java-cli-app`](../java-cli-app), [`aws-cdk`](../aws-cdk) | Implementation | How it is built | runtime, layout, build, test loop | nothing |
 
 `sbce` never names a runner or a test kind; it asks the stack skill "are you green?". The spec
 format and rules live in [SKILL.md](SKILL.md).
