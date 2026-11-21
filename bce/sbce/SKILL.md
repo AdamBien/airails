@@ -37,7 +37,7 @@ checkout                                      # BC name == the only identity
 - `## Requirements` (EARS) ↔ behaviour **and** the tests covering it.
 - `## Entities` ↔ the `entity` layer.
 - A spec'd BC always has a boundary: `new` realizes use cases — all-or-nothing functionality reachable from outside the system. `control`, this BC's or another's, is implementation: no spec section, no ops, no drift.
-- A control-only BC (`/bce`) is implementation too and carries no spec — every spec is one BC, not every BC has a spec. Its package doc states its responsibility only; a package doc without `## Boundary` is not a spec.
+- A control-only BC (`/bce`) is implementation too and carries no spec — every spec is one BC, not every BC has a spec. Its package doc is `# Title` plus the `>` one-line responsibility, optionally `## Decisions` — never `## Boundary` or `## Requirements`; a package doc without `## Boundary` is not a spec.
 
 ## System doc (base package)
 
@@ -64,7 +64,7 @@ map is **generated** from the per-BC docs.
 An **optional** repo-root `README.md` — a human on-ramp that is a **projection of the specs, not a
 source of truth**. Author from `references/readme-template.md`. Two slices, handled oppositely:
 
-- **Generated** (never hand-edited), fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`: Mission + Vision, a BC map (name, `>` one-liner, link to its `package-info`), and a Mermaid `flowchart` of the **declared** `## Components` wiring — projection, never inference from code; no `## Components` → omit the diagram. `apply` regenerates this slice; no markers → README untouched.
+- **Generated** (never hand-edited), fenced by `<!-- sbce:generated:start -->` / `<!-- sbce:generated:end -->`: Mission + Vision, a BC map of the spec'd BCs (name, `>` one-liner, link to its `package-info`; a control-only BC is omitted), and a Mermaid `flowchart` of the **declared** `## Components` wiring — projection, never inference from code; no `## Components` → omit the diagram. `apply` regenerates this slice; no markers → README untouched.
 - **Hand-maintained** (outside the markers, so it can't drift): `## Conventions` — project-specific, **non-behavioral** standards ("money is always cents"), declared not verified, no `Sn`, distinct from a tested system invariant and from a `Dn` — plus build/run/test delegated to the stack skill and free-form meta. This prose is also the **inception seed** `/sbce new` (no argument) reads, never rewrites.
 
 ## Determinism boundary
@@ -176,7 +176,7 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 4. Else read the gap — both directions — and close it:
    - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
    - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
-   - **other BCs**: closing the gap may add or change `control` in another BC — never its spec or `boundary` — and a new control-only BC is proposed before it is created, then gets a package doc stating its responsibility. Green covers every BC's tests.
+   - **other BCs**: closing the gap may add or change `control` in another BC — never its spec or `boundary` — and a new control-only BC is proposed before it is created, then gets its package doc (shape: "Spec ↔ BC mapping"). Green covers every BC's tests.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 6. If the README carries `sbce:generated` markers, regenerate that slice from the system doc + package docs; touch nothing outside the markers.
 
