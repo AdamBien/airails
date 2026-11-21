@@ -45,11 +45,13 @@ procedural responsibility, no facade justified. The spec declares both with an o
 and no `## Boundary` is a control-only BC; the headings are the only marker.
 
 - `## Boundary` is what the BC promises actors outside the system; `## Control` is what it promises the BCs calling it. Every rule for a `## Boundary` op — here, in `/ears-tests`, in a brief's mapping — applies to a `## Control` op unchanged.
-- `## Control` op ↔ one public `control` method. An op is declared once — op names are unique across both sections.
+- `## Control` op ↔ one public `control` method. The same name in both sections is one op — one `Rn` group, a `boundary` method and a public `control` method.
 - `control` reached only through the BC's own boundary is implementation and stays unspecified.
 - Drift (code → spec): a `control` method called from another BC with no declared op; in a control-only BC also any `boundary` type.
 - A control-only BC has no `boundary` layer; neither mode creates one.
-- `new` proposes `## Control` ops when another BC addresses the BC directly, and control-only when no actor outside the system does — user-confirmed, like the carving. The callers are cross-BC wiring for the system doc's `## Components`.
+- `new` proposes `## Control` ops when another BC addresses the BC directly, and control-only when no actor outside the system does — user-confirmed, like the carving.
+- A spec that relies on another BC's operation (a brief's supporting actor tagged `capability`, a call the carving introduces) needs that op under the **other** BC's `## Control`. `new` proposes it there — user-confirmed, never silent: an op already under that BC's `## Boundary` is listed again by name; a missing one is an extension of that BC with its own clarify loop. The system doc's `## Components` line names the op.
+- `apply` writes only inside its own BC — a needed op on another BC is surfaced, never written (see apply).
 - Adding a facade later is a spec change: the user adds `## Boundary`, then `apply` converges.
 
 ## System doc (base package)
@@ -62,7 +64,7 @@ only when a real cross-BC concern appears; a one-BC system needs none beyond the
 
 - **Mission** — the `>` one-liner under the title, the only mandatory line.
 - **Vision** *(optional)* — one aspirational sentence. Rationale, not contract: no `Sn`, no test, the single non-verifiable line in the doc. May be proposed by `/sbce new` from a README seed; the human accepts or edits.
-- **Components** — this system's concrete wiring: which BC may call which, which integration events cross boundaries (`/bce` owns the generic layering).
+- **Components** — this system's concrete wiring: which BC may call which and through which `## Control` op, which integration events cross boundaries (`/bce` owns the generic layering).
 - **System invariants** — cross-cutting EARS `shall` statements, id `Sn`, each tested.
 - **Ubiquitous language** — shared domain nouns defined once, so each BC's `## Entities` stays terse.
 - **Decisions** *(optional)* — append-only `Dn — <choice>. _(why: …; rejected: …)_`, superseded never edited; rationale, no test. Litmus: testable behaviour → EARS statement; standing project rule → README `## Conventions`; point-in-time choice with rejected alternatives → `Dn`. A one-BC decision lives in that BC's doc under the same rules.
@@ -132,9 +134,11 @@ guessed spec makes the oracle verify assumptions, not intent.
 with the domain owner, so its answers are the user's confirmed word: `## Capability` is the
 confirmed carving (name, `new`/`extends`, responsibility) — it replaces the carving confirmation
 below; each `record:` line under `## Decisions` is a confirmed `Dn` to log without offering it
-again; a supporting actor tagged `capability` is declared cross-BC wiring for the system doc;
+again; a supporting actor tagged `capability` is declared cross-BC wiring for the system doc, and
+the op it is relied on for is proposed under that capability's `## Control`;
 `## Out of scope` closes the scope questions. Ask exactly what `## Open issues` lists plus any
-section left blank — nothing else — then author from the brief's own section→spec mapping: named
+section left blank, and confirm each op proposed on another BC — the brief's author signed off
+this capability, not a change to another one — nothing else — then author from the brief's own section→spec mapping: named
 operations → `## Boundary`; `Inputs`, `Extensions` and failing `Acceptance criteria` scenarios →
 `If…then` (an invalid input is rejected naming every invalid part unless an extension or scenario
 states another response); optional paths → `Where…`; `Lifecycle` → `While…`; `Entities` →
@@ -168,7 +172,7 @@ brief it is inception input, not a source of truth.
 2. **Propose** a BC set — each tagged **new** (coin a single lowercase noun) or **extend-existing**, each with the one-line responsibility it owns.
 3. **Confirm the carving before any write** — decomposition has no test oracle, so the human approves the BC set (a brief's `## Capability` / `## Capabilities` is that approval).
 4. Realise each entry via the BC-name steps: **new** → fresh doc + dirs; **extend-existing** → add ops / requirements to its **single** existing doc, never a second spec.
-5. If the carving introduces cross-BC wiring (a call, a shared noun, a system invariant), record it in the system doc — user-confirmed.
+5. If the carving introduces cross-BC wiring (a call, a shared noun, a system invariant), record it in the system doc — user-confirmed. A call also declares its op under the callee's `## Control` (see "Control ops and control-only BCs").
 6. A carving or stack choice the user confirmed **against** a proposed alternative is a decision — offer to record it as a `Dn`; never record one silently (a brief's `record:` lines are already confirmed).
 
 **README seed** (`/sbce new`, no argument):
@@ -189,6 +193,7 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 4. Else read the gap — both directions — and close it:
    - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method (a `## Control` op → a public `control` method); each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
    - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a `control` method called from another BC with no declared op, a `boundary` type in a control-only BC, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
+   - **across BCs** (surface, never write): `apply` writes only inside its own BC. An op this BC needs from another BC that the other spec's `## Control` does not declare → report it and point to `/sbce new <that-bc>`; declared there but not yet built → point to `/sbce apply <that-bc>`. Either blocks the converged verdict, like drift; keep closing whatever does not depend on it.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 6. If the README carries `sbce:generated` markers, regenerate that slice from the system doc + package docs; touch nothing outside the markers.
 
