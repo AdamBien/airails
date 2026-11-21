@@ -11,7 +11,7 @@ strictly.
 ## Guiding principles
 
 - The spec **is** the boundary contract — *what the boundary promises*, never *how*.
-- **Specification vs. realization.** The spec covers what is reachable from outside the system: boundary ops, their EARS statements, the entities named. Everything behind the boundary is realization — `control` in this or another BC, and control-only BCs: no spec, no drift, verified only through the boundary's tests.
+- **Specification vs. realization.** The spec covers what is reachable from outside the system: boundary ops, their EARS statements, the entities named. Everything behind the boundary is realization — `control` in this or another BC, and control-only BCs: no spec, no drift, no `Rn.m` of its own; how it is tested is the stack skill's call.
 - The spec **lives in the BC's package doc** (`package-info.java` with `///` Markdown, `package-info.md` for web, or the leading `///` doc comment of a single-file script), co-located with the code it governs — no separate `specs/` tree. In Java `javadoc` renders it, so one file is source-of-truth *and* published contract.
 - One capability spec ≡ one business component, named the same. No translation between "what" and "where".
 - The task list is the **gap**, read off `spec` vs `BC` on demand — never a hand-maintained tasks file.
