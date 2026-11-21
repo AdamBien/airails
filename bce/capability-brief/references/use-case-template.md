@@ -27,7 +27,8 @@ Use: run `/sbce new` on the file, or paste the body as the argument of `/sbce ne
 - responsibility: <one sentence: what the capability promises, from the system's side>
 
 ## Actors
-<!-- primary: who triggers it; supporting: only what this use case relies on, tagged as another
+<!-- primary: who triggers it, from outside the system — a person, an external system, a schedule;
+never another capability; supporting: only what this use case relies on, tagged as another
 capability or as external to the system -->
 - primary: <e.g. "a shopper">
 - supporting: <name> — capability `<name>` | external; <what this use case relies on it for>

@@ -167,6 +167,10 @@ brief it is inception input, not a source of truth.
 
 Guard: one capability ≡ one BC — output is 1..N package-doc specs, never a persisted feature artifact.
 
+Guard: every spec, and every op added to one, answers an actor outside the system — a person, an
+external system, a schedule. Functionality only other BCs call is realization: on any path, a brief
+included, write no spec and no op for it, say so, and leave it to `apply`.
+
 ### apply — converge
 
 Make reality match the declared spec — the "make it so" step. Idempotent.
@@ -177,7 +181,7 @@ Make reality match the declared spec — the "make it so" step. Idempotent.
 4. Else read the gap — both directions — and close it:
    - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
    - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
-   - **other BCs**: closing the gap may add or change `control` in another BC — never its spec or `boundary` — and a new control-only BC is proposed before it is created, then gets its package doc (shape: "Spec ↔ BC mapping"). Green covers every BC's tests.
+   - **other BCs**: closing the gap may add or change `control` in another BC — never its spec or `boundary` — and a new control-only BC is proposed before it is created, then gets its package doc (shape: "Spec ↔ BC mapping"). Where the system doc declares `## Components`: never add a call it forbids; a call it does not declare is reported like drift — the user declares it there or removes the call. Never edit the system doc to match code. Green covers every BC's tests.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 6. If the README carries `sbce:generated` markers, regenerate that slice from the system doc + package docs; touch nothing outside the markers.
 

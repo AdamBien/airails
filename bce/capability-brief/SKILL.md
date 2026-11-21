@@ -61,6 +61,7 @@ case or a user story, whatever the input's form — `/sbce new` reads only those
 | names only a solution — "add a message queue for orders", "we need an endpoint for X" | ask what someone should be able to do once it exists; continue from the answer |
 | spans several capabilities — "the whole HR portal" | list the capabilities found and ask which one to brief; the others go under `## Out of scope` or into later briefs — or hand the whole to `/system-brief`, which carves it once with the stakeholders and returns one line per capability |
 | describes no system behaviour, or is a bug report, a refactoring, or a technical task | say it is not a capability, and stop |
+| is called only by another capability — "pricing, used by checkout" | say it is not a capability of its own: it is realized inside the capability that calls it, and `/sbce apply` builds it there; offer to brief the calling capability, else stop |
 
 Long text is the risk, not short text. A one-liner is visibly incomplete and gets asked; a document
 looks complete and tempts you to read answers into it — "show the matching products" into an order
@@ -97,6 +98,7 @@ Run this before emitting; every row maps to a part of the spec that would otherw
 |---|---|
 | Capability name is one lowercase word; `kind` is `new` or `extends` a capability whose package doc exists | the spec's identity |
 | `responsibility` is one sentence from the system's side | the spec's `>` line |
+| The primary actor is outside the system — a person, an external system, a schedule — never another capability | a boundary someone outside the system reaches |
 | No responsibility overlaps an existing capability unless `kind: extends` it, it is a supporting actor, or the overlap is rejected under Decisions; no name clashes with an existing capability, operation or entity; every noun matches the ubiquitous language or is new, and a second meaning is recorded under Decisions | no duplicate BC, no overloaded term in the spec |
 | Every step where the primary actor addresses the system names a verb-noun operation; system-only steps name none | `## Boundary`, one op each |
 | Every input an operation carries lists its parts, the required ones, and what makes it invalid; its rejection names every invalid part unless an extension or scenario states another response | the `If…then` rows per operation |
