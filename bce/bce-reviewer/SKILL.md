@@ -52,7 +52,7 @@ Naming, BCs:
 - activity suffix (`-management`, `-processing`, `-handling`, `-service`) → the thing managed
 - name contradicted by the project's own vocabulary in at least two sources → `?` rename to the project's term
 - name narrower or broader than the BC's entities and public controls → `?` rename or split
-- no stated responsibility (`package-info.md` or spec missing) in a BC with more than one class → `?` write it
+- no stated responsibility (`package-info.md` or spec missing) → `?` write it
 - inconsistent form across BC names (singular/plural, case) → `?` one line for the set
 
 Naming, classes:

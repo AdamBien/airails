@@ -37,7 +37,7 @@ checkout                                      # BC name == the only identity
 - `## Requirements` (EARS) ↔ behaviour **and** the tests covering it.
 - `## Entities` ↔ the `entity` layer.
 - A spec'd BC always has a boundary: `new` realizes use cases — all-or-nothing functionality reachable from outside the system. `control`, this BC's or another's, is implementation: no spec section, no ops, no drift.
-- A control-only BC (`/bce`) is implementation too and carries no spec — every spec is one BC, not every BC has a spec.
+- A control-only BC (`/bce`) is implementation too and carries no spec — every spec is one BC, not every BC has a spec. Its package doc states its responsibility only; a package doc without `## Boundary` is not a spec.
 
 ## System doc (base package)
 
@@ -170,13 +170,13 @@ Guard: one capability ≡ one BC — output is 1..N package-doc specs, never a p
 
 Make reality match the declared spec — the "make it so" step. Idempotent.
 
-1. Locate the package doc (the spec); if missing, tell the user to run `/sbce new <bc-name>` first and stop.
+1. Locate the package doc (the spec); if missing, tell the user to run `/sbce new <bc-name>` first and stop. A doc without `## Boundary` belongs to a control-only BC — nothing to converge; report and stop.
 2. Resolve the stack (see above).
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → report "already converged" and go to 6.
 4. Else read the gap — both directions — and close it:
    - **spec → code** (this skill closes it): each undeclared boundary op → a `boundary` method; each untested statement id `Rn.m` → a traceable test via `/ears-tests` (it owns the test shape); then write code to pass them. Invoke `/bce` (invariants) + the stack skill (idioms).
    - **code → spec** (surface, never auto-author): a `boundary` method with no declared op, a test tracing an id no statement carries, an `entity` type absent from `## Entities` — report each as drift and keep closing the spec → code gap; drift blocks the converged verdict, nothing else. The user decides: declare it (`/sbce new` / extend the doc) or delete the orphan. Never edit the spec to match code.
-   - **other BCs**: closing the gap may add or change `control` in another BC — never its spec or `boundary` — and a new control-only BC is proposed before it is created. Green covers every BC's tests.
+   - **other BCs**: closing the gap may add or change `control` in another BC — never its spec or `boundary` — and a new control-only BC is proposed before it is created, then gets a package doc stating its responsibility. Green covers every BC's tests.
 5. Re-run. Repeat 3–5, bounded to **≤3 passes**, then surface remaining failures/drift to the user.
 6. If the README carries `sbce:generated` markers, regenerate that slice from the system doc + package docs; touch nothing outside the markers.
 

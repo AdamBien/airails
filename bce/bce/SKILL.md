@@ -49,7 +49,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 
 ## Documentation
 
-- a BC's package doc states its responsibility and design decisions, never its contents; the stack skill names the file and format
+- every BC has a package doc; it states the BC's responsibility and design decisions, never its contents; the stack skill names the file and format
 - never restate the BCE pattern in generated documentation
 
 ## Composition with Other Skills
