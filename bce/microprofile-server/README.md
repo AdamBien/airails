@@ -9,6 +9,7 @@ An [AIrails.dev](https://airails.dev) skill defining architecture and coding rul
 - JSON-P preferred over JSON-B; `toJSON` / `fromJSON` on record entities
 - Testing conventions: unit, integration (`*IT`), and system tests in a dedicated `-st` module using microprofile-rest-client
 - Maven project structure
+- Platform: Java 25, Jakarta EE 10+ (`jakarta.*` namespace), MicroProfile 6+; exact versions from the project's BOM
 - Minimal dependencies (Java SE → MicroProfile → Jakarta EE)
 - OTEL / OpenTelemetry for metrics and observability
 - Blocking code on virtual threads; no reactive APIs unless explicitly requested

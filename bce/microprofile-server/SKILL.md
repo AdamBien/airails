@@ -10,6 +10,12 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - compose with `readme` for README conventions
 - this skill specializes only the MicroProfile / Jakarta EE server context
 
+## Platform
+- Java 25, as `java-conventions` defines it
+- Jakarta EE 10 or later: EE APIs live in the `jakarta.*` namespace, never `javax.*` — older examples and tutorials still use the `javax.*` names and do not compile against the current APIs; `javax.*` packages of the JDK itself (`javax.sql`, `javax.crypto`) are unaffected
+- MicroProfile 6 or later: MicroProfile OpenTracing is gone, MicroProfile Telemetry (OTEL) replaces it
+- the exact specification and runtime versions come from the project's BOM in `pom.xml` — read it before using a version-specific API; never assume a version and never change one (see Project Management)
+
 ## Dependencies
 - prefer dependencies in this order: Java SE, MicroProfile, Jakarta EE — an API the platform already ships adds nothing to the build, the image, or the upgrade path; a third-party library is the last resort
 
