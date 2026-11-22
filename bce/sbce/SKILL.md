@@ -175,7 +175,9 @@ included, write no spec and no op for it, say so, and leave it to `apply`.
 
 Make reality match the declared spec — the "make it so" step. Idempotent.
 
-1. Locate the package doc (the spec); if missing, tell the user to run `/sbce new <bc-name>` first and stop. A doc without `## Boundary` belongs to a control-only BC — nothing to converge; report and stop.
+1. Locate the package doc; if missing, tell the user to run `/sbce new <bc-name>` first and stop. With `## Boundary` it is the spec — continue. Without it:
+   - the BC has a `boundary` layer, or the doc carries `## Requirements` → not a spec yet; point to `/sbce new <bc-name>` and stop.
+   - otherwise the BC is control-only → nothing to converge; report it, name a doc that lacks the title-plus-responsibility shape, and stop.
 2. Resolve the stack (see above).
 3. Run the stack's test loop. Green **and** no structural gap **in either direction** → report "already converged" and go to 6.
 4. Else read the gap — both directions — and close it:
