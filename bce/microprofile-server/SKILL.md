@@ -77,5 +77,5 @@ description: Architecture and coding rules for long-running Java MicroProfile / 
 - on opening existing projects, load AGENTS.md (if present) before making changes
 - do not create or change any files on opening existing projects
 - do not generate code initially in an empty project
-- never use quarkus-hibernate-validator
+- prefer explicit validation in code over quarkus-hibernate-validator (Bean Validation annotations) — as with JSON-P over JSON-B, the explicit check gives control over the response and its message; a constraint violation produces the framework's generic report
 - create metrics and observability features with OTEL / opentelemetry — one vendor-neutral API for traces, metrics, and logs, and the basis of MicroProfile Telemetry
