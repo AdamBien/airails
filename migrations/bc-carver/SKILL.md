@@ -21,7 +21,8 @@ No mining, no new concepts. Vocabulary missing here is an extractor defect — s
 - Homonym splits settled by the clarifier are the strongest boundary signals — a word that means two things marks two components.
 - Name each BC with one canonical glossary term as a single lowercase token (`contracts`, `pricing`) — this is the future sbce BC name.
 - Give each BC a one-line responsibility phrased in glossary language. If the line needs "and", reconsider the cut.
-- Inter-BC references are directed (`uses`); cycles between candidates are a carving error, not a documentation fact.
+- Inter-BC references are directed (`uses`) and may run in both directions — `/bce` allows mutual dependencies, including entity-to-entity references. Record a mutual `uses` on both components; never bend the cut to make the graph acyclic.
+- Coupling, not direction, is the carving signal: excessive references between two candidates mean merge, split, or rebalance (`/bce`) — raise it as an Open Question with the candidate cuts, not as a settled `uses`.
 
 ## CARVING.md Format
 
