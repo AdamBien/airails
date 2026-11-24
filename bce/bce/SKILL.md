@@ -9,6 +9,7 @@ description: Generic, composable architecture rules for the Boundary-Control-Ent
 - Jacobson's stereotypes classify the analysis objects of a single use case; here they are the layers of a business component and map to packages — the reading documented at bce.design
 - the unit of organization is the business component (BC): it owns one responsibility and consists of the layers boundary, control, entity — only those it needs
 - dependencies point downward only: boundary may use control and entity, control may use entity; never upward
+- the direction holds across BCs: boundary and control may use another BC's control and entity, an entity only another BC's entity; another BC's boundary is never used — it is the entry point from outside the system, not an inter-BC API
 
 ## Package / Directory Structure
 
