@@ -12,6 +12,7 @@ This skill is picked on demand: when the request names no persistence technology
 
 - Jakarta Persistence 3.2, the release for Jakarta EE 11 — a floor above the `/microprofile-server` platform rule; before using an API marked (3.2) below, read the managed `jakarta.persistence-api` version from the effective POM (`mvn help:effective-pom`, which resolves an imported BOM), and when it is older, stay within that version and never change it without asking
 - code imports `jakarta.persistence.*` only, never a provider package (`org.hibernate.*`, `org.eclipse.persistence.*`) — the provider is a runtime decision; provider settings live in configuration, never in annotations or code
+- the rules below name the specification only; the artifacts, configuration keys, and test support of a runtime live in its reference — Quarkus: [references/quarkus.md](references/quarkus.md), read before changing build, configuration, or tests; a runtime without a reference gets the specification's own means, named where they differ
 - server only: a `/java-cli-app` persists with `/jdbc-persistence` — a provider and its transitive dependencies contradict the zero-dependency build
 
 ## Principle
@@ -47,7 +48,7 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 ## Boundary and Control
 
-- both obtain the `EntityManager` the same way: `@Inject EntityManager em;`; a runtime that does not offer it to `@Inject` uses `@PersistenceContext EntityManager em;`
+- both obtain the `EntityManager` the same way: `@Inject EntityManager em;` where the runtime reference offers it, otherwise `@PersistenceContext EntityManager em;`
 - plain operations in the boundary: `this.em.persist(order)` — the instance is managed and carries its id afterwards; `this.em.find(Order.class, id)`, answered with `NotFoundException` when `null`; `this.em.createNamedQuery(Order.ALL, Order.class).getResultList()`; `this.em.remove(order)` on the found entity
 - full replacement (a PUT carrying the complete representation): `this.em.merge(order)` — the returned instance is the managed one, the argument stays detached and is not used afterwards; an unknown id is answered with `NotFoundException` before the merge, since what `merge` does with one is not relied on
 - a partial change: the boundary finds the entity and calls its method; the provider writes the difference at commit
@@ -79,26 +80,24 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 - the Schema rules of `/jdbc-persistence` apply unchanged: hand-written DDL for the target DBMS (PostgreSQL unless the request or the project names another), one Flyway migration per BC per change (`db/migration/V<yyyyMMddHHmm>__<bc>_<change>.sql`), every constraint and index named — `pk_<table>`, `uq_<table>_<column>`, `fk_<table>_<referenced_table>`, `ck_<table>_<rule>`, `ix_<table>_<column>` — because the conflict message (see Exceptions) carries exactly that name; every foreign key column is indexed
 - the agent derives the **first** migration from the entities with the Type Mapping of `/jdbc-persistence`, one column per persistent field; from then on a schema change starts in SQL and the entity follows
-- the provider validates and never generates: `quarkus.hibernate-orm.schema-management.strategy=validate`; never `drop-and-create`, `create`, or `update`, in any profile — the tests run against the migrations that production runs; `validate` compares tables, columns, and types only, so constraints are covered by the round-trip and conflict tests
+- the provider validates and never generates: the runtime's schema strategy is validation, never a creating or updating one, in any profile — the tests run against the migrations that production runs; a runtime without such a setting calls `EntityManagerFactory.getSchemaManager().validate()` (3.2) at startup; validation compares tables, columns, and types only, so constraints are covered by the round-trip and conflict tests
 - no schema-generation members on mapping annotations (`length`, `unique`, `columnDefinition`, `@Index`, `@CheckConstraint`, `@ForeignKey`) — nothing generates DDL from them, so they are an unchecked second copy of the migration; `optional = false` on a to-one association stays, because it changes the generated join
 - constraints mirror the invariants the entity's constructor and methods check, as in `/jdbc-persistence`, and the entity checks what a column bounds (`VARCHAR(n)` length, `NUMERIC(p, s)` precision and scale)
 
-## Configuration and Drivers
+## Configuration
 
-- Quarkus: `quarkus-hibernate-orm` (it brings the transaction manager), the JDBC extension of the target DBMS (`quarkus-jdbc-postgresql` and friends), `quarkus-flyway`, and the Flyway module of that DBMS (`quarkus-flyway-postgresql`) — without it Flyway finds no plugin for the JDBC URL
-- ask before changing `pom.xml`, once, with every build change in the one question — including AssertJ as a test dependency when the module lacks it
-- the persistence unit is configured in `application.properties`, no `persistence.xml`: `quarkus.datasource.db-kind`, `quarkus.hibernate-orm.schema-management.strategy=validate`, `quarkus.flyway.migrate-at-start=true`
-- another Jakarta EE runtime: `META-INF/persistence.xml` in version 3.2 with a `jta-data-source`
-- connection coordinates come from the environment (`QUARKUS_DATASOURCE_*`), never from a committed URL line — it would also switch off Dev Services; the password never lands in a source file
+- the persistence unit uses a JTA data source, so the provider's connections join the boundary's transaction; without a runtime reference that is `META-INF/persistence.xml` in version 3.2 with a `jta-data-source`
+- ask before changing `pom.xml`, once, with every build change in the one question: the provider, the JDBC driver, Flyway with its module for the DBMS, a missing test dependency
+- connection coordinates come from the environment, never from a committed configuration line; the password never lands in a source file
 
 ## Health
 
-- a database-backed BC needs a readiness check that proves the pool hands out a working connection; this skill writes none — the runtime provides it (Quarkus registers a datasource readiness check through `quarkus-smallrye-health`) and `/microprofile-server` owns any custom `@Readiness` check
+- a database-backed BC needs a readiness check that proves the pool hands out a working connection; this skill writes none — the runtime provides it (see its reference) and `/microprofile-server` owns any custom `@Readiness` check
 
 ## Testing
 
-- mapping, queries, and controls are tested against the **same DBMS** as production: `@QuarkusTest` with Dev Services, schema applied by the Flyway migrations; these are integration tests in `/microprofile-server` terms (`IT` suffix, failsafe)
-- the test class carries `@TestTransaction` — a control needs the transaction a boundary would open, and the rollback removes the rows
+- mapping, queries, and controls are tested against the **same DBMS** as production, started and migrated by the runtime's test support (see its reference); these are integration tests in `/microprofile-server` terms (`IT` suffix, failsafe)
+- every test runs in a transaction that is rolled back at its end — a control needs the transaction a boundary would open, and the rollback removes the rows
 - the mapping is tested through a round trip on an injected `EntityManager`: `persist`, `flush()`, `clear()`, `find`; the reloaded entity is another instance, so assert `reloaded.toJSON()` equal to `saved.toJSON()` — one assertion over every serialized field, and independent of the fields a provider adds to an entity class
 - the conflict translation is tested once per BC: the second `save` of a duplicate throws `ClientErrorException`; it is the last database call of its test, because the DBMS aborts the transaction after the violation
 - a test that was skipped has not passed: when the build skips integration tests or no container runtime is available, run them explicitly or report that the mapping is unverified
@@ -106,7 +105,7 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 ## Checklist Before Finishing
 
-- the application starts with `validate` against the migrations
+- the mapping validates against the migrated schema at startup
 - no to-one association without `fetch = FetchType.LAZY`; no `EAGER` anywhere
 - no provider import, no control method that only forwards to the `EntityManager`, no `merge` of a new or partially filled entity
 - every write the client can make conflict runs `persist` or `merge` and `flush` inside the translating `try`

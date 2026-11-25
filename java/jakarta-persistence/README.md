@@ -11,8 +11,9 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying entities
 - Lazy associations throughout; fetching stated per query with `join fetch`
 - Boundary-owned unit of work: `@Transactional` on the class or the `@Boundary` stereotype
 - Conflicts translated once, in the control, after an explicit `flush()`: SQLState `23505` / `23503` and `OptimisticLockException` become `ClientErrorException(CONFLICT)`, everything else `InternalServerErrorException`
-- Flyway migrations per BC with named constraints, as in `jdbc-persistence`; the provider runs with `validate` and never generates the schema
-- Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services and `@TestTransaction`
+- Flyway migrations per BC with named constraints, as in `jdbc-persistence`; the provider validates the mapping against it and never generates the schema
+- Round-trip tests against the production DBMS, each inside a rolled-back transaction
+- Runtime specifics kept out of the rules: Quarkus extensions, configuration keys, `@QuarkusTest`, and `@TestTransaction` in [references/quarkus.md](references/quarkus.md)
 - `jakarta.persistence.*` imports only; 3.2 APIs used only when the project's BOM resolves 3.2
 
 Picked on demand: on JPA wording in the request or an existing provider dependency. An unqualified request to persist uses [`memory-persistence`](../memory-persistence). Not for plain SQL — use [`jdbc-persistence`](../jdbc-persistence). Not for CLI applications and not for NoSQL stores.
