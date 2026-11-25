@@ -24,7 +24,7 @@ Data-Oriented Programming applied to the relational store: the record **is** the
   - `/java-cli-app`: the boundary opens the connection (`DriverManager.getConnection(url, user, password)` or a driver `DataSource`), sets `setAutoCommit(false)`, passes the connection to the controls, commits; a thrown exception rolls back in a `catch` and rethrows. A read-only query may run with auto-commit; a boundary method that writes never does
 - connection coordinates come from configuration, never from literals: `quarkus.datasource.*` / MicroProfile Config on the server, `/zcfg` keys (`db.url`, `db.user`, `db.password`) in a CLI; the password never lands in a source file
 - the schema belongs to the BC: each BC ships its own DDL; a table is owned by exactly one BC
-- a reference to another BC is an `id` component in the referencing record, backed by a real `FOREIGN KEY` (see Schema); never a nested record of the other BC's entity; a join across BC boundaries is confined to read-only projections and is a coupling signal
+- a reference to another BC is stored as an `id` column backed by a real `FOREIGN KEY` (see Schema), so the persisted record carries the `id` component — the row shape, not a ban on entity references, which `/bce` allows; a record that carries the other BC's entity is a read-only projection, filled by a cross-BC join through that entity's `fromResultSet`; the other BC's table is never written, and a cross-BC join stays a coupling signal
 
 ## Control Functions
 
