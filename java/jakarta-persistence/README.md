@@ -5,10 +5,11 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying entities
 ## Scope
 
 - `@Entity` classes in `entity` with field access, package-private fields, state-changing methods instead of setters, `toJSON()` / `fromJSON`; record `@Embeddable`s, record primary key classes, record projections
-- Controls named after responsibilities, `@ApplicationScoped` CDI beans with an injected `EntityManager`: `save` (`persist`), `update` (`merge`, full replacement only), `findById`, `remove`, named query methods; a partial change is a method call on the managed entity, written at commit
+- `EntityManager` injected into the boundary for plain create, read, replace (`merge`, full replacement only), and remove; a partial change is a method call on the managed entity, written at commit
+- Controls only where they add to the `EntityManager` call: conflict handling, operations other BCs call, logic across entities; named after responsibilities, no repositories
 - JPQL in text blocks as named queries, typed execution, named parameters, `getSingleResultOrNull()`, constructor-expression projections
 - Lazy associations throughout; fetching stated per query with `join fetch` or an entity graph
-- Boundary-owned unit of work: `@Transactional` on the class or the `@Boundary` stereotype; the boundary never sees the `EntityManager`
+- Boundary-owned unit of work: `@Transactional` on the class or the `@Boundary` stereotype
 - Conflicts translated once, in the control, after an explicit `flush()`: SQLState `23505` / `23503` and `OptimisticLockException` become `ClientErrorException(CONFLICT)`, everything else `InternalServerErrorException`
 - Flyway migrations per BC with named constraints, as in `jdbc-persistence`; the provider runs with `validate` and never generates the schema
 - Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services and `@TestTransaction`
@@ -30,7 +31,7 @@ graph TD
 
 ## Usage
 
-Activated when a MicroProfile server project persists with Jakarta Persistence: adding entities, associations, JPQL queries, or an `EntityManager`-backed control. The rules in [SKILL.md](SKILL.md) guide generation and review.
+Activated when a MicroProfile server project persists with Jakarta Persistence: adding entities, associations, JPQL queries, or `EntityManager` access in a boundary or control. The rules in [SKILL.md](SKILL.md) guide generation and review.
 
 ## Example
 

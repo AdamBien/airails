@@ -1,6 +1,6 @@
 ---
 name: jakarta-persistence
-description: 'Persist and query entities with Jakarta Persistence 3.2 (JPA) in MicroProfile / Jakarta EE servers: `@Entity` classes with field access and behavior, record embeddables and projections, JPQL named queries, an `EntityManager` in the control under a `@Transactional` boundary, a Flyway-owned schema the mapping is validated against. Use on demand — when the request names "JPA", "Jakarta Persistence", "EntityManager", "@Entity", "JPQL", "persistence unit", "ORM", or "Hibernate", or when the project already depends on a Jakarta Persistence provider. Not the default for an unqualified "add persistence" — use `/memory-persistence`. Not for plain SQL — use `/jdbc-persistence`. Not for CLI applications or NoSQL.'
+description: 'Persist and query entities with Jakarta Persistence 3.2 (JPA) in MicroProfile / Jakarta EE servers: `@Entity` classes with field access and behavior, record embeddables and projections, JPQL named queries, the `EntityManager` in the `@Transactional` boundary with controls only where they add logic, a Flyway-owned schema the mapping is validated against. Use on demand — when the request names "JPA", "Jakarta Persistence", "EntityManager", "@Entity", "JPQL", "persistence unit", "ORM", or "Hibernate", or when the project already depends on a Jakarta Persistence provider. Not the default for an unqualified "add persistence" — use `/memory-persistence`. Not for plain SQL — use `/jdbc-persistence`. Not for CLI applications or NoSQL.'
 argument-hint: "[BC or entity to persist]"
 ---
 
@@ -26,9 +26,9 @@ The persistence context is the state of the unit of work: an entity loaded insid
 ## Placement (BCE)
 
 - `entity` — the `@Entity` classes, their `@Embeddable` records, and the projection records; the only layer that carries mapping annotations
-- `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Store`; a control holds the `EntityManager`, the persist and remove calls, and the query executions for the entities it answers for; no Panache, no Jakarta Data repository interface, no generic `Crud<T>` base class — each replaces the responsibility-named control with a technical one
-- `boundary` — owns the unit of work: `@Transactional` on the class or the project's `@Boundary` stereotype (`/microprofile-server`), one transaction per call, several control calls inside it; it never sees an `EntityManager` and contains no JPQL
-- a reference to another BC's entity is a unidirectional `@ManyToOne(fetch = FetchType.LAZY)` or a plain id field, either one backed by the `FOREIGN KEY` the referencing BC's migration declares (see Schema); no `cascade` and no `orphanRemoval` across BCs — the other BC's control writes its own table; an association mapped from both BCs (`mappedBy` in the other BC's entity) is the coupling signal `/bce` names
+- `boundary` — owns the unit of work: `@Transactional` on the class or the project's `@Boundary` stereotype (`/microprofile-server`), one transaction per call; for plain create, read, replace, and remove it injects the `EntityManager` and calls it directly — the `EntityManager` is already the persistence facade, and a control that only forwards to it is the empty delegate `/java-conventions` rules out; storing and finding an entity is not the business logic `/microprofile-server` keeps out of a resource; JPQL text stays on the entity as named queries, never in the boundary
+- `control` — exists only where it adds something to the `EntityManager` call: a write the client can make conflict (see Exceptions), an operation another BC calls (another BC never uses a boundary — `/bce`), logic across several entities, a query assembled from runtime clauses; named after its responsibility (`Customers`, `OrderReports`), never `*Repository`, `*Dao`, `*Store`; no Panache, no Jakarta Data repository interface, no generic `Crud<T>` base class — each puts a technical type where the `EntityManager` or a responsibility-named control belongs
+- a reference to another BC's entity is a unidirectional `@ManyToOne(fetch = FetchType.LAZY)` or a plain id field, either one backed by the `FOREIGN KEY` the referencing BC's migration declares (see Schema); no `cascade` and no `orphanRemoval` across BCs — the other BC writes its own table; an association mapped from both BCs (`mappedBy` in the other BC's entity) is the coupling signal `/bce` names
 
 ## Entities
 
@@ -49,14 +49,15 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - `@Version` only when the spec asks for lost-update protection
 - no `equals`/`hashCode` by default — inside one persistence context an entity is one instance; an entity kept in a `Set` or compared across transactions defines them over an immutable business key, never over the generated id
 
-## Control
+## Boundary and Control
 
-- an `@ApplicationScoped` CDI bean with `@Inject EntityManager em;`; a runtime that does not offer the `EntityManager` to `@Inject` uses `@PersistenceContext EntityManager em;`
-- a control offers only the operations the request needs; where they exist, their shape matches the sibling skills as far as the persistence context allows: `save(Order order)` calls `persist` and returns the same, now managed, instance carrying its id; `findById(long id)` returns `Optional.ofNullable(this.em.find(Order.class, id))`; queries return `List`, empty, never `null`; `remove(long id)` loads, removes, and returns whether something was removed
-- `update(Order order)` is the full replacement (a PUT carrying the complete representation): `return this.em.merge(order);` — the returned instance is the managed one, the argument stays detached and is not used afterwards; the boundary answers an unknown id with `NotFoundException` before calling `update`, since what `merge` does with one is not relied on
-- a partial change needs no control method unless it can conflict — the boundary loads the entity and calls its method, and the provider writes the difference at commit
-- a state change the client can make conflict (see Exceptions) is a control method: it receives the managed entity the boundary loaded, calls the entity's method, and flushes
-- never in a control: `merge` of a new or a partially filled entity, `getTransaction()`, `clear()`, `refresh()`, an `EntityManagerFactory`, commit or rollback
+- both obtain the `EntityManager` the same way: `@Inject EntityManager em;`; a runtime that does not offer it to `@Inject` uses `@PersistenceContext EntityManager em;`
+- plain operations in the boundary: `this.em.persist(order)` — the instance is managed and carries its id afterwards; `this.em.find(Order.class, id)`, answered with `NotFoundException` when `null`; `this.em.createNamedQuery(Order.ALL, Order.class).getResultList()`; `this.em.remove(order)` on the found entity
+- full replacement (a PUT carrying the complete representation): `this.em.merge(order)` — the returned instance is the managed one, the argument stays detached and is not used afterwards; an unknown id is answered with `NotFoundException` before the merge, since what `merge` does with one is not relied on
+- a partial change: the boundary finds the entity and calls its method; the provider writes the difference at commit
+- a control method, where one exists, has the shape of the sibling skills: `save(Order order)` returns the managed instance with its id, `update(Order order)` returns the merged one, `findById(long id)` returns `Optional`, queries return `List`, empty, never `null`; a state change the client can make conflict (see Exceptions) receives the managed entity the boundary found, calls the entity's method, and flushes
+- an operation moves from the boundary into a control when it gains one of the reasons in Placement; it never exists in both
+- never: `merge` of a new or a partially filled entity, `getTransaction()`, `clear()`, `refresh()`, an `EntityManagerFactory`, commit or rollback
 
 ## Queries
 
@@ -64,21 +65,21 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - typed execution: `this.em.createNamedQuery(Order.OPEN, Order.class)`; where the project already generates the static metamodel, `this.em.createQuery(reference)` with its `TypedQueryReference` (3.2); adding the metamodel processor is a `pom.xml` change — ask
 - parameters are named (`:status`) and bound with `setParameter`; a dynamic clause selects between named queries through an enum or a `switch`, never through string concatenation; the Criteria API only when clauses combine at runtime beyond what a handful of named queries cover
 - a lookup that may find nothing: `Optional.ofNullable(query.getSingleResultOrNull())` (3.2); `NoResultException` is never caught to steer logic
-- projections (a report row, a count with a name, a dropdown entry) are records in `entity`, filled by a constructor expression — `select new airhacks.orders.entity.OrderSummary(o.id, o.total) from Order o`; no `Object[]` or `Tuple` leaves the control, and no entity is loaded to read two of its fields
+- projections (a report row, a count with a name, a dropdown entry) are records in `entity`, filled by a constructor expression — `select new airhacks.orders.entity.OrderSummary(o.id, o.total) from Order o`; no `Object[]` or `Tuple` leaves the method that ran the query, and no entity is loaded to read two of its fields
 - fetching: a query whose result is navigated across an association states it — `join fetch`, or an entity graph passed as a hint; never one query per parent; a to-many `join fetch` is not combined with paging — the provider would page in memory
 - bulk JPQL `update` and `delete` bypass the persistence context — use them only when no affected entity is managed in the same transaction
 - JPQL covers `union`, `intersect`, `except`, `cast`, `left`, `right`, `replace`, and `||` (3.2); a query that still needs native SQL is a signal to ask whether that BC belongs to `/jdbc-persistence`
 
 ## Exceptions
 
-- a constraint violation surfaces when the provider executes the statement: inside `persist` for an identity column, otherwise at flush, by default at commit — after the control has returned and outside any `catch`; left there, a duplicate ends as a rollback and a 500
-- a write the client can make conflict (a unique column, a foreign key to a row that may be gone) therefore runs `persist`, `merge`, or the entity's method **and** `this.em.flush()` inside one `try` in the control method and translates the `PersistenceException` at that point, directly into the exception the stack understands; the original exception travels as the cause
+- a constraint violation surfaces when the provider executes the statement: inside `persist` for an identity column, otherwise at flush, by default at commit — after the boundary method has returned and outside any `catch`; left there, a duplicate ends as a rollback and a 500
+- a write the client can make conflict (a unique column, a foreign key to a row that may be gone) therefore runs `persist`, `merge`, or the entity's method **and** `this.em.flush()` inside one `try` in a control method — the reason that write lives in a control — and translates the `PersistenceException` at that point, directly into the exception the stack understands; the original exception travels as the cause
 - the translation is one package-private `static` function per BC in the control package — on the control when the BC has one, otherwise in an interface named after the responsibility (`Conflicts`): it walks the cause chain to the `SQLException` and switches over `getSQLState()` — `23505` (unique) and `23503` (foreign key) become `ClientErrorException(message, Response.Status.CONFLICT, cause)` with the message naming the kind and the constraint (`duplicate: uq_customer_email`, `unknown reference: fk_order_customer`); everything else becomes `InternalServerErrorException(cause)`; the same mapping as `/jdbc-persistence`, so no cast to a provider exception type
 - the constraint name is taken from the driver's message with a one-line regex in that function, never with a parsing library
 - `OptimisticLockException` becomes `ClientErrorException(Response.Status.CONFLICT)`
 - both are `WebApplicationException`s (`/microprofile-server`): the JAX-RS runtime answers 409 or 500, `@Transactional` rolls back, the boundary catches nothing, and no `ExceptionMapper` is written
-- a missing entity is the boundary's decision: `findById(id).orElseThrow(NotFoundException::new)`, also before it hands the entity to a state-changing control method
-- create-or-update is `find`, then `persist` or `update`, inside one transaction; under concurrency the unique constraint decides and the client receives the 409
+- a missing entity is the boundary's decision — `NotFoundException` when `find` returns `null` — also before it hands the entity to a state-changing control method
+- create-or-update is `find`, then `persist` or `merge`, inside one transaction; under concurrency the unique constraint decides and the client receives the 409
 
 ## Schema
 
@@ -103,9 +104,9 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 ## Testing
 
-- controls are tested against the **same DBMS** as production: `@QuarkusTest` with Dev Services, schema applied by the Flyway migrations; these are integration tests in `/microprofile-server` terms (`IT` suffix, failsafe)
-- the test class carries `@TestTransaction` — the control needs the transaction a boundary would open, and the rollback removes the rows
-- the mapping is tested through a round trip: `save`, then `flush()` and `clear()` on an injected `EntityManager`, then `findById`; the reloaded entity is another instance, so assert `reloaded.toJSON()` equal to `saved.toJSON()` — one assertion over every serialized field, and independent of the fields a provider adds to an entity class
+- mapping, queries, and controls are tested against the **same DBMS** as production: `@QuarkusTest` with Dev Services, schema applied by the Flyway migrations; these are integration tests in `/microprofile-server` terms (`IT` suffix, failsafe)
+- the test class carries `@TestTransaction` — a control needs the transaction a boundary would open, and the rollback removes the rows
+- the mapping is tested through a round trip on an injected `EntityManager`: `persist`, `flush()`, `clear()`, `find`; the reloaded entity is another instance, so assert `reloaded.toJSON()` equal to `saved.toJSON()` — one assertion over every serialized field, and independent of the fields a provider adds to an entity class
 - a query test seeds three or four entities and asserts the exact result with `containsExactly`
 - the conflict translation is tested once per BC: the second `save` of a duplicate throws `ClientErrorException`; it is the last database call of its test, because the DBMS aborts the transaction after the violation
 - a test that was skipped has not passed: when the build skips integration tests or no container runtime is available, run them explicitly or report that the mapping is unverified
@@ -115,12 +116,12 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 - the application starts with `validate` against the migrations
 - no to-one association without `fetch = FetchType.LAZY`; no `EAGER` anywhere
-- no provider import, no `EntityManager` outside a control, no `merge` of a new or partially filled entity
+- no provider import, no control method that only forwards to the `EntityManager`, no `merge` of a new or partially filled entity
 - every write the client can make conflict runs `persist` or `merge` and `flush` inside the translating `try`
 - a round-trip test exists for every entity and was executed, not skipped
 
 ## Composition
 
-- `/sbce`: an entity and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
+- `/sbce`: an entity and the code that persists it are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
 - `/jdbc-persistence` is the plain-SQL sibling with the same placement, schema, and conflict mapping; this skill reads its Schema section (Type Mapping, Constraints and Indexes) instead of restating it, so the two are installed together; a BC uses one of the two, never both — the persistence context does not see rows written through a `DataSource`
-- `/memory-persistence` is the default start; a BC that began there migrates by turning its records into entity classes, replacing the control class — `save`, `update`, and `findById` keep their signatures — and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
+- `/memory-persistence` is the default start; a BC that began there migrates by turning its records into entity classes, replacing a control that only stored and found with the `EntityManager` in the boundary — a control with logic keeps its `save`, `update`, and `findById` signatures — and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
