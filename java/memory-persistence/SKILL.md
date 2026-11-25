@@ -20,6 +20,7 @@ The store is a collection of immutable records. No entity lifecycle, no identity
 - `entity` — the records and sealed interfaces, unchanged from `/jdbc-persistence`
 - `control` — classes named after their responsibilities (`Customers`, `OrderReports`), never `*Repository`, `*Store`, `*InMemory*`; the storage technology does not appear in the name because the boundary must not know it; a control may hold more than one map when it owns more than one record type
 - `boundary` — injects or receives the control; no collection, no stream over stored data
+- a reference to another BC is an `id` component in the stored record, exactly as `/jdbc-persistence` stores it — the shape that survives the migration, not a ban on entity references, which `/bce` allows; a record that carries the other BC's entity is a read-only projection, assembled in a query by resolving the id through the other BC's control; the other BC's collection is never reached, and `save` rejects an unknown id with the integrity exception (see Control), as the foreign key would
 
 ## Control
 
