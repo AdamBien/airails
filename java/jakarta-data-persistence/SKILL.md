@@ -69,9 +69,10 @@ A repository method is one statement, executed when it is called. There is no pe
 
 - a statement runs inside the repository call, so a constraint violation surfaces there, as a `jakarta.data.exceptions.DataException` — no flush is needed to reach it
 - the exception type does not name the violation: `@Insert` reports every constraint violation as `EntityExistsException`, a foreign key to a missing row included, while `@Update` and `@Delete` report the same violations as a plain `DataException`; the type is therefore never used to tell them apart
-- a write the client can make conflict (a unique column, a foreign key to a row that may be gone, a row another row still references) is a `default` method on the repository: it calls the annotated method inside a `try` and translates the `DataException`; the annotated method is named after the statement (`insert`), the `default` method keeps the contract name (`save`), and the boundary calls only the latter
+- a write the client can make conflict (a unique column, a foreign key to a row that may be gone, a row another row still references, a `@Version`) is a `default` method on the repository: it calls the annotated method inside a `try` and translates the `DataException`; the `default` method keeps the contract name, the annotated method takes the name of what the statement does — `insert` behind `save`, `replace` behind `update`, `delete` behind `remove` — and the boundary calls only the contract name; a write that cannot conflict stays the annotated method under its contract name
 - the translation is the one of `/jakarta-persistence`: one `static` function per BC, in a package-private interface of the control package named after the responsibility (`Conflicts`); it walks the cause chain to the `SQLException` and switches over `getSQLState()` — `23505` (unique) and `23503` (foreign key) become `ClientErrorException(message, Response.Status.CONFLICT, cause)` with the message naming the kind and the constraint (`duplicate: uq_customer_email`, `unknown reference: fk_order_customer`); everything else becomes `InternalServerErrorException(cause)`
-- `OptimisticLockingFailureException` comes from `@Update` or `@Delete` of an entity whose row is gone or whose `@Version` has moved; the function turns it into `ClientErrorException(Response.Status.CONFLICT)`; an unknown id is not detected this way — the boundary answers `NotFoundException` when `findById` returns empty, before it updates
+- `23503` names two opposite faults and does not tell which: behind an insert or update the referenced row is missing, behind a delete the row is still referenced; the `default` method of a delete therefore calls a second function of the same interface (`Conflicts.translateDelete`) that differs in this one message — `still referenced: fk_order_customer`
+- `OptimisticLockingFailureException` comes from `@Update` or `@Delete` of an entity whose row is gone or whose `@Version` has moved; the function turns it into `ClientErrorException(Response.Status.CONFLICT)`; an unknown id is not left to it — the boundary answers `NotFoundException` when `findById` returns empty, before it updates, so the exception remains for a row that was removed or changed between that read and the update
 - both results are `WebApplicationException`s (`/microprofile-server`): the JAX-RS runtime answers 409 or 500, `@Transactional` rolls back, the boundary catches nothing, and no `ExceptionMapper` is written; an untranslated `DataException` ends as a 500
 
 ## Schema, Configuration, Health
@@ -85,7 +86,7 @@ A repository method is one statement, executed when it is called. There is no pe
 - every test runs in a transaction that is rolled back at its end
 - the mapping is tested through a round trip on the injected repository: `save`, then `findById`; the found entity is another instance without any clearing, so assert `reloaded.toJSON()` equal to `saved.toJSON()`
 - every `@Query` method is executed once with a row that matches — the only check of the attribute names in its text
-- the conflict translation is tested once per BC: the second `save` of a duplicate throws `ClientErrorException`; it is the last database call of its test, because the DBMS aborts the transaction after the violation
+- the conflict translation is tested once per BC: the second `save` of a duplicate throws `ClientErrorException`; a translated delete is tested the same way, by removing a row another row references; each is the last database call of its test, because the DBMS aborts the transaction after the violation
 - a test that was skipped has not passed: when the build skips integration tests or no container runtime is available, run them explicitly or report that the mapping and the queries are unverified
 - system tests stay black box: they exercise the boundary over HTTP and never read the tables (`/system-tests`)
 
@@ -108,7 +109,7 @@ public interface Coffees {
     Coffee insert(Coffee coffee);
 
     @Update
-    Coffee update(Coffee coffee);
+    Coffee replace(Coffee coffee);
 
     @Delete
     void remove(long id);
@@ -135,6 +136,14 @@ public interface Coffees {
     default Coffee save(Coffee coffee) {
         try {
             return insert(coffee);
+        } catch (DataException e) {
+            throw Conflicts.translate(e);
+        }
+    }
+
+    default Coffee update(Coffee coffee) {
+        try {
+            return replace(coffee);
         } catch (DataException e) {
             throw Conflicts.translate(e);
         }
