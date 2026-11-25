@@ -8,6 +8,8 @@ Add Jakarta Persistence using $ARGUMENTS. Apply all rules below strictly; `/bce`
 
 This skill is picked on demand: when the request names no persistence technology and the project's build carries no Jakarta Persistence provider, stop and use `/memory-persistence` instead.
 
+Between the two durable skills, `/jdbc-persistence` is the successor of `/memory-persistence`. This skill takes a BC when the project already persists through Jakarta Persistence, the request names it, or a boundary call changes a loaded graph of entities in ways not known in advance (children added, removed, and edited) — the persistence context derives the statements a JDBC control would have to find by comparing the loaded with the changed state. A BC of reports, projections, bulk writes, or DBMS-specific SQL belongs to `/jdbc-persistence`.
+
 ## Platform
 
 - Jakarta Persistence 3.2, the release for Jakarta EE 11 — a floor above the `/microprofile-server` platform rule; before using an API marked (3.2) below, read the managed `jakarta.persistence-api` version from the effective POM (`mvn help:effective-pom`, which resolves an imported BOM), and when it is older, stay within that version and never change it without asking

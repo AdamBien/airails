@@ -8,6 +8,8 @@ Add JDBC persistence using $ARGUMENTS. Apply all rules below strictly; `/bce`, `
 
 This skill is picked on demand: when the request names no persistence technology and the project does not already persist through JDBC, stop and use `/memory-persistence` instead.
 
+Between the two durable skills this one is the successor of `/memory-persistence` — for generated code the mapping costs nothing to write, and explicit SQL is what a reviewer and a test can check. `/jakarta-persistence` takes a BC only when the project already uses it, the request names it, or a boundary call changes a loaded graph of entities in ways not known in advance (children added, removed, and edited), so that a control here would have to compare the loaded with the changed state to find its statements.
+
 The rules below name the stack skill only; the artifacts, configuration keys, and test support of a server runtime live in its reference — Quarkus: [references/quarkus.md](references/quarkus.md), read before changing build, configuration, or tests.
 
 ## Principle
