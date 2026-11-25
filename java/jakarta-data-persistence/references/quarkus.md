@@ -1,6 +1,6 @@
 # Quarkus
 
-Runtime specifics of `jakarta-data-persistence` on Quarkus. The rules in [SKILL.md](../SKILL.md) apply unchanged; this file names the artifacts, the annotation processor, the configuration keys, and the test support that realize them. Provider, JDBC driver, Flyway, and the configuration keys are those of the `jakarta-persistence` Quarkus reference.
+Runtime specifics of `jakarta-data-persistence` on Quarkus. The rules in [SKILL.md](../SKILL.md) apply unchanged; this file names the artifacts, the annotation processor, the configuration keys, and the test support that realize them, and the behavior of the provider the rules refer to. Provider, JDBC driver, Flyway, and the configuration keys are those of the `jakarta-persistence` Quarkus reference.
 
 ## Dependencies
 
@@ -31,10 +31,13 @@ The processor generates the repository implementations (`Coffees_`) and the stat
 - `org.hibernate.orm:hibernate-processor` is managed by the Quarkus BOM (checked with 3.35.1); where the BOM of the project's Quarkus version manages `io.quarkus:quarkus-data-processor`, the Quarkus guide names that artifact instead — read the effective POM and use the one that is managed, never a hand-picked version
 - the two elements are added to the existing `<configuration>` of the plugin; nothing else in it changes
 - the generated sources land in `target/generated-sources/annotations`; a repository without a generated `<Repository>_` there has no implementation
+- an abstract repository method without an annotation is only a warning — `repository method cannot be implemented (skipping whole repository)`; the build succeeds and no `<Repository>_` is generated
 
 ## Repository
 
 - `@Inject Coffees coffees;` — the generated implementation is a `@Dependent` bean
+- `@Insert` reports every constraint violation as `EntityExistsException`, a foreign key to a missing row included; `@Update` and `@Delete` report the same violations as a plain `DataException`
+- an unfetched collection fails with `org.hibernate.LazyInitializationException` on access; an unfetched to-one is loaded by a further statement per entity
 
 ## Configuration
 

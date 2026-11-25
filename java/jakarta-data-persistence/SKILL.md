@@ -15,7 +15,7 @@ Among the durable skills, `/jdbc-persistence` is the successor of `/memory-persi
 - Jakarta Data 1.0, the release for Jakarta EE 11, over a Jakarta Persistence provider; read the managed `jakarta.data-api` version from the effective POM (`mvn help:effective-pom`) and never change it without asking
 - the repository implementation is generated at compile time by the provider's annotation processor — a build change (see Configuration); without the processor a repository interface has no implementation
 - code imports `jakarta.data.*` for repositories and `jakarta.persistence.*` for the mapping, never a provider package (`org.hibernate.*`) — which also rules out a resource accessor method returning the provider's session
-- the artifacts, the processor, configuration keys, and test support of a runtime live in its reference — Quarkus: [references/quarkus.md](references/quarkus.md), read before changing build, configuration, or tests
+- the rules below name the specification; the artifacts, the processor, configuration keys, test support, and the provider's own behavior on a runtime live in its reference — Quarkus: [references/quarkus.md](references/quarkus.md), read before changing build, configuration, or tests
 - server only: a `/java-cli-app` persists with `/jdbc-persistence`
 
 ## Principle
@@ -40,14 +40,14 @@ A repository method is one statement, executed when it is called. There is no pe
 - the Entities rules of `/jakarta-persistence` apply: shape, field access, no `get`/`set` pairs, `toJSON()` / `fromJSON`, identity id, names, `BigDecimal` scale, types, enums, record embeddables, `fetch = FetchType.LAZY` on every to-one
 - a state-changing method on the entity (`ship(Instant on)`) changes the instance only; the boundary passes the entity to the repository's `update` afterwards — the call that is implicit in `/jakarta-persistence` is written here
 - `update` writes every column: a full replacement is the entity `fromJSON` created, with the id from the request path; a partial change loads the entity with `findById`, calls its method, and updates — a partially filled instance is never updated
-- no `cascade` and no `orphanRemoval` on any association — the repository applies neither, so they would state a behavior that does not happen; a child is written by a lifecycle method that takes the child, inside the same boundary call
+- no `cascade` and no `orphanRemoval` on any association — the repository applies neither, so they would state a behavior that does not happen; a child entity has its own repository (`OrderLines`) whose lifecycle methods take the child; writing a parent with its children spans two repositories and is therefore a control method (see Placement) — parent first, inside the one boundary transaction — and a removed child is deleted by an explicit call; a boundary call that first has to find out which children were added, removed, or edited belongs to `/jakarta-persistence`
 - `@Version` only when the spec asks for lost-update protection
 
 ## Repository
 
-- every abstract method carries exactly one of `@Insert`, `@Update`, `@Delete`, `@Find`, `@Query`; a method without one is not derived from its name — the processor only warns (`repository method cannot be implemented (skipping whole repository)`), the build succeeds, no implementation is generated, and the injection fails at startup
+- every abstract method carries exactly one of `@Insert`, `@Update`, `@Delete`, `@Find`, `@Query`; no statement is derived from a method name — a method without an annotation can leave the whole repository without an implementation while the build still succeeds (see the runtime reference), and the injection then fails at startup
 - the method names follow the control contract of the sibling skills, so a boundary survives a migration: `save(Order order)` returns the entity with its id, `update(Order order)` returns the entity, `findById(long id)` returns `Optional`, `all()` and queries return `List`, empty, never `null`; the annotation decides what a method does, never its name
-- `@Insert` assigns the generated id to the instance it received and returns that instance; a `List` parameter inserts several entities
+- `@Insert` returns the entity with its generated id; the returned instance is the one used afterwards, never the argument — the specification does not promise that the argument carries the inserted state; a `List` parameter inserts several entities
 - `@Update` and `@Delete` with an entity parameter expect the row to exist — a missing row is an `OptimisticLockingFailureException` (see Exceptions)
 - `@Delete void remove(long id)` removes by the field the parameter is named after and reports nothing when no row matched — what an idempotent DELETE needs
 - no `@Save`: the boundary operation already knows whether it creates or replaces, and an upsert hides a wrong id as a new row
@@ -56,11 +56,11 @@ A repository method is one statement, executed when it is called. There is no pe
 ## Queries
 
 - `@Find` first: every parameter is named after an entity field and compared for equality; the processor rejects an unknown name and a wrong type at compile time; a fixed order is `@OrderBy("name")`, repeatable
-- `@Query` where `@Find` ends — another comparison, a projection, an aggregate, a fetched association, a bulk `update` or `delete`; the query is JPQL in a text block, its named parameters (`:roast`) are bound to the method parameters of the same name; no positional parameters, no `@Param`
+- `@Query` where `@Find` ends — another comparison, a projection, an aggregate, a fetched association, a bulk `update` or `delete`; the query is JPQL in a text block — JDQL is the subset every Jakarta Data provider accepts, and a request for JDQL gets the same `@Query` method; a constructor expression and `join fetch` go beyond JDQL and rely on the Jakarta Persistence provider behind the repository; named parameters (`:roast`) are bound to the method parameters of the same name; no positional parameters, no `@Param`
 - the processor checks the syntax of the query text and the binding and types of its parameters; a misspelled attribute inside the text is not reported, so every `@Query` method is executed by at least one test (see Testing)
 - a single result that may be missing returns `Optional`; a non-`Optional` single result is never declared, since it turns "not found" into an `EmptyResultException`
 - projections (a report row, a count with a name, a dropdown entry) are records in `entity`, filled by a constructor expression — `select new airhacks.orders.entity.OrderSummary(o.id, o.total) from Order o`; no entity is loaded to read two of its fields
-- an association the caller navigates is fetched by the query: `from Order o join fetch o.lines where o.id = :id`; an unfetched collection fails with `LazyInitializationException` on access, an unfetched to-one is loaded by a further statement per entity
+- an association the caller navigates is fetched by the query: `from Order o join fetch o.lines where o.id = :id`; without a persistence context nothing promises that an unfetched association can still be loaded — what access to one does is the provider's (see the runtime reference)
 - the first n rows: a `Limit` parameter; `PageRequest` with a `Page` return type only when the spec asks for paging, on a method whose `@OrderBy` ends with the id, so the order is total
 - a bulk statement (`update Coffee set price = price * :factor where roast = :roast`) returns `int` or `void` and does not touch entities already loaded
 - a query that needs native SQL is a signal to ask whether that BC belongs to `/jdbc-persistence`
@@ -68,7 +68,7 @@ A repository method is one statement, executed when it is called. There is no pe
 ## Exceptions
 
 - a statement runs inside the repository call, so a constraint violation surfaces there, as a `jakarta.data.exceptions.DataException` — no flush is needed to reach it
-- the exception type does not name the violation: `@Insert` reports every constraint violation as `EntityExistsException`, a foreign key to a missing row included, while `@Update` and `@Delete` report the same violations as a plain `DataException`; the type is therefore never used to tell them apart
+- the exception type does not name the violation: which `DataException` subtype a constraint violation arrives as differs by statement and by provider (see the runtime reference); the type is therefore never used to tell violations apart
 - a write the client can make conflict (a unique column, a foreign key to a row that may be gone, a row another row still references, a `@Version`) is a `default` method on the repository: it calls the annotated method inside a `try` and translates the `DataException`; the `default` method keeps the contract name, the annotated method takes the name of what the statement does — `insert` behind `save`, `replace` behind `update`, `delete` behind `remove` — and the boundary calls only the contract name; a write that cannot conflict stays the annotated method under its contract name
 - the translation is the one of `/jakarta-persistence`: one `static` function per BC, in a package-private interface of the control package named after the responsibility (`Conflicts`); it walks the cause chain to the `SQLException` and switches over `getSQLState()` — `23505` (unique) and `23503` (foreign key) become `ClientErrorException(message, Response.Status.CONFLICT, cause)` with the message naming the kind and the constraint (`duplicate: uq_customer_email`, `unknown reference: fk_order_customer`); everything else becomes `InternalServerErrorException(cause)`
 - `23503` names two opposite faults and does not tell which: behind an insert or update the referenced row is missing, behind a delete the row is still referenced; the `default` method of a delete therefore calls a second function of the same interface (`Conflicts.translateDelete`) that differs in this one message — `still referenced: fk_order_customer`
@@ -92,7 +92,7 @@ A repository method is one statement, executed when it is called. There is no pe
 
 ## Checklist Before Finishing
 
-- the build generated an implementation for every repository (`<Repository>_` under the generated sources) and reported no "cannot be implemented" warning
+- the build generated an implementation for every repository and reported no warning about a method that cannot be implemented (see the runtime reference)
 - no abstract repository method without an annotation, no built-in supertype, no `@Save`, no provider import
 - no `cascade`, no `orphanRemoval`; every changed entity is passed to `update`
 - the boundary is `@Transactional`; no control class that only forwards to a repository
