@@ -19,7 +19,7 @@ This skill is picked on demand: when the request names no persistence technology
 The persistence context is the state of the unit of work: an entity loaded inside the boundary's transaction is managed, a change is a call to one of its methods, and the provider writes the difference at commit — unlike `/jdbc-persistence`, where a change is a new record followed by an explicit `UPDATE`.
 
 - entities are classes with state and behavior; records carry what has no identity — embeddable value objects, primary key classes, projections
-- an entity lives for one boundary call; no detached entity is kept, cached, or handed back to `merge`
+- an entity lives for one boundary call; no detached entity is kept or cached between calls — a full replacement arrives as a new instance and is merged
 - what the provider generates stays predictable — every association is lazy, and a query states what it fetches
 - the schema is not derived from the mapping; the mapping is validated against the schema
 
@@ -35,7 +35,7 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - shape: a non-final top-level class with a `protected` no-arg constructor for the provider and a constructor or static factory that takes the mandatory state and checks its invariants; an enum, record, or interface cannot be an entity
 - field access: `@Id` sits on the field, so the provider reads and writes fields and no accessor is required; fields are package-private and never `final` (`/java-conventions`)
 - no `get`/`set` pairs: record-style accessors where a caller needs the value, and methods named after the state change (`ship(Instant on)`, `rename(String name)`) that guard the invariant they touch — a setter per field is the anemic shape `/bce` rules out
-- `toJSON()` and `static fromJSON(JsonObject)` as `/microprofile-server` defines them for records; `fromJSON` creates a new entity; an update reads the values in the boundary and passes them to the managed entity's method — a `fromJSON` instance is never passed to `merge`, which overwrites every column, including those the client did not send
+- `toJSON()` and `static fromJSON(JsonObject)` as `/microprofile-server` defines them for records; `fromJSON` creates a new entity, or the complete replacement of an existing one with the id taken from the request path; a partial change reads its values in the boundary and passes them to the managed entity's method — a partially filled instance is never merged, because `merge` overwrites every column, including those the client did not send
 - id: `@Id @GeneratedValue(strategy = GenerationType.IDENTITY) long id;`, the counterpart of `BIGINT GENERATED ALWAYS AS IDENTITY` in the DDL
 - names: tables and columns are `snake_case`, one singular table per entity (`order_line`), primary key `id`; the defaults are the entity name and the field name unchanged, so every multi-word entity carries `@Table(name = "order_line")` and every multi-word field `@Column(name = "feature_number")`; a project that already configures a naming strategy keeps it and omits them — never both
 - a `BigDecimal` field is set to the scale of its column in the constructor and in every method that assigns it (`setScale`) — the database returns `4.20` for a stored `4.2`, and the two are not `equals`
@@ -53,9 +53,10 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 - an `@ApplicationScoped` CDI bean with `@Inject EntityManager em;`; a runtime that does not offer the `EntityManager` to `@Inject` uses `@PersistenceContext EntityManager em;`
 - a control offers only the operations the request needs; where they exist, their shape matches the sibling skills as far as the persistence context allows: `save(Order order)` calls `persist` and returns the same, now managed, instance carrying its id; `findById(long id)` returns `Optional.ofNullable(this.em.find(Order.class, id))`; queries return `List`, empty, never `null`; `remove(long id)` loads, removes, and returns whether something was removed
-- no `update` method — a managed entity is changed through its own methods and written at commit; the `update` of the sibling skills has no counterpart
+- `update(Order order)` is the full replacement (a PUT carrying the complete representation): `return this.em.merge(order);` — the returned instance is the managed one, the argument stays detached and is not used afterwards; the boundary answers an unknown id with `NotFoundException` before calling `update`, since what `merge` does with one is not relied on
+- a partial change needs no control method unless it can conflict — the boundary loads the entity and calls its method, and the provider writes the difference at commit
 - a state change the client can make conflict (see Exceptions) is a control method: it receives the managed entity the boundary loaded, calls the entity's method, and flushes
-- never in a control: `merge` to save, `getTransaction()`, `clear()`, `refresh()`, an `EntityManagerFactory`, commit or rollback
+- never in a control: `merge` of a new or a partially filled entity, `getTransaction()`, `clear()`, `refresh()`, an `EntityManagerFactory`, commit or rollback
 
 ## Queries
 
@@ -71,13 +72,13 @@ The persistence context is the state of the unit of work: an entity loaded insid
 ## Exceptions
 
 - a constraint violation surfaces when the provider executes the statement: inside `persist` for an identity column, otherwise at flush, by default at commit — after the control has returned and outside any `catch`; left there, a duplicate ends as a rollback and a 500
-- a write the client can make conflict (a unique column, a foreign key to a row that may be gone) therefore runs `persist` or the entity's method **and** `this.em.flush()` inside one `try` in the control method and translates the `PersistenceException` at that point, directly into the exception the stack understands; the original exception travels as the cause
+- a write the client can make conflict (a unique column, a foreign key to a row that may be gone) therefore runs `persist`, `merge`, or the entity's method **and** `this.em.flush()` inside one `try` in the control method and translates the `PersistenceException` at that point, directly into the exception the stack understands; the original exception travels as the cause
 - the translation is one package-private `static` function per BC in the control package — on the control when the BC has one, otherwise in an interface named after the responsibility (`Conflicts`): it walks the cause chain to the `SQLException` and switches over `getSQLState()` — `23505` (unique) and `23503` (foreign key) become `ClientErrorException(message, Response.Status.CONFLICT, cause)` with the message naming the kind and the constraint (`duplicate: uq_customer_email`, `unknown reference: fk_order_customer`); everything else becomes `InternalServerErrorException(cause)`; the same mapping as `/jdbc-persistence`, so no cast to a provider exception type
 - the constraint name is taken from the driver's message with a one-line regex in that function, never with a parsing library
 - `OptimisticLockException` becomes `ClientErrorException(Response.Status.CONFLICT)`
 - both are `WebApplicationException`s (`/microprofile-server`): the JAX-RS runtime answers 409 or 500, `@Transactional` rolls back, the boundary catches nothing, and no `ExceptionMapper` is written
 - a missing entity is the boundary's decision: `findById(id).orElseThrow(NotFoundException::new)`, also before it hands the entity to a state-changing control method
-- create-or-update is `find`, then `persist` or a method call on the found entity, inside one transaction; under concurrency the unique constraint decides and the client receives the 409
+- create-or-update is `find`, then `persist` or `update`, inside one transaction; under concurrency the unique constraint decides and the client receives the 409
 
 ## Schema
 
@@ -114,12 +115,12 @@ The persistence context is the state of the unit of work: an entity loaded insid
 
 - the application starts with `validate` against the migrations
 - no to-one association without `fetch = FetchType.LAZY`; no `EAGER` anywhere
-- no provider import, no `merge`, no `EntityManager` outside a control
-- every write the client can make conflict runs `persist` and `flush` inside the translating `try`
+- no provider import, no `EntityManager` outside a control, no `merge` of a new or partially filled entity
+- every write the client can make conflict runs `persist` or `merge` and `flush` inside the translating `try`
 - a round-trip test exists for every entity and was executed, not skipped
 
 ## Composition
 
 - `/sbce`: an entity and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
 - `/jdbc-persistence` is the plain-SQL sibling with the same placement, schema, and conflict mapping; this skill reads its Schema section (Type Mapping, Constraints and Indexes) instead of restating it, so the two are installed together; a BC uses one of the two, never both — the persistence context does not see rows written through a `DataSource`
-- `/memory-persistence` is the default start; a BC that began there migrates by turning its records into entity classes, replacing the control's `update` calls with entity methods, and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
+- `/memory-persistence` is the default start; a BC that began there migrates by turning its records into entity classes, replacing the control class — `save`, `update`, and `findById` keep their signatures — and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary

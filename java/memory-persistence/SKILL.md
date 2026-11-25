@@ -106,5 +106,5 @@ In a `/java-cli-app` the class loses the annotation and is created once in the e
 - `/bce` owns BC carving and layer placement; this skill only fixes where the collection lives
 - `/java-conventions` owns syntax and style, including the ban on mutable statics and inline lambdas that shapes the control above
 - `/jdbc-persistence` is the durable sibling; the two share the entity layer and the control contract, and this skill never introduces a method the JDBC control could not implement
-- `/jakarta-persistence` is the ORM alternative on `/microprofile-server`; that migration is not a control swap — the records become entity classes and the control's `update` calls become entity methods
+- `/jakarta-persistence` is the ORM alternative on `/microprofile-server`; that migration also rewrites the entity layer — the records become entity classes; the control keeps its `save`, `update`, and `findById` signatures
 - `/microprofile-server` and `/java-cli-app` own lifecycle and the test loop; `/showtime` and the first `/sbce apply` iteration are the usual callers

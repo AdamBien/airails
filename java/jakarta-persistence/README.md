@@ -5,7 +5,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying entities
 ## Scope
 
 - `@Entity` classes in `entity` with field access, package-private fields, state-changing methods instead of setters, `toJSON()` / `fromJSON`; record `@Embeddable`s, record primary key classes, record projections
-- Controls named after responsibilities, `@ApplicationScoped` CDI beans with an injected `EntityManager`: `save`, `findById`, `remove`, named query methods; no `update` — a managed entity is written at commit
+- Controls named after responsibilities, `@ApplicationScoped` CDI beans with an injected `EntityManager`: `save` (`persist`), `update` (`merge`, full replacement only), `findById`, `remove`, named query methods; a partial change is a method call on the managed entity, written at commit
 - JPQL in text blocks as named queries, typed execution, named parameters, `getSingleResultOrNull()`, constructor-expression projections
 - Lazy associations throughout; fetching stated per query with `join fetch` or an entity graph
 - Boundary-owned unit of work: `@Transactional` on the class or the `@Boundary` stereotype; the boundary never sees the `EntityManager`
