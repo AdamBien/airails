@@ -1,6 +1,6 @@
 ---
 name: memory-persistence
-description: 'In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. The default persistence — use when a request to persist, store, or save names no technology; for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs; or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence` or `/jakarta-persistence`, both picked on demand.'
+description: 'In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. The default persistence — use when a request to persist, store, or save names no technology; for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs; or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence`, `/jakarta-persistence`, or `/jakarta-data-persistence`, each picked on demand.'
 argument-hint: "[BC or record to store in memory]"
 ---
 
@@ -107,4 +107,5 @@ In a `/java-cli-app` the class loses the annotation and is created once in the e
 - `/java-conventions` owns syntax and style, including the ban on mutable statics and inline lambdas that shapes the control above
 - `/jdbc-persistence` is the durable sibling and the successor when a BC needs a database; the two share the entity layer and the control contract, and this skill never introduces a method the JDBC control could not implement
 - `/jakarta-persistence` is the ORM alternative on `/microprofile-server`, chosen when the project already uses it, the request names it, or boundary calls change loaded entity graphs in ways not known in advance; that migration also rewrites the entity layer — the records become entity classes, and a control that only stored and found gives way to the `EntityManager` in the boundary
+- `/jakarta-data-persistence` is the repository alternative on `/microprofile-server`, chosen when the request names Jakarta Data or the project already persists through it; the records become entity classes and the control class becomes a repository interface with the same method names
 - `/microprofile-server` and `/java-cli-app` own lifecycle and the test loop; `/showtime` and the first `/sbce apply` iteration are the usual callers

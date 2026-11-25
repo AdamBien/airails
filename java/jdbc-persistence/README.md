@@ -13,7 +13,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 - Round-trip tests against the production DBMS on the server, or `zunit` against a disposable database in a CLI
 - Runtime specifics kept out of the rules: Quarkus extensions, configuration keys, and `@QuarkusTest` in [references/quarkus.md](references/quarkus.md)
 
-Picked on demand: on JDBC or SQL wording in the request or existing JDBC persistence in the project. Between the two durable skills it is the successor of `memory-persistence`: for generated code the mapping costs nothing to write, and explicit SQL is what a reviewer and a test can check. An unqualified request to persist uses [`memory-persistence`](../memory-persistence), the collection-backed store with the same control contract. Not for JPA — use [`jakarta-persistence`](../jakarta-persistence). Not for NoSQL stores.
+Picked on demand: on JDBC or SQL wording in the request or existing JDBC persistence in the project. Among the durable skills it is the successor of `memory-persistence`: for generated code the mapping costs nothing to write, and explicit SQL is what a reviewer and a test can check. An unqualified request to persist uses [`memory-persistence`](../memory-persistence), the collection-backed store with the same control contract. Not for JPA — use [`jakarta-persistence`](../jakarta-persistence). Not for Jakarta Data repositories — use [`jakarta-data-persistence`](../jakarta-data-persistence). Not for NoSQL stores.
 
 ## Composition
 

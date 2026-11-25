@@ -11,7 +11,7 @@ An [AIrails.dev](https://airails.dev) skill for storing Java records in plain `j
 - Opt-in JSON snapshot for demos that must survive a restart
 - Plain-object unit tests without a container
 
-The default when a request names no persistence technology. Not for durable storage — use [`jdbc-persistence`](../jdbc-persistence) or [`jakarta-persistence`](../jakarta-persistence), both picked on demand.
+The default when a request names no persistence technology. Not for durable storage — use [`jdbc-persistence`](../jdbc-persistence), [`jakarta-persistence`](../jakarta-persistence), or [`jakarta-data-persistence`](../jakarta-data-persistence), each picked on demand.
 
 ## Composition
 

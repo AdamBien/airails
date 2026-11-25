@@ -74,7 +74,7 @@ List<Bundle> bundles() {
     var javaServer = new Bundle("java-server", with(
             "microprofile-server", "continuous-testing", "aws-cdk",
             "java-conventions", "concerns", "jdbc-persistence", "jakarta-persistence",
-            "memory-persistence"));
+            "jakarta-data-persistence", "memory-persistence"));
     var javaCli = new Bundle("java-cli", with(
             "java-cli-app", "java-cli-script", "java-conventions", "concerns",
             "zb", "zb-release-pipeline", "zargs", "zcfg", "zcl", "zjson", "zunit",

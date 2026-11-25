@@ -16,7 +16,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying entities
 - Runtime specifics kept out of the rules: Quarkus extensions, configuration keys, `@QuarkusTest`, and `@TestTransaction` in [references/quarkus.md](references/quarkus.md)
 - `jakarta.persistence.*` imports only; 3.2 APIs used only when the project's BOM resolves 3.2
 
-Picked on demand: on JPA wording in the request, an existing provider dependency, or boundary calls that change a loaded graph of entities in ways not known in advance. Reports, projections, bulk writes, and DBMS-specific SQL belong to `jdbc-persistence`. An unqualified request to persist uses [`memory-persistence`](../memory-persistence). Not for plain SQL — use [`jdbc-persistence`](../jdbc-persistence). Not for CLI applications and not for NoSQL stores.
+Picked on demand: on JPA wording in the request, an existing provider dependency, or boundary calls that change a loaded graph of entities in ways not known in advance. Reports, projections, bulk writes, and DBMS-specific SQL belong to `jdbc-persistence`. An unqualified request to persist uses [`memory-persistence`](../memory-persistence). Not for plain SQL — use [`jdbc-persistence`](../jdbc-persistence). Not for Jakarta Data repositories — use [`jakarta-data-persistence`](../jakarta-data-persistence). Not for CLI applications and not for NoSQL stores.
 
 ## Composition
 
