@@ -10,7 +10,8 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 - Boundary-owned unit of work: `@Transactional` on the server, explicit commit in a CLI
 - `SQLException` translated once, at the control, into the stack's own exception: `ClientErrorException(CONFLICT)` / `InternalServerErrorException` on the server, `IllegalArgumentException` / `IllegalStateException` in a CLI — the boundary maps nothing
 - Hand-written DDL per BC, derived from the records by a fixed type mapping, with named constraints mirroring the compact constructor; Flyway on the server, idempotent `CREATE TABLE IF NOT EXISTS` in a CLI
-- Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services, or `zunit` against a disposable database
+- Round-trip tests against the production DBMS on the server, or `zunit` against a disposable database in a CLI
+- Runtime specifics kept out of the rules: Quarkus extensions, configuration keys, and `@QuarkusTest` in [references/quarkus.md](references/quarkus.md)
 
 Picked on demand: on JDBC or SQL wording in the request or existing JDBC persistence in the project. An unqualified request to persist uses [`memory-persistence`](../memory-persistence), the collection-backed store with the same control contract. Not for JPA — use [`jakarta-persistence`](../jakarta-persistence). Not for NoSQL stores.
 

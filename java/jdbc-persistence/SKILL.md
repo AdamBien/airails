@@ -8,6 +8,8 @@ Add JDBC persistence using $ARGUMENTS. Apply all rules below strictly; `/bce`, `
 
 This skill is picked on demand: when the request names no persistence technology and the project does not already persist through JDBC, stop and use `/memory-persistence` instead.
 
+The rules below name the stack skill only; the artifacts, configuration keys, and test support of a server runtime live in its reference — Quarkus: [references/quarkus.md](references/quarkus.md), read before changing build, configuration, or tests.
+
 ## Principle
 
 Data-Oriented Programming applied to the relational store: the record **is** the row shape, the sealed interface **is** the closed set of variants, and the control is a set of functions that move data between the two representations. Nothing is hidden — no proxies, no lazy loading, no dirty checking, no generated SQL. What the code reads is what the database executes.
@@ -24,7 +26,7 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - `boundary` — owns the unit of work: one connection, one transaction, several control calls; never contains SQL
   - `/microprofile-server`: `@Transactional` on the boundary class, never on single methods, and `@Inject` of the control; the boundary never sees a `DataSource` or `Connection` — the container opens the transaction, the control's connections enlist in it, the container commits. When the project defines a `@Boundary` stereotype (a CDI `@Stereotype` carrying `@ApplicationScoped` and `@Transactional`), use it instead of an explicit `@Transactional`, likewise on the class; introduce the stereotype only when the project already has one or asks for it
   - `/java-cli-app`: the boundary opens the connection (`DriverManager.getConnection(url, user, password)` or a driver `DataSource`), sets `setAutoCommit(false)`, passes the connection to the controls, commits; a thrown exception rolls back in a `catch` and rethrows. A read-only query may run with auto-commit; a boundary method that writes never does
-- connection coordinates come from configuration, never from literals: `quarkus.datasource.*` / MicroProfile Config on the server, `/zcfg` keys (`db.url`, `db.user`, `db.password`) in a CLI; the password never lands in a source file
+- connection coordinates come from configuration, never from literals: MicroProfile Config on the server (the runtime reference names the keys), `/zcfg` keys (`db.url`, `db.user`, `db.password`) in a CLI; the password never lands in a source file
 - the schema belongs to the BC: each BC ships its own DDL; a table is owned by exactly one BC
 - a reference to another BC is stored as an `id` column backed by a real `FOREIGN KEY` (see Schema), so the persisted record carries the `id` component — the row shape, not a ban on entity references, which `/bce` allows; a record that carries the other BC's entity is a read-only projection, filled by a cross-BC join through that entity's `fromResultSet`; the other BC's table is never written, and a cross-BC join stays a coupling signal
 
@@ -71,7 +73,7 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - table and column names are `snake_case`, singular table per record (`order_line`), primary key `id`
 - every constraint and index is named — `pk_<table>`, `uq_<table>_<column>`, `fk_<table>_<referenced_table>`, `ck_<table>_<rule>`, `ix_<table>_<column>` — because the integrity-violation message (see Exceptions) carries exactly that name
 - DDL targets the named DBMS (PostgreSQL by default); no portable lowest-common-denominator SQL, since tests run against the production engine; in a CLI on H2 or SQLite use that engine's identity syntax and check its `IF NOT EXISTS` support
-- `/microprofile-server`: apply through Flyway at startup (`quarkus-flyway` plus the Flyway module of the DBMS, e.g. `quarkus-flyway-postgresql`, and `quarkus.flyway.migrate-at-start=true`) — ask before adding the dependencies to `pom.xml`
+- `/microprofile-server`: apply through Flyway at startup — Flyway, its module for the DBMS, and the migrate-at-start switch, as the runtime reference names them; ask before adding the dependencies to `pom.xml`
 - `/java-cli-app`: a `Schema` control in the owning BC executes idempotent `CREATE TABLE IF NOT EXISTS` statements from a text block at startup; add a `schema_version` table only when destructive changes appear
 
 ### Type Mapping
@@ -94,20 +96,20 @@ The inverse of the `getObject(column, Type.class)` rule; one column per record c
 
 ## Drivers
 
-- `/microprofile-server`: the Quarkus JDBC extension of the target DBMS (`quarkus-jdbc-postgresql` and friends) brings the driver and the Agroal pool; `@Inject DataSource` is the only API the code sees
+- `/microprofile-server`: the runtime's JDBC integration for the target DBMS brings the driver and the connection pool (see its reference); `@Inject DataSource` is the only API the code sees
 - `/java-cli-app`: `zb` bundles no binary dependencies, so the driver JAR lives in `lib/` and is appended at launch — `java -cp zbo/app.jar:lib/* Main`; put that line in the `/java-cli-script` launcher; prefer a single-JAR, pure-Java driver (PostgreSQL, H2, SQLite) that needs no native setup
 - `DriverManager` auto-discovers drivers from `META-INF/services`; never call `Class.forName`
 
 ## Health
 
 - a database-backed BC needs a readiness check that proves the pool can hand out a working connection; a server that answers ready while its `DataSource` is down fails requests with 500 instead of being taken out of rotation
-- this skill writes no check: the concrete MicroProfile runtime provides it (Quarkus registers a `DataSource` readiness check through `quarkus-smallrye-health` when the Agroal extension is present) and `/microprofile-server` owns any custom `@Readiness` check, placed in the boundary package; a control never exposes `isValid` or a `SELECT 1` for that purpose
+- this skill writes no check: the concrete MicroProfile runtime provides it (see its reference) and `/microprofile-server` owns any custom `@Readiness` check, placed in the boundary package; a control never exposes `isValid` or a `SELECT 1` for that purpose
 - `/java-cli-app`: no readiness probe exists; the boundary's first `getConnection` is the check, and its failure is reported as in Exceptions
 
 ## Testing
 
 - control functions are tested against a real connection of the **same DBMS** as production; no in-memory substitute unless production is that engine
-- `/microprofile-server`: `@QuarkusTest` with Dev Services starts the container; the test injects the control, calls it, and asserts on returned records with AssertJ; each test seeds and cleans its own rows
+- `/microprofile-server`: the runtime's test support starts the DBMS and applies the migrations (see its reference); the test injects the control, calls it, and asserts on returned records with AssertJ; each test seeds and cleans its own rows
 - `/java-cli-app`: a `/zunit` test opens a connection to a disposable database (temporary H2/SQLite file, or a local PostgreSQL named in `app.properties`), runs `Schema`, exercises the control, asserts with `assert`
 - the mapping is tested through a round trip — `save` then `findById` yields an equal record; records make equality exact, so one assertion covers every column
 - system tests stay black box: they exercise the boundary (HTTP, CLI) and never read the tables (`/system-tests`)
