@@ -42,12 +42,8 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - types: `Instant`, `OffsetDateTime`, `LocalDate`, `BigDecimal`, `UUID`; never `java.util.Date`, `Calendar`, the `java.sql` date types, or `@Temporal` — deprecated for new applications (3.2)
 - enums: `@Enumerated(EnumType.STRING)`, never ordinal — the DDL `CHECK` lists the `name()` values; a stored code that differs from the constant name is a `final` field of the enum annotated `@EnumeratedValue` (3.2), not an `AttributeConverter`
 - value objects: a record annotated `@Embeddable` (3.2), its compact constructor holding the invariants; a composite primary key class is a record as well
-- a closed set of variants with data (`Open`, `Shipped(on)`): the entity stores the discriminator enum and the detail columns as plain fields and exposes the sealed type through one method whose exhaustive `switch` builds the variant; the state-changing methods set both — the same columns `/jdbc-persistence` uses; entity inheritance only for entities that differ in identity or associations, then `SINGLE_TABLE`
 - associations: every `@ManyToOne` and `@OneToOne` declares `fetch = FetchType.LAZY` — their default is `EAGER`, which loads the target with every read; to-many associations keep their lazy default; `EAGER` is never written
-- a bidirectional association exists only inside a BC and only when both directions are navigated; the many side owns it (`mappedBy` on the other side) and one entity method keeps both ends consistent (`addLine(OrderLine line)`)
-- `cascade` and `orphanRemoval` only from an aggregate root to the children it owns and that have no life outside it
 - `@Version` only when the spec asks for lost-update protection
-- no `equals`/`hashCode` by default — inside one persistence context an entity is one instance; an entity kept in a `Set` or compared across transactions defines them over an immutable business key, never over the generated id
 
 ## Boundary and Control
 
@@ -57,17 +53,16 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - a partial change: the boundary finds the entity and calls its method; the provider writes the difference at commit
 - a control method, where one exists, has the shape of the sibling skills: `save(Order order)` returns the managed instance with its id, `update(Order order)` returns the merged one, `findById(long id)` returns `Optional`, queries return `List`, empty, never `null`; a state change the client can make conflict (see Exceptions) receives the managed entity the boundary found, calls the entity's method, and flushes
 - an operation moves from the boundary into a control when it gains one of the reasons in Placement; it never exists in both
-- never: `merge` of a new or a partially filled entity, `getTransaction()`, `clear()`, `refresh()`, an `EntityManagerFactory`, commit or rollback
+- never `merge` a new or a partially filled entity; no transaction handling besides the boundary's `@Transactional`
 
 ## Queries
 
 - JPQL in a text block; a static query is a `@NamedQuery` on the entity it returns, its name a `static final String` constant on that entity prefixed with the entity name (`Order.OPEN = "Order.open"`) — named queries are parsed when the persistence unit starts, so a broken query fails the startup, not the first request
 - typed execution: `this.em.createNamedQuery(Order.OPEN, Order.class)`; where the project already generates the static metamodel, `this.em.createQuery(reference)` with its `TypedQueryReference` (3.2); adding the metamodel processor is a `pom.xml` change — ask
-- parameters are named (`:status`) and bound with `setParameter`; a dynamic clause selects between named queries through an enum or a `switch`, never through string concatenation; the Criteria API only when clauses combine at runtime beyond what a handful of named queries cover
+- a dynamic clause selects between named queries through an enum or a `switch`; the Criteria API only when clauses combine at runtime beyond what a handful of named queries cover
 - a lookup that may find nothing: `Optional.ofNullable(query.getSingleResultOrNull())` (3.2); `NoResultException` is never caught to steer logic
 - projections (a report row, a count with a name, a dropdown entry) are records in `entity`, filled by a constructor expression — `select new airhacks.orders.entity.OrderSummary(o.id, o.total) from Order o`; no `Object[]` or `Tuple` leaves the method that ran the query, and no entity is loaded to read two of its fields
-- fetching: a query whose result is navigated across an association states it — `join fetch`, or an entity graph passed as a hint; never one query per parent; a to-many `join fetch` is not combined with paging — the provider would page in memory
-- bulk JPQL `update` and `delete` bypass the persistence context — use them only when no affected entity is managed in the same transaction
+- a query whose result is navigated across an association fetches it with `join fetch` — the counterpart of the lazy default, never one query per parent
 - JPQL covers `union`, `intersect`, `except`, `cast`, `left`, `right`, `replace`, and `||` (3.2); a query that still needs native SQL is a signal to ask whether that BC belongs to `/jdbc-persistence`
 
 ## Exceptions
@@ -79,7 +74,6 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - `OptimisticLockException` becomes `ClientErrorException(Response.Status.CONFLICT)`
 - both are `WebApplicationException`s (`/microprofile-server`): the JAX-RS runtime answers 409 or 500, `@Transactional` rolls back, the boundary catches nothing, and no `ExceptionMapper` is written
 - a missing entity is the boundary's decision — `NotFoundException` when `find` returns `null` — also before it hands the entity to a state-changing control method
-- create-or-update is `find`, then `persist` or `merge`, inside one transaction; under concurrency the unique constraint decides and the client receives the 409
 
 ## Schema
 
@@ -96,7 +90,6 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - the persistence unit is configured in `application.properties`, no `persistence.xml`: `quarkus.datasource.db-kind`, `quarkus.hibernate-orm.schema-management.strategy=validate`, `quarkus.flyway.migrate-at-start=true`
 - another Jakarta EE runtime: `META-INF/persistence.xml` in version 3.2 with a `jta-data-source`
 - connection coordinates come from the environment (`QUARKUS_DATASOURCE_*`), never from a committed URL line — it would also switch off Dev Services; the password never lands in a source file
-- SQL logging is a local diagnosis switch, never committed as enabled
 
 ## Health
 
@@ -107,7 +100,6 @@ The persistence context is the state of the unit of work: an entity loaded insid
 - mapping, queries, and controls are tested against the **same DBMS** as production: `@QuarkusTest` with Dev Services, schema applied by the Flyway migrations; these are integration tests in `/microprofile-server` terms (`IT` suffix, failsafe)
 - the test class carries `@TestTransaction` — a control needs the transaction a boundary would open, and the rollback removes the rows
 - the mapping is tested through a round trip on an injected `EntityManager`: `persist`, `flush()`, `clear()`, `find`; the reloaded entity is another instance, so assert `reloaded.toJSON()` equal to `saved.toJSON()` — one assertion over every serialized field, and independent of the fields a provider adds to an entity class
-- a query test seeds three or four entities and asserts the exact result with `containsExactly`
 - the conflict translation is tested once per BC: the second `save` of a duplicate throws `ClientErrorException`; it is the last database call of its test, because the DBMS aborts the transaction after the violation
 - a test that was skipped has not passed: when the build skips integration tests or no container runtime is available, run them explicitly or report that the mapping is unverified
 - system tests stay black box: they exercise the boundary over HTTP and never read the tables (`/system-tests`)
