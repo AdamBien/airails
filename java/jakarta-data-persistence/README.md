@@ -13,7 +13,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Jakarta 
 - Conflicts translated in a `default` method of the repository by SQLState: `23505` / `23503` and `OptimisticLockingFailureException` become `ClientErrorException(CONFLICT)`, everything else `InternalServerErrorException`
 - Entity mapping, Flyway schema, configuration, and health as in [`jakarta-persistence`](../jakarta-persistence)
 - Round-trip tests against the production DBMS, each inside a rolled-back transaction; every `@Query` method executed by a test
-- Runtime specifics kept out of the rules: Quarkus dependencies, the annotation processor, configuration keys, and test support in [references/quarkus.md](references/quarkus.md)
+- Runtime specifics kept out of the rules: the Jakarta Data API, the annotation processor, and provider behavior on Quarkus in [references/quarkus.md](references/quarkus.md); provider, driver, Flyway, configuration keys, and test support in the [Quarkus reference of `jakarta-persistence`](../jakarta-persistence/references/quarkus.md)
 
 Picked on demand: on Jakarta Data wording in the request or an existing `jakarta.data-api` dependency. An unqualified request to persist uses [`memory-persistence`](../memory-persistence). Boundary calls that change a loaded graph of entities belong to [`jakarta-persistence`](../jakarta-persistence), plain SQL to [`jdbc-persistence`](../jdbc-persistence). Not for Spring Data, CLI applications, or NoSQL stores.
 

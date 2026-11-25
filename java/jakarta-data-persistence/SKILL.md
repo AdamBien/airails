@@ -128,10 +128,10 @@ public interface Coffees {
     @Query("""
             select new airhacks.coffee.entity.CoffeeSummary(c.id, c.name)
             from Coffee c
-            where c.price < :limit
+            where c.price < :price
             order by c.name
             """)
-    List<CoffeeSummary> cheaperThan(BigDecimal limit);
+    List<CoffeeSummary> cheaperThan(BigDecimal price);
 
     default Coffee save(Coffee coffee) {
         try {
