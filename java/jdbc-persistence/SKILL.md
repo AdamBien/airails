@@ -71,7 +71,7 @@ Data-Oriented Programming applied to the relational store: the record **is** the
 - table and column names are `snake_case`, singular table per record (`order_line`), primary key `id`
 - every constraint and index is named — `pk_<table>`, `uq_<table>_<column>`, `fk_<table>_<referenced_table>`, `ck_<table>_<rule>`, `ix_<table>_<column>` — because the integrity-violation message (see Exceptions) carries exactly that name
 - DDL targets the named DBMS (PostgreSQL by default); no portable lowest-common-denominator SQL, since tests run against the production engine; in a CLI on H2 or SQLite use that engine's identity syntax and check its `IF NOT EXISTS` support
-- `/microprofile-server`: apply through Flyway (`quarkus-flyway`) at startup — ask before adding the dependency to `pom.xml`
+- `/microprofile-server`: apply through Flyway at startup (`quarkus-flyway` plus the Flyway module of the DBMS, e.g. `quarkus-flyway-postgresql`, and `quarkus.flyway.migrate-at-start=true`) — ask before adding the dependencies to `pom.xml`
 - `/java-cli-app`: a `Schema` control in the owning BC executes idempotent `CREATE TABLE IF NOT EXISTS` statements from a text block at startup; add a `schema_version` table only when destructive changes appear
 
 ### Type Mapping
