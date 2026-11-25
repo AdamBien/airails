@@ -11,7 +11,7 @@ An [AIrails.dev](https://airails.dev) skill for storing Java records in plain `j
 - Opt-in JSON snapshot for demos that must survive a restart
 - Plain-object unit tests without a container
 
-Not for durable storage — use `jdbc-persistence`.
+The default when a request names no persistence technology. Not for durable storage — use [`jdbc-persistence`](../jdbc-persistence) or [`jakarta-persistence`](../jakarta-persistence), both picked on demand.
 
 ## Composition
 
@@ -28,7 +28,7 @@ graph TD
 
 ## Usage
 
-Activated for prototypes, demos, the first `sbce` convergence of a BC, or when a database is not available yet. The rules in [SKILL.md](SKILL.md) guide generation and review.
+Activated when a request to persist names no technology, and for prototypes, demos, the first `sbce` convergence of a BC, or when a database is not available yet. The rules in [SKILL.md](SKILL.md) guide generation and review.
 
 ## Test
 

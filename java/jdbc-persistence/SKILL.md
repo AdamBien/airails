@@ -1,10 +1,12 @@
 ---
 name: jdbc-persistence
-description: 'Persist and query Java records with plain JDBC and Data-Oriented Programming: records as row shapes, sealed interfaces for variants, hand-written SQL, no ORM. Use when adding persistence, a table, a query, a repository, or a database-backed BC; when mapping `ResultSet` rows to records; or on "JDBC", "plain SQL", "DataSource", "PreparedStatement", "DDL", "CREATE TABLE", "migration". Not for JPA/Hibernate or NoSQL.'
+description: 'Persist and query Java records with plain JDBC and Data-Oriented Programming: records as row shapes, sealed interfaces for variants, hand-written SQL, no ORM. Use on demand — when the request names "JDBC", "plain SQL", "DataSource", "PreparedStatement", "ResultSet", "DDL", "CREATE TABLE", or "migration", when adding a table or a SQL query, or when the project already persists through JDBC. Not the default for an unqualified "add persistence" — use `/memory-persistence`. Not for JPA — use `/jakarta-persistence`. Not for NoSQL.'
 argument-hint: "[BC, record, or query to persist]"
 ---
 
 Add JDBC persistence using $ARGUMENTS. Apply all rules below strictly; `/bce`, `/java-conventions`, and the stack skill hold wherever this skill is silent.
+
+This skill is picked on demand: when the request names no persistence technology and the project does not already persist through JDBC, stop and use `/memory-persistence` instead.
 
 ## Principle
 
@@ -120,3 +122,4 @@ The inverse of the `getObject(column, Type.class)` rule; one column per record c
 
 - `/sbce`: a persisted record and its control are converged like any other code — the spec names the boundary operation, this skill shapes the storage behind it
 - `/memory-persistence` is the collection-backed sibling with the same control contract; a BC that started there migrates by replacing the control class, adding `fromResultSet` to its records, and adding `@Transactional` (or the `@Boundary` stereotype) to the boundary
+- `/jakarta-persistence` is the ORM sibling on `/microprofile-server`; it reuses the Schema rules and the conflict mapping of this skill; a BC uses one of the two, never both

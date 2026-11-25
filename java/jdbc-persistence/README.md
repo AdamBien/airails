@@ -12,7 +12,7 @@ An [AIrails.dev](https://airails.dev) skill for persisting and querying Java rec
 - Hand-written DDL per BC, derived from the records by a fixed type mapping, with named constraints mirroring the compact constructor; Flyway on the server, idempotent `CREATE TABLE IF NOT EXISTS` in a CLI
 - Round-trip tests against the production DBMS: `@QuarkusTest` with Dev Services, or `zunit` against a disposable database
 
-Not for JPA/Hibernate projects and not for NoSQL stores. For a collection-backed store with the same control contract, see [`memory-persistence`](../memory-persistence).
+Picked on demand: on JDBC or SQL wording in the request or existing JDBC persistence in the project. An unqualified request to persist uses [`memory-persistence`](../memory-persistence), the collection-backed store with the same control contract. Not for JPA — use [`jakarta-persistence`](../jakarta-persistence). Not for NoSQL stores.
 
 ## Composition
 
@@ -28,7 +28,7 @@ graph TD
 
 ## Usage
 
-Activated when adding persistence, tables, queries, or `ResultSet` mapping to a MicroProfile server or Java CLI project. The rules in [SKILL.md](SKILL.md) guide generation and review.
+Activated when adding JDBC persistence, tables, SQL queries, or `ResultSet` mapping to a MicroProfile server or Java CLI project. The rules in [SKILL.md](SKILL.md) guide generation and review.
 
 ## Example
 

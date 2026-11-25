@@ -1,6 +1,6 @@
 ---
 name: memory-persistence
-description: 'In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. Use for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs, or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence`.'
+description: 'In-memory persistence for Java records in plain `java.util` collections: a `ConcurrentHashMap` keyed by id is the table, queries are streams over its values. Same control contract as `/jdbc-persistence`, so a BC moves to JDBC by replacing one control class. The default persistence — use when a request to persist, store, or save names no technology; for prototypes, demos, the first `/sbce` convergence, test doubles for other BCs; or on "in-memory", "memory persistence", "store in a map", "no database yet", "collection-backed", "fake repository", "stub persistence". Not for durable storage — use `/jdbc-persistence` or `/jakarta-persistence`, both picked on demand.'
 argument-hint: "[BC or record to store in memory]"
 ---
 
@@ -106,4 +106,5 @@ In a `/java-cli-app` the class loses the annotation and is created once in the e
 - `/bce` owns BC carving and layer placement; this skill only fixes where the collection lives
 - `/java-conventions` owns syntax and style, including the ban on mutable statics and inline lambdas that shapes the control above
 - `/jdbc-persistence` is the durable sibling; the two share the entity layer and the control contract, and this skill never introduces a method the JDBC control could not implement
+- `/jakarta-persistence` is the ORM alternative on `/microprofile-server`; that migration is not a control swap — the records become entity classes and the control's `update` calls become entity methods
 - `/microprofile-server` and `/java-cli-app` own lifecycle and the test loop; `/showtime` and the first `/sbce apply` iteration are the usual callers
