@@ -39,7 +39,7 @@ Create diagrams that show interactions and dependencies between business compone
 - Represent each BC as a subgraph containing its boundary, control, and entity layers
 - Show internal interactions: boundary → control → entity
 - Show cross-BC interactions between the layers involved: a boundary or control uses another BC's control or entity, an entity only another BC's entity; never draw an edge into another BC's boundary
-- External dependencies connect to the boundary or control layer that uses them
+- External dependencies connect to the control that calls them, never to a boundary; inbound callers from outside the system (clients, UI, other systems) connect to a boundary
 
 ## Information Gathering
 
