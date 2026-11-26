@@ -30,7 +30,7 @@ Create diagrams that show interactions and dependencies between business compone
 - Show BCs, subsystems, and external services — not classes, methods, or fields
 - Represent each BC as a single node labeled by its responsibility: `Orders`, `Payments`, `Users`
 - Group BCs into subsystems when they share a domain: `subgraph Billing [Orders, Payments, Invoicing]`
-- Focus on interactions between BCs: which boundary calls which boundary, what data flows where
+- Focus on interactions between BCs: which BC uses which BC, what data flows where
 - Label arrows with the interaction type when not obvious: `-->|REST|`, `-->|async|`, `-->|JPA|`
 - Show external dependencies (third-party APIs, databases, message brokers) as separate nodes
 
@@ -38,7 +38,7 @@ Create diagrams that show interactions and dependencies between business compone
 
 - Represent each BC as a subgraph containing its boundary, control, and entity layers
 - Show internal interactions: boundary → control → entity
-- Show cross-BC interactions at the boundary level: one BC's boundary calls another BC's boundary
+- Show cross-BC interactions between the layers involved: a boundary or control uses another BC's control or entity, an entity only another BC's entity; never draw an edge into another BC's boundary
 - External dependencies connect to the boundary or control layer that uses them
 
 ## Information Gathering
