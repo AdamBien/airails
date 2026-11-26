@@ -36,7 +36,7 @@ Create diagrams that show interactions and dependencies between business compone
 
 ### Within components
 
-- Represent each BC as a subgraph containing its boundary, control, and entity layers
+- Represent each BC as a subgraph containing only the layers it has — a control-only BC shows a single control node; never draw a placeholder for a missing layer
 - Show internal interactions: boundary → control → entity
 - Show cross-BC interactions between the layers involved: a boundary or control uses another BC's control or entity, an entity only another BC's entity; never draw an edge into another BC's boundary
 - External dependencies connect to the control that calls them, never to a boundary; inbound callers from outside the system (clients, UI, other systems) connect to a boundary
