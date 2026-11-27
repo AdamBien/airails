@@ -10,8 +10,7 @@ Create diagrams that show interactions and dependencies between business compone
 
 ## BCE Terminology
 
-- **Business Component (BC)** — a feature-based unit grouping related boundary, control, and entity packages. Named after its domain responsibility (e.g., `orders`, `payments`, `speakers`).
-- **Boundary** — the BC's external interface: JAX-RS resources, facades, health checks.
+- **Business Component (BC)**, **boundary**, **control**, **entity** — as defined by `/bce`; the stack skill names what fulfills each layer.
 - **Subsystem** — a grouping of related BCs at a higher level of abstraction.
 - In "between components" mode, show BCs and subsystems as opaque nodes. In "within components" mode, expand BCs to show their boundary, control, and entity layers.
 
@@ -31,7 +30,7 @@ Create diagrams that show interactions and dependencies between business compone
 - Represent each BC as a single node labeled by its responsibility: `Orders`, `Payments`, `Users`
 - Group BCs into subsystems when they share a domain: `subgraph Billing [Orders, Payments, Invoicing]`
 - Focus on interactions between BCs: which BC uses which BC, what data flows where
-- Label arrows with the interaction type when not obvious: `-->|REST|`, `-->|async|`, `-->|JPA|`
+- Label arrows with the interaction type when not obvious: `-->|REST|`, `-->|async|`
 - Show external dependencies (third-party APIs, databases, message brokers) as separate nodes
 
 ### Within components
