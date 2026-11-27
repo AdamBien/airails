@@ -30,7 +30,8 @@ These guidelines decide what is shown; the invoked `mermaid` or `drawio` skill o
 - Represent each BC as a single node labeled by its responsibility: `Orders`, `Payments`, `Users`
 - Group BCs into subsystems when they share a domain: the subsystem `Billing` contains `Orders`, `Payments`, `Invoicing`
 - Focus on interactions between BCs: which BC uses which BC, what data flows where
-- Label arrows with the interaction type when not obvious: `REST`, `async`
+- Label arrows with the interaction type when not obvious: `REST`, `events`
+- Distinguish asynchronous interactions from synchronous calls: with the format skill's async notation where it has one, otherwise with the label `async`
 - Show external dependencies (third-party APIs, databases, message brokers) as separate nodes
 
 ### Within components
