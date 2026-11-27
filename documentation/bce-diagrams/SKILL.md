@@ -16,7 +16,7 @@ Create diagrams that show interactions and dependencies between business compone
 
 ## Workflow
 
-1. **Gather information** - Identify BCs, subsystems, and external services to visualize. Analyze the codebase package structure (`[org].[project].[bc].[boundary|control|entity]`) or use the user's description.
+1. **Gather information** - Identify BCs, subsystems, and external services to visualize. Analyze the codebase's package or directory structure (`[ORGANIZATION].[PROJECT].[BC].[boundary|control|entity]`, see `/bce`) or use the user's description.
 2. **Choose detail level and format** - Ask the user using a single AskUserQuestion call with two questions:
    - **Detail level**: "Between components" (each BC is a single opaque node) or "Within components" (show boundary, control, entity layers inside each BC)
    - **Format**: "Mermaid (Recommended)" (text-based, version-control friendly, renders natively in GitHub/GitLab — default for README.md in GitHub projects) or "draw.io" (visual editor, richer styling, exportable to PNG/SVG)
@@ -43,6 +43,6 @@ Create diagrams that show interactions and dependencies between business compone
 ## Information Gathering
 
 When the user does not specify components, analyze the codebase:
-- Scan the package structure for BC packages (children of the top-level application package containing boundary/control/entity sub-packages)
-- Identify cross-BC interactions via injected references, REST client calls, or messaging
+- Scan the package or directory structure for BCs: direct children of the top-level package that contain a `boundary`, `control`, or `entity` package or directory
+- Identify cross-BC interactions: references from one BC's code to another BC's control or entity, and messaging between BCs; the stack skill names how a reference appears in code
 - Determine external dependencies (third-party APIs, cloud services, databases)
