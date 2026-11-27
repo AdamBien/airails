@@ -12,8 +12,6 @@ Create diagrams that show interactions and dependencies between business compone
 
 - **Business Component (BC)**, **boundary**, **control**, **entity** — as defined by `/bce`; the stack skill names what fulfills each layer.
 - **Subsystem** — a grouping of related BCs at a higher level of abstraction.
-- In "between components" mode, show BCs and subsystems as opaque nodes. In "within components" mode, expand BCs to show their boundary, control, and entity layers.
-
 ## Workflow
 
 1. **Gather information** - Identify BCs, subsystems, and external services to visualize, from the first applicable source in "Information Gathering".
