@@ -22,18 +22,20 @@ Create diagrams that show interactions and dependencies between business compone
 
 ## Diagram Content Guidelines
 
+These guidelines decide what is shown; the invoked `mermaid` or `drawio` skill owns the notation.
+
 ### Between components
 
 - Show BCs, subsystems, and external services — not classes, methods, or fields
 - Represent each BC as a single node labeled by its responsibility: `Orders`, `Payments`, `Users`
-- Group BCs into subsystems when they share a domain: `subgraph Billing [Orders, Payments, Invoicing]`
+- Group BCs into subsystems when they share a domain: the subsystem `Billing` contains `Orders`, `Payments`, `Invoicing`
 - Focus on interactions between BCs: which BC uses which BC, what data flows where
-- Label arrows with the interaction type when not obvious: `-->|REST|`, `-->|async|`
+- Label arrows with the interaction type when not obvious: `REST`, `async`
 - Show external dependencies (third-party APIs, databases, message brokers) as separate nodes
 
 ### Within components
 
-- Represent each BC as a subgraph containing only the layers it has — a control-only BC shows a single control node; never draw a placeholder for a missing layer
+- Represent each BC as a group containing only the layers it has — a control-only BC shows a single control node; never draw a placeholder for a missing layer
 - Show internal interactions: boundary → control → entity
 - Show cross-BC interactions between the layers involved: a boundary or control uses another BC's control or entity, an entity only another BC's entity; never draw an edge into another BC's boundary
 - External dependencies connect to the control that calls them, never to a boundary; inbound callers from outside the system (clients, UI, other systems) connect to a boundary
