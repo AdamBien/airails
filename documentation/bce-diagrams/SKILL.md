@@ -17,14 +17,14 @@ Create diagrams that show interactions and dependencies between business compone
 ## Workflow
 
 1. **Gather information** - Identify BCs, subsystems, and external services to visualize, from the first applicable source in "Information Gathering".
-2. **Choose detail level and format** - Ask the user using a single AskUserQuestion call with two questions:
-   - **Detail level**: "Between components" (each BC is a single opaque node) or "Within components" (show boundary, control, entity layers inside each BC)
-   - **Format**: "Mermaid (Recommended)" (text-based, version-control friendly, renders natively in GitHub/GitLab — default for README.md in GitHub projects) or "draw.io" (visual editor, richer styling, exportable to PNG/SVG)
-3. **Invoke the chosen skill** - Use the Skill tool to invoke either `mermaid` or `drawio` with the identified BCs, subsystems, interactions, and chosen detail level. When the diagram is destined for a README.md in a GitHub project, default to Mermaid without asking.
+2. **Choose detail level and format** - Settle each from the request and its target first; ask only what remains open, in a single AskUserQuestion call, and skip the call when nothing does:
+   - **Detail level**: settled when the request names it (e.g. "BC overview", "show the layers"). Otherwise ask: "Between components (Recommended)" (each BC is a single opaque node) or "Within components" (show the layers inside each BC)
+   - **Format**: settled when the request names Mermaid or draw.io, or when the diagram is destined for a README.md in a GitHub project (Mermaid). Otherwise ask: "Mermaid (Recommended)" (text-based, version-control friendly, renders natively in GitHub/GitLab) or "draw.io" (visual editor, richer styling, exportable to PNG/SVG)
+3. **Invoke the chosen skill** - Use the Skill tool to invoke either `mermaid` or `drawio` with the identified BCs, subsystems, interactions, and chosen detail level.
 
 ## Diagram Content Guidelines
 
-### Between components (default)
+### Between components
 
 - Show BCs, subsystems, and external services — not classes, methods, or fields
 - Represent each BC as a single node labeled by its responsibility: `Orders`, `Payments`, `Users`
