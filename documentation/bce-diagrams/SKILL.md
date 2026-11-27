@@ -1,7 +1,7 @@
 ---
 name: bce-diagrams
-description: Create high-level overview diagrams showing interactions between business components (BCs), subsystems, services, or systems. Use when asked to create architecture overviews, BC interaction diagrams, subsystem diagrams, service interaction diagrams, system landscapes, or integration maps. Triggers on "diagram", "overview diagram", "BC interaction", "business component diagram", "subsystem diagram", "service interaction", "component interaction", "architecture overview", "system diagram", "integration diagram", or requests to visualize how BCs, subsystems, or services communicate. Not for detailed class diagrams or sequence diagrams.
-argument-hint: "[services or components to visualize]"
+description: Create high-level overview diagrams of a BCE-structured application, showing the interactions between its business components (BCs), subsystems, and external services — between components, or within them at the boundary/control/entity layer level. Decides what the diagram shows and delegates the notation to the `mermaid` or `drawio` skill. Use when asked for an architecture overview, a BC interaction diagram, a subsystem diagram, or a view of the layers inside BCs. Triggers on "overview diagram", "BC diagram", "BC interaction", "business component diagram", "subsystem diagram", "component interaction", "architecture overview", or requests to visualize how BCs or subsystems communicate. Not for class diagrams or sequence diagrams.
+argument-hint: "[BCs or subsystems to visualize]"
 ---
 
 # BCE Overview Diagrams
