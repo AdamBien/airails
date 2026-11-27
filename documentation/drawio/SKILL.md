@@ -12,6 +12,7 @@ Generate valid draw.io XML and save as `<name>.drawio` using the Write tool.
 - rounded routing: `edgeStyle=orthogonalEdgeStyle;rounded=1;`
 - black stroke: `strokeColor=#000000;`
 - arrow at target: `endArrow=block;endFill=1;`
+- solid line for dependencies, dashed for optional/async dependencies: `dashed=1;dashPattern=8 4;`
 - label without shadow: `shadow=0;` on the label cell
 - when an edge crosses container boundaries (source or target is nested in a container), pin explicit `exitX`/`exitY` on the source and `entryX`/`entryY` on the target so the orthogonal router does not take ugly paths; when multiple edges share a target, give each a distinct entry point to prevent overlap
 
@@ -49,7 +50,7 @@ Drawio ships with the Jacobson BCE icons. Use these — never reconstruct them f
 - Control Object: `ellipse;shape=umlControl;whiteSpace=wrap;html=1;`
 - Entity Object: `ellipse;shape=umlEntity;whiteSpace=wrap;html=1;`
 
-Color them by adding `fillColor=#ffffff;strokeColor=<layer-border>;`. Typical icon size: `width=30;height=32`.
+Color them by adding `fillColor=#ffffff;strokeColor=<layer-border>;`. Typical icon size: `width=30;height=32`. Place the icon inside its layer node, left of the label: icon cell with `parent` set to the layer node and `connectable="0"`, `spacingLeft=30;` on the layer node.
 
 ## Content
 
@@ -62,8 +63,10 @@ Color them by adding `fillColor=#ffffff;strokeColor=<layer-border>;`. Typical ic
 ## Layout
 
 - arrange components in logical flow (top-to-bottom or left-to-right)
-- consistent spacing: 40px between nodes, 20px padding inside containers
+- consistent spacing: 40px between nodes, at least 120px where the edge between them carries a label, 20px padding inside containers
 - avoid crossing lines where possible
+- never route an edge through a node or along another edge — move the target into its own row or column, or pin the exit and entry points
+- with layers shown: stack a BC's layers top to bottom, place BCs left to right, and put the two ends of a cross-BC edge in the same row
 - use container shapes (`container=1;`) for subsystem grouping
 - default node size: `width=160;height=60;`
 
@@ -122,4 +125,4 @@ Minimal skeleton — every `.drawio` file must follow this hierarchy:
 ## File Output
 
 - save as `<name>.drawio` using the Write tool
-- see `references/example.drawio` for a complete BCE example
+- see `references/example.drawio` for a complete BCE example: page 1 between components, page 2 within components (layers and robustness icons)
